@@ -47,106 +47,102 @@ function Login() {
 
   return (
     <Shell hideTabs>
-      {/* ബാക്ക്ഗ്രൗണ്ട് ഇമേജ് അല്ലെങ്കിൽ ഗ്രേഡിയന്റ് ചേർക്കുന്നത് Glassmorphism ഡിസൈൻ കൂടുതൽ വ്യക്തമാക്കും */}
-      <div className="min-h-[calc(100vh-theme(spacing.16))] flex items-center justify-center p-6 bg-gradient-to-br from-[#1a1c2e] to-[#0f111a]">
-        {/* Glassmorphism കണ്ടെയ്നർ */}
-        <div className="w-full max-w-md px-8 py-12 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_80px_rgba(255,215,0,0.1)]">
-          <div className="flex items-center justify-center gap-3">
-            {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ (Circle ആക്കിയത്) */}
-            <img
-              src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
-              alt="LM Coin Logo"
-              className="h-11 w-11 rounded-full object-cover"
+      <div className="px-6 pt-8">
+        <div className="flex items-center justify-center gap-3">
+          {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ (Circle ആക്കിയത്) */}
+          <img
+            src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
+            alt="LM Coin Logo"
+            className="h-11 w-11 rounded-full object-cover"
+          />
+          <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
+        </div>
+
+        <h1 className="mt-10 text-3xl font-extrabold tracking-tight">Account Login</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
+
+        <form onSubmit={onSubmit} className="mt-8 space-y-5">
+          <div>
+            <label className="text-sm font-medium">Email</label>
+            <input
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none text-sm placeholder:text-muted-foreground"
             />
-            <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
           </div>
 
-          <h1 className="mt-10 text-3xl font-extrabold tracking-tight">Account Login</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
-
-          <form onSubmit={onSubmit} className="mt-8 space-y-5">
-            <div>
-              <label className="text-sm font-medium">Email</label>
+          <div>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Password</label>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email) return toast.error("Enter your email first");
+                  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  });
+                  if (error) toast.error(error.message);
+                  else toast.success("Password reset email sent");
+                }}
+                className="text-sm font-semibold text-[color:var(--gold)]"
+              >
+                Forgot Password?
+              </button>
+            </div>
+            <div className="mt-2 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3">
               <input
-                type="email"
-                autoComplete="email"
+                type={show ? "text" : "password"}
+                autoComplete="current-password"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none text-sm placeholder:text-muted-foreground"
+                minLength={6}
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+                placeholder="Password"
+                className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
               />
+              <button
+                type="button"
+                onClick={() => setShow((s) => !s)}
+                className="text-muted-foreground"
+                aria-label="Toggle password"
+              >
+                {show ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
+          </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Password</label>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!email) return toast.error("Enter your email first");
-                    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-                      redirectTo: `${window.location.origin}/reset-password`,
-                    });
-                    if (error) toast.error(error.message);
-                    else toast.success("Password reset email sent");
-                  }}
-                  className="text-sm font-semibold text-[color:var(--gold)]"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-              <div className="mt-2 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3">
-                <input
-                  type={show ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  minLength={6}
-                  value={pw}
-                  onChange={(e) => setPw(e.target.value)}
-                  placeholder="Password"
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShow((s) => !s)}
-                  className="text-muted-foreground"
-                  aria-label="Toggle password"
-                >
-                  {show ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
+          <button
+            disabled={busy}
+            className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {busy && <Loader2 size={16} className="animate-spin" />} Log In
+          </button>
 
-            <button
-              disabled={busy}
-              className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
-            >
-              {busy && <Loader2 size={16} className="animate-spin" />} Log In
-            </button>
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">Or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
 
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-xs uppercase tracking-widest text-muted-foreground">Or</span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
+          <button
+            type="button"
+            onClick={onGoogle}
+            className="w-full rounded-xl btn-soft py-3.5 text-base font-semibold flex items-center justify-center gap-2"
+          >
+            <GoogleIcon /> Continue with Google
+          </button>
 
-            <button
-              type="button"
-              onClick={onGoogle}
-              className="w-full rounded-xl btn-soft py-3.5 text-base font-semibold flex items-center justify-center gap-2"
-            >
-              <GoogleIcon /> Continue with Google
-            </button>
-
-            <p className="text-sm pt-2">
-              No Account?{" "}
-              <Link to="/register" className="font-semibold text-[color:var(--gold)]">
-                Register Now »
-              </Link>
-            </p>
-          </form>
-        </div>
+          <p className="text-sm pt-2">
+            No Account?{" "}
+            <Link to="/register" className="font-semibold text-[color:var(--gold)]">
+              Register Now »
+            </Link>
+          </p>
+        </form>
       </div>
     </Shell>
   );
