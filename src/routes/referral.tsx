@@ -1,92 +1,121 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Shell } from "@/components/lmc/Shell";
-import { formatINR } from "@/lib/lmc-market";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Shell, AppHeader } from "@/components/lmc/Shell";
+import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/lib/lmc-api";
+import { Copy, Check, Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/referral")({
   component: Referral,
-  head: () => ({ meta: [{ title: "Referral · LM Coin" }, { name: "description", content: "Invite friends to LM Coin and earn a share of their trading fees." }] }),
+  head: () => ({
+    meta: [
+      { title: "Referral · LM Coin" },
+      { name: "description", content: "Invite friends to LM Coin and earn rewards." },
+    ],
+  }),
 });
 
 function Referral() {
-  const code = "LM-XZ4Q9";
-  const link = typeof window !== "undefined" ? `${window.location.origin}/?ref=${code}` : `https://lmcoin.app/?ref=${code}`;
+  const nav = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  useEffect(() => { if (!authLoading && !user) nav({ to: "/" }); }, [authLoading, user, nav]);
+
+  const { profile } = useProfile();
+  const code = profile?.referral_code ?? "";
+  const link = typeof window !== "undefined" && code ? `${window.location.origin}/register?ref=${code}` : "";
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
+
   const copy = async (v: string, k: "code" | "link") => {
-    try { await navigator.clipboard.writeText(v); setCopied(k); setTimeout(() => setCopied(null), 1500); } catch {}
+    try {
+      await navigator.clipboard.writeText(v);
+      setCopied(k);
+      toast.success("Copied");
+      setTimeout(() => setCopied(null), 1500);
+    } catch {
+      toast.error("Copy failed");
+    }
+  };
+
+  const share = async () => {
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await navigator.share({ title: "Join LM Coin", text: `Sign up with my code ${code}`, url: link });
+      } catch {}
+    } else {
+      copy(link, "link");
+    }
   };
 
   return (
     <Shell>
-      <section className="mx-auto max-w-6xl px-4 py-10 md:py-14">
-        <span className="text-xs uppercase tracking-[0.25em] text-[color:var(--gold)]">Referral</span>
-        <h1 className="mt-1 font-serif text-3xl md:text-5xl">Earn with every friend.</h1>
-        <p className="mt-3 text-muted-foreground max-w-xl">Share your link, and earn 25% of the trading fees whenever they buy or sell LMC.</p>
-
-        <div className="mt-8 grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2 card-glass rounded-2xl p-6">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <div className="text-xs uppercase tracking-widest text-muted-foreground">Your code</div>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="font-mono text-2xl text-gold-gradient">{code}</span>
-                  <button onClick={() => copy(code, "code")} className="text-xs rounded-md border border-border px-2 py-1 hover:bg-secondary">
-                    {copied === "code" ? "Copied" : "Copy"}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-widest text-muted-foreground">Share link</div>
-                <div className="mt-1 flex items-center gap-2">
-                  <input readOnly value={link} className="flex-1 rounded-md bg-background/60 border border-border px-3 py-2 text-sm font-mono truncate" />
-                  <button onClick={() => copy(link, "link")} className="text-xs rounded-md btn-gold px-3 py-2 font-semibold">
-                    {copied === "link" ? "Copied" : "Copy"}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <Stat k="Total referred" v="42" />
-              <Stat k="Active traders" v="18" />
-              <Stat k="Lifetime earnings" v={formatINR(24_120.4)} />
-            </div>
-          </div>
-
-          <div className="card-glass rounded-2xl p-6">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">Referral wallet</div>
-            <div className="mt-1 font-mono tabular-nums text-3xl font-semibold text-gold-gradient">{formatINR(4_812.5)}</div>
-            <button className="mt-4 w-full rounded-lg btn-gold py-2.5 text-sm font-semibold">Withdraw to INR</button>
-            <p className="mt-2 text-xs text-muted-foreground text-center">Payouts settle instantly.</p>
+      <AppHeader title="Referral" />
+      <div className="px-4 pt-4 space-y-4">
+        <div
+          className="rounded-2xl p-5 text-[oklch(0.2_0.02_260)]"
+          style={{ background: "linear-gradient(135deg, var(--gold) 0%, oklch(0.92 0.11 92) 100%)" }}
+        >
+          <div className="text-sm opacity-80">Invite friends. Earn together.</div>
+          <div className="mt-3 text-xs uppercase tracking-widest opacity-80">Your code</div>
+          <div className="mt-1 flex items-center gap-2">
+            <span className="font-mono text-3xl font-extrabold tracking-tight">{code || "—"}</span>
+            <button
+              disabled={!code}
+              onClick={() => copy(code, "code")}
+              className="ml-auto grid place-items-center h-9 w-9 rounded-full bg-background/70 disabled:opacity-40"
+              aria-label="Copy code"
+            >
+              {copied === "code" ? <Check size={16} /> : <Copy size={16} />}
+            </button>
           </div>
         </div>
 
-        <div className="mt-8 card-glass rounded-2xl p-6">
-          <h2 className="font-serif text-xl">How it works</h2>
-          <ol className="mt-4 grid gap-4 sm:grid-cols-3 text-sm">
+        <div className="rounded-2xl card-flat p-4">
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">Share link</div>
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              readOnly
+              value={link}
+              className="flex-1 rounded-lg bg-secondary px-3 py-2 text-xs font-mono truncate outline-none"
+            />
+            <button
+              disabled={!link}
+              onClick={() => copy(link, "link")}
+              className="rounded-lg btn-gold px-3 py-2 text-xs font-semibold disabled:opacity-50"
+            >
+              {copied === "link" ? "Copied" : "Copy"}
+            </button>
+          </div>
+          <button
+            onClick={share}
+            disabled={!link}
+            className="mt-3 w-full rounded-xl btn-soft py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <Share2 size={16} /> Share
+          </button>
+        </div>
+
+        <div className="rounded-2xl card-flat p-4">
+          <h2 className="text-base font-bold">How it works</h2>
+          <ol className="mt-3 space-y-3 text-sm">
             {[
               ["Share", "Send your link to friends via WhatsApp, Telegram or email."],
-              ["They trade", "When they buy or sell LMC, we track it against your code."],
-              ["You earn", "25% of every fee credits to your referral wallet in real time."],
+              ["They join", "When they sign up with your code, we link their account to you."],
+              ["You earn", "Earn a share of every trade fee they generate."],
             ].map(([t, d], i) => (
-              <li key={t} className="rounded-xl border border-border p-4">
-                <div className="h-7 w-7 rounded-full btn-gold grid place-items-center font-serif">{i + 1}</div>
-                <div className="font-serif text-lg mt-3">{t}</div>
-                <p className="text-muted-foreground mt-1">{d}</p>
+              <li key={t} className="flex gap-3">
+                <span className="grid place-items-center h-7 w-7 rounded-full btn-gold text-xs font-bold shrink-0">
+                  {i + 1}
+                </span>
+                <div>
+                  <div className="font-semibold">{t}</div>
+                  <div className="text-muted-foreground text-xs">{d}</div>
+                </div>
               </li>
             ))}
           </ol>
         </div>
-      </section>
+      </div>
     </Shell>
-  );
-}
-
-function Stat({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="rounded-xl border border-border bg-background/40 p-4">
-      <div className="text-xs uppercase tracking-widest text-muted-foreground">{k}</div>
-      <div className="mt-1 font-serif text-2xl">{v}</div>
-    </div>
   );
 }
