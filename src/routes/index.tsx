@@ -241,6 +241,18 @@ function AnimatedHuman({
           0% { transform: rotate(0deg); }
           100% { transform: rotate(-15deg); }
         }
+        @keyframes scrollRoadAnim {
+          0% { stroke-dashoffset: 100; }
+          25% { stroke-dashoffset: 50; }
+          65% { stroke-dashoffset: 50; }
+          100% { stroke-dashoffset: 0; }
+        }
+        @keyframes scrollTreeAnim {
+          0% { transform: translateX(60px); }
+          25% { transform: translateX(0px); }
+          65% { transform: translateX(0px); }
+          100% { transform: translateX(-60px); }
+        }
       `}</style>
 
       <svg
@@ -285,6 +297,44 @@ function AnimatedHuman({
             strokeLinecap="round"
             strokeLinejoin="round"
           />
+        </g>
+
+        {/* --- NEW SCENERY (Road & Trees - Visible only when driving) --- */}
+        <g style={{ opacity: idleState === "driving" ? 1 : 0, transition: "opacity 0.5s ease-in-out" }}>
+          {/* Trees Group */}
+          <g style={{ animation: idleState === "driving" ? "scrollTreeAnim 4s ease-in-out forwards" : "none" }}>
+            {/* Tree 1 */}
+            <g transform="translate(20, 25)">
+              <rect x="16" y="20" width="8" height="40" rx="2" fill="#78350F" />
+              <circle cx="20" cy="5" r="20" fill="#15803D" />
+              <circle cx="5" cy="18" r="15" fill="#16A34A" />
+              <circle cx="35" cy="18" r="15" fill="#22C55E" />
+            </g>
+            {/* Tree 2 */}
+            <g transform="translate(140, 15) scale(0.8)">
+              <rect x="16" y="20" width="8" height="50" rx="2" fill="#78350F" />
+              <circle cx="20" cy="0" r="22" fill="#15803D" />
+              <circle cx="2" cy="18" r="16" fill="#16A34A" />
+              <circle cx="38" cy="18" r="16" fill="#22C55E" />
+            </g>
+          </g>
+
+          {/* Road Group */}
+          <g>
+            {/* Base Road */}
+            <rect x="-20" y="105" width="240" height="15" fill="#334155" />
+            {/* Moving Dashed Line on the road */}
+            <line
+              x1="-20"
+              y1="112.5"
+              x2="220"
+              y2="112.5"
+              stroke="#FACC15"
+              strokeWidth="2"
+              strokeDasharray="15 15"
+              style={{ animation: idleState === "driving" ? "scrollRoadAnim 4s ease-in-out forwards" : "none" }}
+            />
+          </g>
         </g>
 
         {/* --- MOVING GROUP (Human + Car) --- */}
