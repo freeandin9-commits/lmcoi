@@ -6,21 +6,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/")({
-  component: Login,
+export const Route = createFileRoute("/register")({
+  component: Register,
   head: () => ({
-    meta: [{ title: "LM Coin — Sign In" }, { name: "description", content: "Sign in to your LM Coin account." }],
+    meta: [{ title: "LM Coin — Sign Up" }, { name: "description", content: "Create a new LM Coin account." }],
   }),
 });
 
-function Login() {
+function Register() {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  // New state to track which input field is currently focused
+  // State to track which input field is currently focused for the animation
   const [focusedField, setFocusedField] = useState<"email" | "password" | null>(null);
 
   useEffect(() => {
@@ -32,18 +32,26 @@ function Login() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pw });
+    // Changed to signUp for registration
+    const { error, data } = await supabase.auth.signUp({ email: email.trim(), password: pw });
     setBusy(false);
+
     if (error) {
       toast.error(error.message);
       return;
     }
-    nav({ to: "/home" });
+
+    if (data.user && !data.session) {
+      toast.success("Registration successful! Please check your email to verify your account.");
+    } else {
+      toast.success("Account created successfully!");
+      nav({ to: "/home" });
+    }
   };
 
   const onGoogle = async () => {
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (res.error) toast.error(res.error.message ?? "Google sign-in failed");
+    if (res.error) toast.error(res.error.message ?? "Google sign-up failed");
     if (res.redirected) return;
     nav({ to: "/home" });
   };
@@ -66,7 +74,6 @@ function Login() {
 
       <div className="px-6 pt-8">
         <div className="flex items-center justify-center gap-3 opacity-0 animate-fade-up hover:scale-105 transition-transform duration-300 cursor-default">
-          {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ (Circle ആക്കിയത്) */}
           <img
             src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
             alt="LM Coin Logo"
@@ -76,11 +83,11 @@ function Login() {
         </div>
 
         <div className="opacity-0 animate-fade-up delay-100">
-          <h1 className="mt-10 text-3xl font-extrabold tracking-tight">Account Login</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
+          <h1 className="mt-10 text-3xl font-extrabold tracking-tight">Create Account</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Sign up with your email and password.</p>
         </div>
 
-        {/* Animated Human Component added here */}
+        {/* Animated Human Component */}
         <AnimatedHuman focusedField={focusedField} showPassword={show} />
 
         <form onSubmit={onSubmit} className="mt-4 space-y-5 opacity-0 animate-fade-up delay-200">
@@ -106,32 +113,18 @@ function Login() {
               <label className="text-sm font-medium transition-colors group-focus-within:text-[color:var(--gold)]">
                 Password
               </label>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!email) return toast.error("Enter your email first");
-                  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-                    redirectTo: `${window.location.origin}/reset-password`,
-                  });
-                  if (error) toast.error(error.message);
-                  else toast.success("Password reset email sent");
-                }}
-                className="text-sm font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 transition-all"
-              >
-                Forgot Password?
-              </button>
             </div>
             <div className="mt-2 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3 transition-all duration-300 focus-within:ring-2 focus-within:ring-[color:var(--gold)]/50 hover:bg-secondary/80">
               <input
                 type={show ? "text" : "password"}
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 minLength={6}
                 value={pw}
                 onChange={(e) => setPw(e.target.value)}
                 onFocus={() => setFocusedField("password")}
                 onBlur={() => setFocusedField(null)}
-                placeholder="Password"
+                placeholder="Create a password"
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
               />
               <button
@@ -149,7 +142,7 @@ function Login() {
             disabled={busy}
             className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(255,215,0,0.3)] active:scale-95"
           >
-            {busy && <Loader2 size={16} className="animate-spin" />} Log In
+            {busy && <Loader2 size={16} className="animate-spin" />} Sign Up
           </button>
 
           <div className="flex items-center gap-3 opacity-0 animate-fade-up delay-300">
@@ -167,12 +160,12 @@ function Login() {
           </button>
 
           <p className="text-sm pt-2 text-center opacity-0 animate-fade-up delay-300">
-            No Account?{" "}
+            Already have an account?{" "}
             <Link
-              to="/register"
+              to="/"
               className="font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 inline-block transition-transform"
             >
-              Register Now »
+              Log In Here »
             </Link>
           </p>
         </form>
@@ -192,24 +185,21 @@ function AnimatedHuman({
   const isEmail = focusedField === "email";
   const isPassword = focusedField === "password";
 
-  // State to manage idle animations (driving home, trading)
   const [idleState, setIdleState] = useState<"standing" | "driving" | "trading">("standing");
 
   useEffect(() => {
-    // If user interacts with inputs, reset to normal standing position
     if (focusedField !== null) {
       setIdleState("standing");
       return;
     }
 
-    // Set up the idle animation sequence
     const timer1 = setTimeout(() => {
       setIdleState("driving");
-    }, 3000); // After 3 seconds of being idle, start driving
+    }, 3000);
 
     const timer2 = setTimeout(() => {
       setIdleState("trading");
-    }, 7000); // 4 seconds of driving animation, then switch to trading at home
+    }, 7000);
 
     return () => {
       clearTimeout(timer1);
@@ -219,7 +209,6 @@ function AnimatedHuman({
 
   return (
     <div className="flex justify-center mt-6 mb-2 opacity-0 animate-fade-up delay-100 w-full overflow-hidden relative">
-      {/* Keyframes for the idle animations */}
       <style>{`
         @keyframes driveAcross {
           0% { transform: translateX(-200px); }
@@ -262,11 +251,8 @@ function AnimatedHuman({
         className="overflow-visible mx-auto"
         style={{ maxWidth: "100%" }}
       >
-        {/* --- BACKGROUND (House - Visible when trading) --- */}
         <g style={{ opacity: idleState === "trading" ? 1 : 0, transition: "opacity 1s ease-in-out" }}>
-          {/* Home Wall */}
           <rect x="10" y="10" width="180" height="110" rx="8" fill="var(--secondary, #1E293B)" opacity="0.4" />
-          {/* Window */}
           <rect
             x="130"
             y="25"
@@ -278,7 +264,6 @@ function AnimatedHuman({
             strokeWidth="2"
           />
           <path d="M 150 25 L 150 65 M 130 45 L 170 45" stroke="var(--border, #334155)" strokeWidth="2" />
-          {/* Chart on Wall */}
           <rect
             x="30"
             y="25"
@@ -299,18 +284,14 @@ function AnimatedHuman({
           />
         </g>
 
-        {/* --- NEW SCENERY (Road & Trees - Visible only when driving) --- */}
         <g style={{ opacity: idleState === "driving" ? 1 : 0, transition: "opacity 0.5s ease-in-out" }}>
-          {/* Trees Group */}
           <g style={{ animation: idleState === "driving" ? "scrollTreeAnim 4s ease-in-out forwards" : "none" }}>
-            {/* Tree 1 */}
             <g transform="translate(20, 25)">
               <rect x="16" y="20" width="8" height="40" rx="2" fill="#78350F" />
               <circle cx="20" cy="5" r="20" fill="#15803D" />
               <circle cx="5" cy="18" r="15" fill="#16A34A" />
               <circle cx="35" cy="18" r="15" fill="#22C55E" />
             </g>
-            {/* Tree 2 */}
             <g transform="translate(140, 15) scale(0.8)">
               <rect x="16" y="20" width="8" height="50" rx="2" fill="#78350F" />
               <circle cx="20" cy="0" r="22" fill="#15803D" />
@@ -319,11 +300,8 @@ function AnimatedHuman({
             </g>
           </g>
 
-          {/* Road Group */}
           <g>
-            {/* Base Road */}
             <rect x="-20" y="105" width="240" height="15" fill="#334155" />
-            {/* Moving Dashed Line on the road */}
             <line
               x1="-20"
               y1="112.5"
@@ -337,14 +315,12 @@ function AnimatedHuman({
           </g>
         </g>
 
-        {/* --- MOVING GROUP (Human + Car) --- */}
         <g
           style={{
             animation: idleState === "driving" ? "driveAcross 4s ease-in-out forwards" : "none",
             transformOrigin: "center",
           }}
         >
-          {/* --- THE REAL HUMAN --- */}
           <g
             className="transition-all duration-700 ease-in-out"
             style={{
@@ -353,57 +329,41 @@ function AnimatedHuman({
                   ? "translate(40px, 25px) scale(0.65)"
                   : idleState === "trading"
                     ? "translate(0px, 15px) scale(0.7)"
-                    : "translate(40px, 0px) scale(1)", // Default standing centered
+                    : "translate(40px, 0px) scale(1)",
               transformOrigin: "60px 60px",
             }}
           >
-            {/* Neck */}
             <rect x="52" y="65" width="16" height="15" fill="#FFC8A2" />
-
-            {/* Body (Shirt) */}
             <path d="M 35 85 Q 60 70 85 85 L 95 120 L 25 120 Z" fill="#3B82F6" />
-            {/* Shirt Collar */}
             <path d="M 52 70 L 60 82 L 68 70 Z" fill="#2563EB" />
-
-            {/* Ears */}
             <circle cx="36" cy="50" r="6" fill="#FFC8A2" />
             <circle cx="84" cy="50" r="6" fill="#FFC8A2" />
-
-            {/* Head */}
             <circle cx="60" cy="50" r="22" fill="#FFC8A2" />
-
-            {/* Hair */}
             <path d="M 38 50 C 35 20 85 20 82 50 C 75 40 45 40 38 50 Z" fill="#1E293B" />
 
-            {/* Face Features */}
             <g
               className="transition-all duration-300 ease-out"
               style={{
                 transform: isEmail
                   ? "translateY(5px) scale(0.9)"
                   : idleState === "trading"
-                    ? "translate(8px, 4px) scale(0.9)" /* Looking at laptop */
+                    ? "translate(8px, 4px) scale(0.9)"
                     : "translateY(0)",
               }}
             >
-              {/* Left Eye */}
               {isPassword && !showPassword ? (
                 <path d="M 43 50 Q 50 45 57 50" stroke="#1E293B" strokeWidth="2.5" fill="none" strokeLinecap="round" />
               ) : (
                 <circle cx="50" cy="50" r="3.5" fill="#1E293B" />
               )}
-              {/* Right Eye */}
               {isPassword && !showPassword ? (
                 <path d="M 63 50 Q 70 45 77 50" stroke="#1E293B" strokeWidth="2.5" fill="none" strokeLinecap="round" />
               ) : (
                 <circle cx="70" cy="50" r="3.5" fill="#1E293B" />
               )}
-              {/* Mouth */}
               <path d="M 52 60 Q 60 66 68 60" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
             </g>
 
-            {/* Arms / Hands */}
-            {/* Left Arm */}
             <g
               className="transition-all duration-300 ease-in-out origin-bottom"
               style={{
@@ -414,7 +374,6 @@ function AnimatedHuman({
                     : "translate(0px, 0px) rotate(0deg)",
               }}
             >
-              {/* Hand/Arm Base */}
               <rect
                 x="15"
                 y="85"
@@ -424,11 +383,9 @@ function AnimatedHuman({
                 fill="#FFC8A2"
                 style={{ animation: idleState === "trading" ? "typeAnimLeft 0.2s infinite alternate" : "none" }}
               />
-              {/* Sleeve */}
               <rect x="15" y="85" width="16" height="14" rx="4" fill="#3B82F6" />
             </g>
 
-            {/* Right Arm */}
             <g
               className="transition-all duration-300 ease-in-out origin-bottom"
               style={{
@@ -441,7 +398,6 @@ function AnimatedHuman({
                     : "translate(0px, 0px) rotate(0deg)",
               }}
             >
-              {/* Hand/Arm Base */}
               <rect
                 x="89"
                 y="85"
@@ -451,24 +407,19 @@ function AnimatedHuman({
                 fill="#FFC8A2"
                 style={{ animation: idleState === "trading" ? "typeAnimRight 0.25s infinite alternate" : "none" }}
               />
-              {/* Sleeve */}
               <rect x="89" y="85" width="16" height="14" rx="4" fill="#3B82F6" />
             </g>
           </g>
 
-          {/* --- CAR FOREGROUND (Visible only when driving) --- */}
           <g className="transition-opacity duration-300" style={{ opacity: idleState === "driving" ? 1 : 0 }}>
-            {/* Car Body Profile */}
             <path
               d="M 30 75 L 170 75 L 180 110 L 20 110 Z"
               fill="var(--gold, #FFD700)"
               stroke="var(--border, #334155)"
               strokeWidth="3"
             />
-            {/* Car Headlight */}
             <circle cx="170" cy="90" r="6" fill="#FACC15" />
             <path d="M 175 90 L 195 85 L 195 95 Z" fill="#FACC15" opacity="0.5" />
-            {/* Wheels */}
             <circle cx="60" cy="110" r="14" fill="#1E293B" stroke="var(--border, #334155)" strokeWidth="3" />
             <circle cx="60" cy="110" r="6" fill="#94A3B8" />
             <circle cx="140" cy="110" r="14" fill="#1E293B" stroke="var(--border, #334155)" strokeWidth="3" />
@@ -476,9 +427,7 @@ function AnimatedHuman({
           </g>
         </g>
 
-        {/* --- FOREGROUND (Desk & Laptop - Visible when trading) --- */}
         <g style={{ opacity: idleState === "trading" ? 1 : 0, transition: "opacity 1s ease-in-out 0.5s" }}>
-          {/* Desk */}
           <rect
             x="70"
             y="105"
@@ -490,7 +439,6 @@ function AnimatedHuman({
             strokeWidth="2"
           />
 
-          {/* Laptop */}
           <rect
             x="100"
             y="70"
@@ -512,7 +460,6 @@ function AnimatedHuman({
             strokeWidth="1"
           />
 
-          {/* Laptop Screen Chart */}
           <rect x="105" y="75" width="40" height="25" rx="2" fill="#0F172A" />
           <polyline
             points="108,95 118,85 125,90 140,78"
@@ -524,7 +471,6 @@ function AnimatedHuman({
           />
           <circle cx="140" cy="78" r="2" fill="#22C55E" />
 
-          {/* Floating Coins (LM Coin Profit) */}
           <g style={{ animation: idleState === "trading" ? "floatCoin 2s infinite linear" : "none", opacity: 0 }}>
             <circle cx="125" cy="65" r="10" fill="#FFD700" stroke="#B45309" strokeWidth="1" />
             <text x="125" y="68.5" fontSize="8" fill="#B45309" textAnchor="middle" fontWeight="bold">
