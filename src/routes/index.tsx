@@ -20,6 +20,9 @@ function Login() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // New state to track which input field is currently focused
+  const [focusedField, setFocusedField] = useState<"email" | "password" | null>(null);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) nav({ to: "/home" });
@@ -77,7 +80,10 @@ function Login() {
           <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
         </div>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-5 opacity-0 animate-fade-up delay-200">
+        {/* Animated Robot Component added here */}
+        <AnimatedRobot focusedField={focusedField} showPassword={show} />
+
+        <form onSubmit={onSubmit} className="mt-4 space-y-5 opacity-0 animate-fade-up delay-200">
           <div className="group">
             <label className="text-sm font-medium transition-colors group-focus-within:text-[color:var(--gold)]">
               Email
@@ -88,6 +94,8 @@ function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setFocusedField("email")}
+              onBlur={() => setFocusedField(null)}
               placeholder="you@example.com"
               className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none text-sm placeholder:text-muted-foreground transition-all duration-300 focus:ring-2 focus:ring-[color:var(--gold)]/50 hover:bg-secondary/80"
             />
@@ -121,6 +129,8 @@ function Login() {
                 minLength={6}
                 value={pw}
                 onChange={(e) => setPw(e.target.value)}
+                onFocus={() => setFocusedField("password")}
+                onBlur={() => setFocusedField(null)}
                 placeholder="Password"
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
               />
@@ -168,6 +178,107 @@ function Login() {
         </form>
       </div>
     </Shell>
+  );
+}
+
+// Interactive Animated Robot Component
+function AnimatedRobot({
+  focusedField,
+  showPassword,
+}: {
+  focusedField: "email" | "password" | null;
+  showPassword: boolean;
+}) {
+  const isEmail = focusedField === "email";
+  const isPassword = focusedField === "password";
+
+  return (
+    <div className="flex justify-center mt-6 mb-2 opacity-0 animate-fade-up delay-100">
+      <svg width="120" height="120" viewBox="0 0 120 120" className="overflow-visible">
+        {/* Antenna */}
+        <line x1="60" y1="20" x2="60" y2="5" stroke="currentColor" strokeWidth="3" className="text-muted-foreground" />
+        <circle cx="60" cy="5" r="4" fill="var(--gold, #FFD700)" />
+
+        {/* Head */}
+        <rect
+          x="25"
+          y="20"
+          width="70"
+          height="60"
+          rx="15"
+          fill="var(--secondary, #1E293B)"
+          stroke="var(--border, #334155)"
+          strokeWidth="3"
+        />
+
+        {/* Face Screen */}
+        <rect x="35" y="35" width="50" height="30" rx="8" fill="var(--background, #0F172A)" />
+
+        {/* Eyes */}
+        <g
+          className="transition-all duration-300 ease-out"
+          style={{ transform: isEmail ? "translateY(6px) scale(0.9)" : "translateY(0)" }}
+        >
+          {/* Left Eye */}
+          {isPassword && !showPassword ? (
+            <path
+              d="M 42 48 Q 47 44 52 48"
+              stroke="var(--gold, #FFD700)"
+              strokeWidth="2.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+          ) : (
+            <circle cx="47" cy="50" r="4.5" fill="var(--gold, #FFD700)" />
+          )}
+          {/* Right Eye */}
+          {isPassword && !showPassword ? (
+            <path
+              d="M 68 48 Q 73 44 78 48"
+              stroke="var(--gold, #FFD700)"
+              strokeWidth="2.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+          ) : (
+            <circle cx="73" cy="50" r="4.5" fill="var(--gold, #FFD700)" />
+          )}
+        </g>
+
+        {/* Body */}
+        <path
+          d="M 40 85 L 80 85 L 90 120 L 30 120 Z"
+          fill="var(--secondary, #1E293B)"
+          stroke="var(--border, #334155)"
+          strokeWidth="3"
+        />
+
+        {/* Arms / Hands */}
+        {/* Left Arm */}
+        <g
+          className="transition-all duration-300 ease-in-out origin-bottom"
+          style={{
+            transform: isPassword ? "translate(22px, -45px) rotate(15deg)" : "translate(0px, 0px) rotate(0deg)",
+          }}
+        >
+          <rect x="15" y="85" width="16" height="26" rx="8" fill="var(--gold, #FFD700)" />
+        </g>
+
+        {/* Right Arm */}
+        <g
+          className="transition-all duration-300 ease-in-out origin-bottom"
+          style={{
+            transform: isPassword
+              ? showPassword
+                ? "translate(-22px, -20px) rotate(-15deg)"
+                : "translate(-22px, -45px) rotate(-15deg)"
+              : "translate(0px, 0px) rotate(0deg)",
+          }}
+        >
+          <rect x="89" y="85" width="16" height="26" rx="8" fill="var(--gold, #FFD700)" />
+        </g>
+      </svg>
+    </div>
   );
 }
 
