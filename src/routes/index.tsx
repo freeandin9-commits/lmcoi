@@ -49,11 +49,11 @@ function Login() {
     <Shell hideTabs>
       <div className="px-6 pt-8">
         <div className="flex items-center justify-center gap-3">
-          {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ */}
+          {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ (Circle ആക്കിയത്) */}
           <img
             src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
             alt="LM Coin Logo"
-            className="h-11 w-11 object-contain"
+            className="h-11 w-11 rounded-full object-cover"
           />
           <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
         </div>
