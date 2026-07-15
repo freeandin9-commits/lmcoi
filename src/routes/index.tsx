@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Shell, LMCMark } from "@/components/lmc/Shell";
+import { Shell } from "@/components/lmc/Shell";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -49,7 +49,12 @@ function Login() {
     <Shell hideTabs>
       <div className="px-6 pt-8">
         <div className="flex items-center justify-center gap-3">
-          <LMCMark size={44} />
+          {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ */}
+          <img
+            src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
+            alt="LM Coin Logo"
+            className="h-11 w-11 object-contain"
+          />
           <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
         </div>
 
