@@ -80,8 +80,8 @@ function Login() {
           <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
         </div>
 
-        {/* Animated Robot Component added here */}
-        <AnimatedRobot focusedField={focusedField} showPassword={show} />
+        {/* Animated Human Component added here */}
+        <AnimatedHuman focusedField={focusedField} showPassword={show} />
 
         <form onSubmit={onSubmit} className="mt-4 space-y-5 opacity-0 animate-fade-up delay-200">
           <div className="group">
@@ -181,8 +181,8 @@ function Login() {
   );
 }
 
-// Interactive Animated Robot Component
-function AnimatedRobot({
+// Interactive Animated Human Component
+function AnimatedHuman({
   focusedField,
   showPassword,
 }: {
@@ -287,15 +287,14 @@ function AnimatedRobot({
           />
         </g>
 
-        {/* --- MOVING GROUP (Robot + Car) --- */}
+        {/* --- MOVING GROUP (Human + Car) --- */}
         <g
           style={{
             animation: idleState === "driving" ? "driveAcross 4s ease-in-out forwards" : "none",
             transformOrigin: "center",
           }}
         >
-          {/* --- THE ROBOT --- */}
-          {/* We translate the entire original robot logic so it centers correctly in the new 200 width view */}
+          {/* --- THE REAL HUMAN --- */}
           <g
             className="transition-all duration-700 ease-in-out"
             style={{
@@ -305,80 +304,53 @@ function AnimatedRobot({
                   : idleState === "trading"
                     ? "translate(0px, 15px) scale(0.7)"
                     : "translate(40px, 0px) scale(1)", // Default standing centered
-              transformOrigin: "60px 60px", // Center of the 120x120 robot
+              transformOrigin: "60px 60px",
             }}
           >
-            {/* Antenna */}
-            <line
-              x1="60"
-              y1="20"
-              x2="60"
-              y2="5"
-              stroke="currentColor"
-              strokeWidth="3"
-              className="text-muted-foreground"
-            />
-            <circle cx="60" cy="5" r="4" fill="var(--gold, #FFD700)" />
+            {/* Neck */}
+            <rect x="52" y="65" width="16" height="15" fill="#FFC8A2" />
+
+            {/* Body (Shirt) */}
+            <path d="M 35 85 Q 60 70 85 85 L 95 120 L 25 120 Z" fill="#3B82F6" />
+            {/* Shirt Collar */}
+            <path d="M 52 70 L 60 82 L 68 70 Z" fill="#2563EB" />
+
+            {/* Ears */}
+            <circle cx="36" cy="50" r="6" fill="#FFC8A2" />
+            <circle cx="84" cy="50" r="6" fill="#FFC8A2" />
 
             {/* Head */}
-            <rect
-              x="25"
-              y="20"
-              width="70"
-              height="60"
-              rx="15"
-              fill="var(--secondary, #1E293B)"
-              stroke="var(--border, #334155)"
-              strokeWidth="3"
-            />
+            <circle cx="60" cy="50" r="22" fill="#FFC8A2" />
 
-            {/* Face Screen */}
-            <rect x="35" y="35" width="50" height="30" rx="8" fill="var(--background, #0F172A)" />
+            {/* Hair */}
+            <path d="M 38 50 C 35 20 85 20 82 50 C 75 40 45 40 38 50 Z" fill="#1E293B" />
 
-            {/* Eyes */}
+            {/* Face Features */}
             <g
               className="transition-all duration-300 ease-out"
               style={{
                 transform: isEmail
-                  ? "translateY(6px) scale(0.9)"
+                  ? "translateY(5px) scale(0.9)"
                   : idleState === "trading"
-                    ? "translate(10px, 2px) scale(0.9)" /* Looking at laptop */
+                    ? "translate(8px, 4px) scale(0.9)" /* Looking at laptop */
                     : "translateY(0)",
               }}
             >
               {/* Left Eye */}
               {isPassword && !showPassword ? (
-                <path
-                  d="M 42 48 Q 47 44 52 48"
-                  stroke="var(--gold, #FFD700)"
-                  strokeWidth="2.5"
-                  fill="none"
-                  strokeLinecap="round"
-                />
+                <path d="M 43 50 Q 50 45 57 50" stroke="#1E293B" strokeWidth="2.5" fill="none" strokeLinecap="round" />
               ) : (
-                <circle cx="47" cy="50" r="4.5" fill="var(--gold, #FFD700)" />
+                <circle cx="50" cy="50" r="3.5" fill="#1E293B" />
               )}
               {/* Right Eye */}
               {isPassword && !showPassword ? (
-                <path
-                  d="M 68 48 Q 73 44 78 48"
-                  stroke="var(--gold, #FFD700)"
-                  strokeWidth="2.5"
-                  fill="none"
-                  strokeLinecap="round"
-                />
+                <path d="M 63 50 Q 70 45 77 50" stroke="#1E293B" strokeWidth="2.5" fill="none" strokeLinecap="round" />
               ) : (
-                <circle cx="73" cy="50" r="4.5" fill="var(--gold, #FFD700)" />
+                <circle cx="70" cy="50" r="3.5" fill="#1E293B" />
               )}
+              {/* Mouth */}
+              <path d="M 52 60 Q 60 66 68 60" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
             </g>
-
-            {/* Body */}
-            <path
-              d="M 40 85 L 80 85 L 90 120 L 30 120 Z"
-              fill="var(--secondary, #1E293B)"
-              stroke="var(--border, #334155)"
-              strokeWidth="3"
-            />
 
             {/* Arms / Hands */}
             {/* Left Arm */}
@@ -386,21 +358,24 @@ function AnimatedRobot({
               className="transition-all duration-300 ease-in-out origin-bottom"
               style={{
                 transform: isPassword
-                  ? "translate(22px, -45px) rotate(15deg)"
+                  ? "translate(22px, -45px) rotate(25deg)"
                   : idleState === "trading"
                     ? "translate(15px, -20px) rotate(35deg)"
                     : "translate(0px, 0px) rotate(0deg)",
               }}
             >
+              {/* Hand/Arm Base */}
               <rect
                 x="15"
                 y="85"
                 width="16"
                 height="26"
                 rx="8"
-                fill="var(--gold, #FFD700)"
+                fill="#FFC8A2"
                 style={{ animation: idleState === "trading" ? "typeAnimLeft 0.2s infinite alternate" : "none" }}
               />
+              {/* Sleeve */}
+              <rect x="15" y="85" width="16" height="14" rx="4" fill="#3B82F6" />
             </g>
 
             {/* Right Arm */}
@@ -410,21 +385,24 @@ function AnimatedRobot({
                 transform: isPassword
                   ? showPassword
                     ? "translate(-22px, -20px) rotate(-15deg)"
-                    : "translate(-22px, -45px) rotate(-15deg)"
+                    : "translate(-22px, -45px) rotate(-25deg)"
                   : idleState === "trading"
                     ? "translate(-10px, -20px) rotate(-45deg)"
                     : "translate(0px, 0px) rotate(0deg)",
               }}
             >
+              {/* Hand/Arm Base */}
               <rect
                 x="89"
                 y="85"
                 width="16"
                 height="26"
                 rx="8"
-                fill="var(--gold, #FFD700)"
+                fill="#FFC8A2"
                 style={{ animation: idleState === "trading" ? "typeAnimRight 0.25s infinite alternate" : "none" }}
               />
+              {/* Sleeve */}
+              <rect x="89" y="85" width="16" height="14" rx="4" fill="#3B82F6" />
             </g>
           </g>
 
