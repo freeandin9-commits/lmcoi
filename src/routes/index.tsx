@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Shell } from "@/components/lmc/Shell";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,9 @@ function Login() {
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  // New state to track input focus for robot animation
+  const [focusedField, setFocusedField] = useState<null | "email" | "password">(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -46,126 +49,131 @@ function Login() {
   };
 
   return (
+    // Integrated background image and centered layout
     <Shell hideTabs>
-      {/* Custom CSS for Animations */}
-      <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-up {
-          animation: fadeUp 0.6s ease-out forwards;
-        }
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-      `}</style>
-
-      <div className="px-6 pt-8">
-        <div className="flex items-center justify-center gap-3 opacity-0 animate-fade-up hover:scale-105 transition-transform duration-300 cursor-default">
-          {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ (Circle ആക്കിയത്) */}
-          <img
-            src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
-            alt="LM Coin Logo"
-            className="h-11 w-11 rounded-full object-cover"
-          />
-          <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
-        </div>
-
-        <div className="opacity-0 animate-fade-up delay-100">
-          <h1 className="mt-10 text-3xl font-extrabold tracking-tight">Account Login</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
-        </div>
-
-        <form onSubmit={onSubmit} className="mt-8 space-y-5 opacity-0 animate-fade-up delay-200">
-          <div className="group">
-            <label className="text-sm font-medium transition-colors group-focus-within:text-[color:var(--gold)]">
-              Email
-            </label>
-            <input
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none text-sm placeholder:text-muted-foreground transition-all duration-300 focus:ring-2 focus:ring-[color:var(--gold)]/50 hover:bg-secondary/80"
-            />
-          </div>
-
-          <div className="group">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium transition-colors group-focus-within:text-[color:var(--gold)]">
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!email) return toast.error("Enter your email first");
-                  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-                    redirectTo: `${window.location.origin}/reset-password`,
-                  });
-                  if (error) toast.error(error.message);
-                  else toast.success("Password reset email sent");
-                }}
-                className="text-sm font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 transition-all"
-              >
-                Forgot Password?
-              </button>
-            </div>
-            <div className="mt-2 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3 transition-all duration-300 focus-within:ring-2 focus-within:ring-[color:var(--gold)]/50 hover:bg-secondary/80">
-              <input
-                type={show ? "text" : "password"}
-                autoComplete="current-password"
-                required
-                minLength={6}
-                value={pw}
-                onChange={(e) => setPw(e.target.value)}
-                placeholder="Password"
-                className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
-              />
-              <button
-                type="button"
-                onClick={() => setShow((s) => !s)}
-                className="text-muted-foreground hover:text-[color:var(--gold)] hover:scale-110 transition-all duration-200"
-                aria-label="Toggle password"
-              >
-                {show ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            disabled={busy}
-            className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(255,215,0,0.3)] active:scale-95"
-          >
-            {busy && <Loader2 size={16} className="animate-spin" />} Log In
-          </button>
-
-          <div className="flex items-center gap-3 opacity-0 animate-fade-up delay-300">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">Or</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <button
-            type="button"
-            onClick={onGoogle}
-            className="w-full rounded-xl btn-soft py-3.5 text-base font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:bg-secondary active:scale-95 opacity-0 animate-fade-up delay-300"
-          >
-            <GoogleIcon /> Continue with Google
-          </button>
-
-          <p className="text-sm pt-2 text-center opacity-0 animate-fade-up delay-300">
-            No Account?{" "}
-            <Link
-              to="/register"
-              className="font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 inline-block transition-transform"
+      <div
+        className="min-h-screen w-full flex items-center justify-center p-6 bg-cover bg-center"
+        style={{ backgroundImage: "url('https://i.supaimg.com/a/9b39864a-25c1-4824-8120-d3d63b2f913d.png')" }}
+      >
+        <div className="w-full max-w-md bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white/10 relative overflow-hidden">
+          {/* Dynamic Robot Layer (replaces static logo) */}
+          <div className="absolute inset-0 flex justify-center -top-10 opacity-30 pointer-events-none">
+            {/* Focus Robot */}
+            <div
+              className={`transition-opacity duration-300 ${focusedField === "email" ? "opacity-100" : "opacity-0"}`}
             >
-              Register Now »
-            </Link>
-          </p>
-        </form>
+              <img src="/path-to-your-focus-robot-asset.png" alt="" className="h-40 w-auto" />
+            </div>
+            {/* Covering Robot (Matches image) */}
+            <div
+              className={`transition-opacity duration-300 ${focusedField === "password" ? "opacity-100" : "opacity-0"}`}
+            >
+              <img src="/path-to-your-covering-robot-asset.png" alt="" className="h-40 w-auto" />
+            </div>
+          </div>
+
+          {/* Original Form Content */}
+          <div className="relative z-10">
+            <div className="flex items-center justify-center gap-3">
+              <img
+                src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
+                alt="LM Coin Logo"
+                className="h-11 w-11 rounded-full object-cover"
+              />
+              <span className="text-xl font-extrabold tracking-tight text-white">LM Coin</span>
+            </div>
+
+            <h1 className="mt-10 text-3xl font-extrabold tracking-tight text-white">Account Login</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
+
+            <form onSubmit={onSubmit} className="mt-8 space-y-5">
+              <div>
+                <label className="text-sm font-medium text-white">Email</label>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setFocusedField("email")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="you@example.com"
+                  className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none text-sm placeholder:text-muted-foreground text-white focus:ring-1 focus:ring-[color:var(--gold)]"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-white">Password</label>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!email) return toast.error("Enter your email first");
+                      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+                        redirectTo: `${window.location.origin}/reset-password`,
+                      });
+                      if (error) toast.error(error.message);
+                      else toast.success("Password reset email sent");
+                    }}
+                    className="text-sm font-semibold text-[color:var(--gold)]"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+                <div className="mt-2 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3 focus-within:ring-1 focus-within:ring-[color:var(--gold)]">
+                  <input
+                    type={show ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    minLength={6}
+                    value={pw}
+                    onChange={(e) => setPw(e.target.value)}
+                    onFocus={() => setFocusedField("password")}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="Password"
+                    className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShow((s) => !s)}
+                    className="text-muted-foreground"
+                    aria-label="Toggle password"
+                  >
+                    {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                disabled={busy}
+                className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {busy && <Loader2 size={16} className="animate-spin" />} Log In
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">Or</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+
+              <button
+                type="button"
+                onClick={onGoogle}
+                className="w-full rounded-xl btn-soft py-3.5 text-base font-semibold flex items-center justify-center gap-2 text-white"
+              >
+                <GoogleIcon /> Continue with Google
+              </button>
+
+              <p className="text-sm pt-2 text-muted-foreground">
+                No Account?{" "}
+                <Link to="/register" className="font-semibold text-[color:var(--gold)]">
+                  Register Now »
+                </Link>
+              </p>
+            </form>
+          </div>
+        </div>
       </div>
     </Shell>
   );
