@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Shell, LMCMark } from "@/components/lmc/Shell";
+import { Shell } from "@/components/lmc/Shell";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -9,7 +9,7 @@ import { z } from "zod";
 export const Route = createFileRoute("/register")({
   component: Register,
   head: () => ({
-    meta: [{ title: "LM Coin — Create account" }, { name: "description", content: "Create your LM Coin account." }],
+    meta: [{ title: "Create account" }, { name: "description", content: "Create your account." }],
   }),
 });
 
@@ -30,45 +30,35 @@ const Robert = ({ focused, show }: { focused: string | null; show: boolean }) =>
   const isName = focused === "displayName";
   const isInvite = focused === "invite";
   const coveringEyes = isPassword && !show;
-  const peeking = isPassword && show; // If password is visible, he peeks!
+  const peeking = isPassword && show;
 
-  // Eye movement logic
   let eyeX = 0;
   let eyeY = 0;
   if (isEmail) {
     eyeX = 0;
-    eyeY = 6; // Looking down at Email field
+    eyeY = 6;
   } else if (isName) {
     eyeX = -2;
-    eyeY = 2; // Looking slightly left/down
+    eyeY = 2;
   } else if (isInvite) {
     eyeX = 0;
-    eyeY = 10; // Looking further down
+    eyeY = 10;
   } else if (peeking) {
     eyeX = 6;
-    eyeY = -2; // Looking sideways when peeking
+    eyeY = -2;
   }
 
   return (
     <div className="flex justify-center my-4 h-28 items-end relative overflow-visible transition-all duration-300">
       <svg width="120" height="120" viewBox="0 0 100 100" className="overflow-visible drop-shadow-md">
-        {/* Body */}
         <path d="M 20 100 C 20 65 80 65 80 100" fill="#374151" />
-
-        {/* Head */}
         <rect x="25" y="20" width="50" height="50" rx="20" fill="#fcd34d" stroke="#f59e0b" strokeWidth="2" />
-
-        {/* Eyes (Animates based on focus) */}
         <g style={{ transform: `translate(${eyeX}px, ${eyeY}px)`, transition: "transform 0.3s ease-out" }}>
-          {/* Eye Whites */}
           <ellipse cx="37" cy="40" rx="5" ry="7" fill="white" />
           <ellipse cx="63" cy="40" rx="5" ry="7" fill="white" />
-          {/* Pupils */}
           <circle cx="37" cy="41" r="2.5" fill="#1f2937" />
           <circle cx="63" cy="41" r="2.5" fill="#1f2937" />
         </g>
-
-        {/* Mouth */}
         <path
           d={coveringEyes ? "M 42 60 Q 50 55 58 60" : "M 42 58 Q 50 65 58 58"}
           stroke="#b45309"
@@ -77,8 +67,6 @@ const Robert = ({ focused, show }: { focused: string | null; show: boolean }) =>
           strokeLinecap="round"
           style={{ transition: "all 0.3s ease" }}
         />
-
-        {/* Left Hand */}
         <g
           style={{
             transform: coveringEyes
@@ -91,8 +79,6 @@ const Robert = ({ focused, show }: { focused: string | null; show: boolean }) =>
         >
           <circle cx="0" cy="0" r="11" fill="#fcd34d" stroke="#f59e0b" strokeWidth="2" />
         </g>
-
-        {/* Right Hand */}
         <g
           style={{
             transform: coveringEyes
@@ -119,8 +105,6 @@ function Register() {
   const [invite, setInvite] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
-
-  // State to track which field Robert should focus on
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -151,14 +135,8 @@ function Register() {
   return (
     <Shell hideTabs>
       <div className="px-6 pt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex items-center gap-3">
-          <LMCMark size={44} />
-          <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
-        </div>
+        <h1 className="text-3xl font-extrabold tracking-tight">Create account</h1>
 
-        <h1 className="mt-8 text-3xl font-extrabold tracking-tight">Create account</h1>
-
-        {/* The Animated Human: Robert */}
         <Robert focused={focusedField} show={show} />
 
         <form onSubmit={onSubmit} className="mt-2 space-y-4">
@@ -256,7 +234,6 @@ function Register() {
   );
 }
 
-// Updated Field Component for minor ring animation when focused
 function Field({ label, focused, children }: { label: string; focused?: boolean; children: React.ReactNode }) {
   return (
     <div>
