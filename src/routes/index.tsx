@@ -192,90 +192,329 @@ function AnimatedRobot({
   const isEmail = focusedField === "email";
   const isPassword = focusedField === "password";
 
+  // State to manage idle animations (driving home, trading)
+  const [idleState, setIdleState] = useState<"standing" | "driving" | "trading">("standing");
+
+  useEffect(() => {
+    // If user interacts with inputs, reset to normal standing position
+    if (focusedField !== null) {
+      setIdleState("standing");
+      return;
+    }
+
+    // Set up the idle animation sequence
+    const timer1 = setTimeout(() => {
+      setIdleState("driving");
+    }, 3000); // After 3 seconds of being idle, start driving
+
+    const timer2 = setTimeout(() => {
+      setIdleState("trading");
+    }, 7000); // 4 seconds of driving animation, then switch to trading at home
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [focusedField]);
+
   return (
-    <div className="flex justify-center mt-6 mb-2 opacity-0 animate-fade-up delay-100">
-      <svg width="120" height="120" viewBox="0 0 120 120" className="overflow-visible">
-        {/* Antenna */}
-        <line x1="60" y1="20" x2="60" y2="5" stroke="currentColor" strokeWidth="3" className="text-muted-foreground" />
-        <circle cx="60" cy="5" r="4" fill="var(--gold, #FFD700)" />
+    <div className="flex justify-center mt-6 mb-2 opacity-0 animate-fade-up delay-100 w-full overflow-hidden relative">
+      {/* Keyframes for the idle animations */}
+      <style>{`
+        @keyframes driveAcross {
+          0% { transform: translateX(-200px); }
+          25% { transform: translateX(0px); }
+          65% { transform: translateX(0px); }
+          100% { transform: translateX(200px); }
+        }
+        @keyframes floatCoin {
+          0% { opacity: 0; transform: translateY(0) scale(0.5); }
+          20% { opacity: 1; transform: translateY(-15px) scale(1.2); }
+          80% { opacity: 1; transform: translateY(-40px) scale(1); }
+          100% { opacity: 0; transform: translateY(-55px) scale(0.5); }
+        }
+        @keyframes typeAnimLeft {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(15deg); }
+        }
+        @keyframes typeAnimRight {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(-15deg); }
+        }
+      `}</style>
 
-        {/* Head */}
-        <rect
-          x="25"
-          y="20"
-          width="70"
-          height="60"
-          rx="15"
-          fill="var(--secondary, #1E293B)"
-          stroke="var(--border, #334155)"
-          strokeWidth="3"
-        />
-
-        {/* Face Screen */}
-        <rect x="35" y="35" width="50" height="30" rx="8" fill="var(--background, #0F172A)" />
-
-        {/* Eyes */}
-        <g
-          className="transition-all duration-300 ease-out"
-          style={{ transform: isEmail ? "translateY(6px) scale(0.9)" : "translateY(0)" }}
-        >
-          {/* Left Eye */}
-          {isPassword && !showPassword ? (
-            <path
-              d="M 42 48 Q 47 44 52 48"
-              stroke="var(--gold, #FFD700)"
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          ) : (
-            <circle cx="47" cy="50" r="4.5" fill="var(--gold, #FFD700)" />
-          )}
-          {/* Right Eye */}
-          {isPassword && !showPassword ? (
-            <path
-              d="M 68 48 Q 73 44 78 48"
-              stroke="var(--gold, #FFD700)"
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          ) : (
-            <circle cx="73" cy="50" r="4.5" fill="var(--gold, #FFD700)" />
-          )}
+      <svg
+        width="200"
+        height="120"
+        viewBox="0 0 200 120"
+        className="overflow-visible mx-auto"
+        style={{ maxWidth: "100%" }}
+      >
+        {/* --- BACKGROUND (House - Visible when trading) --- */}
+        <g style={{ opacity: idleState === "trading" ? 1 : 0, transition: "opacity 1s ease-in-out" }}>
+          {/* Home Wall */}
+          <rect x="10" y="10" width="180" height="110" rx="8" fill="var(--secondary, #1E293B)" opacity="0.4" />
+          {/* Window */}
+          <rect
+            x="130"
+            y="25"
+            width="40"
+            height="40"
+            rx="4"
+            fill="#0F172A"
+            stroke="var(--border, #334155)"
+            strokeWidth="2"
+          />
+          <path d="M 150 25 L 150 65 M 130 45 L 170 45" stroke="var(--border, #334155)" strokeWidth="2" />
+          {/* Chart on Wall */}
+          <rect
+            x="30"
+            y="25"
+            width="50"
+            height="30"
+            rx="2"
+            fill="#0F172A"
+            stroke="var(--border, #334155)"
+            strokeWidth="1"
+          />
+          <polyline
+            points="35,50 45,40 55,45 75,30"
+            fill="none"
+            stroke="#22C55E"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </g>
 
-        {/* Body */}
-        <path
-          d="M 40 85 L 80 85 L 90 120 L 30 120 Z"
-          fill="var(--secondary, #1E293B)"
-          stroke="var(--border, #334155)"
-          strokeWidth="3"
-        />
-
-        {/* Arms / Hands */}
-        {/* Left Arm */}
+        {/* --- MOVING GROUP (Robot + Car) --- */}
         <g
-          className="transition-all duration-300 ease-in-out origin-bottom"
           style={{
-            transform: isPassword ? "translate(22px, -45px) rotate(15deg)" : "translate(0px, 0px) rotate(0deg)",
+            animation: idleState === "driving" ? "driveAcross 4s ease-in-out forwards" : "none",
+            transformOrigin: "center",
           }}
         >
-          <rect x="15" y="85" width="16" height="26" rx="8" fill="var(--gold, #FFD700)" />
+          {/* --- THE ROBOT --- */}
+          {/* We translate the entire original robot logic so it centers correctly in the new 200 width view */}
+          <g
+            className="transition-all duration-700 ease-in-out"
+            style={{
+              transform:
+                idleState === "driving"
+                  ? "translate(40px, 25px) scale(0.65)"
+                  : idleState === "trading"
+                    ? "translate(0px, 15px) scale(0.7)"
+                    : "translate(40px, 0px) scale(1)", // Default standing centered
+              transformOrigin: "60px 60px", // Center of the 120x120 robot
+            }}
+          >
+            {/* Antenna */}
+            <line
+              x1="60"
+              y1="20"
+              x2="60"
+              y2="5"
+              stroke="currentColor"
+              strokeWidth="3"
+              className="text-muted-foreground"
+            />
+            <circle cx="60" cy="5" r="4" fill="var(--gold, #FFD700)" />
+
+            {/* Head */}
+            <rect
+              x="25"
+              y="20"
+              width="70"
+              height="60"
+              rx="15"
+              fill="var(--secondary, #1E293B)"
+              stroke="var(--border, #334155)"
+              strokeWidth="3"
+            />
+
+            {/* Face Screen */}
+            <rect x="35" y="35" width="50" height="30" rx="8" fill="var(--background, #0F172A)" />
+
+            {/* Eyes */}
+            <g
+              className="transition-all duration-300 ease-out"
+              style={{
+                transform: isEmail
+                  ? "translateY(6px) scale(0.9)"
+                  : idleState === "trading"
+                    ? "translate(10px, 2px) scale(0.9)" /* Looking at laptop */
+                    : "translateY(0)",
+              }}
+            >
+              {/* Left Eye */}
+              {isPassword && !showPassword ? (
+                <path
+                  d="M 42 48 Q 47 44 52 48"
+                  stroke="var(--gold, #FFD700)"
+                  strokeWidth="2.5"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              ) : (
+                <circle cx="47" cy="50" r="4.5" fill="var(--gold, #FFD700)" />
+              )}
+              {/* Right Eye */}
+              {isPassword && !showPassword ? (
+                <path
+                  d="M 68 48 Q 73 44 78 48"
+                  stroke="var(--gold, #FFD700)"
+                  strokeWidth="2.5"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              ) : (
+                <circle cx="73" cy="50" r="4.5" fill="var(--gold, #FFD700)" />
+              )}
+            </g>
+
+            {/* Body */}
+            <path
+              d="M 40 85 L 80 85 L 90 120 L 30 120 Z"
+              fill="var(--secondary, #1E293B)"
+              stroke="var(--border, #334155)"
+              strokeWidth="3"
+            />
+
+            {/* Arms / Hands */}
+            {/* Left Arm */}
+            <g
+              className="transition-all duration-300 ease-in-out origin-bottom"
+              style={{
+                transform: isPassword
+                  ? "translate(22px, -45px) rotate(15deg)"
+                  : idleState === "trading"
+                    ? "translate(15px, -20px) rotate(35deg)"
+                    : "translate(0px, 0px) rotate(0deg)",
+              }}
+            >
+              <rect
+                x="15"
+                y="85"
+                width="16"
+                height="26"
+                rx="8"
+                fill="var(--gold, #FFD700)"
+                style={{ animation: idleState === "trading" ? "typeAnimLeft 0.2s infinite alternate" : "none" }}
+              />
+            </g>
+
+            {/* Right Arm */}
+            <g
+              className="transition-all duration-300 ease-in-out origin-bottom"
+              style={{
+                transform: isPassword
+                  ? showPassword
+                    ? "translate(-22px, -20px) rotate(-15deg)"
+                    : "translate(-22px, -45px) rotate(-15deg)"
+                  : idleState === "trading"
+                    ? "translate(-10px, -20px) rotate(-45deg)"
+                    : "translate(0px, 0px) rotate(0deg)",
+              }}
+            >
+              <rect
+                x="89"
+                y="85"
+                width="16"
+                height="26"
+                rx="8"
+                fill="var(--gold, #FFD700)"
+                style={{ animation: idleState === "trading" ? "typeAnimRight 0.25s infinite alternate" : "none" }}
+              />
+            </g>
+          </g>
+
+          {/* --- CAR FOREGROUND (Visible only when driving) --- */}
+          <g className="transition-opacity duration-300" style={{ opacity: idleState === "driving" ? 1 : 0 }}>
+            {/* Car Body Profile */}
+            <path
+              d="M 30 75 L 170 75 L 180 110 L 20 110 Z"
+              fill="var(--gold, #FFD700)"
+              stroke="var(--border, #334155)"
+              strokeWidth="3"
+            />
+            {/* Car Headlight */}
+            <circle cx="170" cy="90" r="6" fill="#FACC15" />
+            <path d="M 175 90 L 195 85 L 195 95 Z" fill="#FACC15" opacity="0.5" />
+            {/* Wheels */}
+            <circle cx="60" cy="110" r="14" fill="#1E293B" stroke="var(--border, #334155)" strokeWidth="3" />
+            <circle cx="60" cy="110" r="6" fill="#94A3B8" />
+            <circle cx="140" cy="110" r="14" fill="#1E293B" stroke="var(--border, #334155)" strokeWidth="3" />
+            <circle cx="140" cy="110" r="6" fill="#94A3B8" />
+          </g>
         </g>
 
-        {/* Right Arm */}
-        <g
-          className="transition-all duration-300 ease-in-out origin-bottom"
-          style={{
-            transform: isPassword
-              ? showPassword
-                ? "translate(-22px, -20px) rotate(-15deg)"
-                : "translate(-22px, -45px) rotate(-15deg)"
-              : "translate(0px, 0px) rotate(0deg)",
-          }}
-        >
-          <rect x="89" y="85" width="16" height="26" rx="8" fill="var(--gold, #FFD700)" />
+        {/* --- FOREGROUND (Desk & Laptop - Visible when trading) --- */}
+        <g style={{ opacity: idleState === "trading" ? 1 : 0, transition: "opacity 1s ease-in-out 0.5s" }}>
+          {/* Desk */}
+          <rect
+            x="70"
+            y="105"
+            width="110"
+            height="15"
+            rx="4"
+            fill="#334155"
+            stroke="var(--border, #334155)"
+            strokeWidth="2"
+          />
+
+          {/* Laptop */}
+          <rect
+            x="100"
+            y="70"
+            width="50"
+            height="35"
+            rx="4"
+            fill="#94A3B8"
+            stroke="var(--border, #334155)"
+            strokeWidth="2"
+          />
+          <rect
+            x="90"
+            y="100"
+            width="70"
+            height="5"
+            rx="2"
+            fill="#CBD5E1"
+            stroke="var(--border, #334155)"
+            strokeWidth="1"
+          />
+
+          {/* Laptop Screen Chart */}
+          <rect x="105" y="75" width="40" height="25" rx="2" fill="#0F172A" />
+          <polyline
+            points="108,95 118,85 125,90 140,78"
+            fill="none"
+            stroke="#22C55E"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="140" cy="78" r="2" fill="#22C55E" />
+
+          {/* Floating Coins (LM Coin Profit) */}
+          <g style={{ animation: idleState === "trading" ? "floatCoin 2s infinite linear" : "none", opacity: 0 }}>
+            <circle cx="125" cy="65" r="10" fill="#FFD700" stroke="#B45309" strokeWidth="1" />
+            <text x="125" y="68.5" fontSize="8" fill="#B45309" textAnchor="middle" fontWeight="bold">
+              LMC
+            </text>
+          </g>
+          <g style={{ animation: idleState === "trading" ? "floatCoin 2.5s infinite linear 1s" : "none", opacity: 0 }}>
+            <circle cx="105" cy="55" r="8" fill="#10B981" stroke="#047857" strokeWidth="1" />
+            <text x="105" y="58" fontSize="10" fill="#064E3B" textAnchor="middle" fontWeight="bold">
+              $
+            </text>
+          </g>
+          <g style={{ animation: idleState === "trading" ? "floatCoin 3s infinite linear 0.5s" : "none", opacity: 0 }}>
+            <circle cx="145" cy="60" r="8" fill="#10B981" stroke="#047857" strokeWidth="1" />
+            <text x="145" y="63" fontSize="10" fill="#064E3B" textAnchor="middle" fontWeight="bold">
+              $
+            </text>
+          </g>
         </g>
       </svg>
     </div>
