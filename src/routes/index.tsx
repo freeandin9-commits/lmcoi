@@ -106,7 +106,7 @@ function Home() {
       <div className="bg-primary text-primary-foreground text-xs sm:text-sm">
         <div className="mx-auto max-w-7xl px-4 py-2 flex items-center justify-between">
           <span>Free shipping on orders above ₹500 · Baked fresh daily</span>
-          <span className="hidden sm:inline opacity-80">FSSAI Lic : 21324260000374</span>
+          <span className="hidden sm:inline opacity-80">FSSAI Lic : 21320374</span>
         </div>
       </div>
 
@@ -322,7 +322,7 @@ function Home() {
         <div className="border-t border-border">
           <div className="mx-auto max-w-7xl px-4 py-5 flex flex-wrap items-center justify-between text-xs text-muted-foreground gap-2">
             <span>© {new Date().getFullYear()} LM Snacks & Bakery. All rights reserved.</span>
-            <span>FSSAI Lic : 21324260000374</span>
+            <span>FSSAI Lic : 21320374</span>
           </div>
         </div>
       </footer>
