@@ -1,81 +1,25 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { Home, LineChart, Wallet, Users, User } from "lucide-react";
 
-const nav = [
-  { to: "/", label: "Home" },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/wallet", label: "Wallet" },
-  { to: "/trade", label: "Trade" },
-  { to: "/referral", label: "Referral" },
-];
+const tabs = [
+  { to: "/home", label: "Home", icon: Home },
+  { to: "/trade", label: "Trade", icon: LineChart },
+  { to: "/wallet", label: "Wallet", icon: Wallet },
+  { to: "/referral", label: "Referral", icon: Users },
+  { to: "/dashboard", label: "Me", icon: User },
+] as const;
 
-export function Shell({ children }: { children: ReactNode }) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  return (
-    <div className="min-h-screen">
-      <TopBar pathname={pathname} />
-      <main>{children}</main>
-      <Footer />
-    </div>
-  );
-}
-
-function TopBar({ pathname }: { pathname: string }) {
-  return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-xl">
-      <div className="mx-auto max-w-7xl px-4 h-16 flex items-center gap-6">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <LMCMark />
-          <span className="font-serif text-lg tracking-tight">
-            LM<span className="text-gold-gradient">Coin</span>
-          </span>
-        </Link>
-        <nav className="hidden md:flex items-center gap-1 text-sm">
-          {nav.map((n) => {
-            const active = pathname === n.to || (n.to !== "/" && pathname.startsWith(n.to));
-            return (
-              <Link
-                key={n.to}
-                to={n.to}
-                className={`px-3 py-2 rounded-lg transition ${
-                  active ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {n.label}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <Link
-            to="/dashboard"
-            className="hidden sm:inline-flex items-center rounded-lg border border-border bg-secondary/60 px-3 py-2 text-xs font-medium hover:bg-secondary"
-          >
-            Sign in
-          </Link>
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center rounded-lg btn-gold px-3.5 py-2 text-xs font-semibold"
-          >
-            Get started
-          </Link>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-export function LMCMark({ size = 28 }: { size?: number }) {
+export function LMCMark({ size = 32 }: { size?: number }) {
   return (
     <span
-      className="grid place-items-center rounded-full font-serif font-semibold"
+      className="grid place-items-center rounded-full font-bold"
       style={{
         width: size,
         height: size,
-        background: "linear-gradient(140deg, oklch(0.9 0.14 88), oklch(0.62 0.14 78))",
-        color: "oklch(0.16 0.012 260)",
-        boxShadow: "0 6px 20px -8px oklch(0.75 0.16 82 / 0.55), inset 0 1px 0 oklch(1 0 0 / 0.5)",
-        fontSize: size * 0.42,
+        background: "var(--gold)",
+        color: "oklch(0.2 0.02 260)",
+        fontSize: size * 0.44,
       }}
     >
       L
@@ -83,47 +27,52 @@ export function LMCMark({ size = 28 }: { size?: number }) {
   );
 }
 
-function Footer() {
+/** Mobile-app phone frame. On desktop we center a phone-width column. */
+export function Shell({ children, hideTabs = false }: { children: ReactNode; hideTabs?: boolean }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <footer className="mt-24 border-t border-border">
-      <div className="mx-auto max-w-7xl px-4 py-12 grid gap-8 md:grid-cols-4 text-sm">
-        <div className="md:col-span-2">
-          <div className="flex items-center gap-2">
-            <LMCMark />
-            <span className="font-serif text-lg">LM Coin</span>
-          </div>
-          <p className="mt-3 text-muted-foreground max-w-sm">
-            A modern digital asset platform. Buy, sell, trade and earn — with security and speed built in.
-          </p>
-          <p className="mt-4 text-xs text-muted-foreground">
-            LMC is a simulated internal token. Prices shown are demo data.
-          </p>
-        </div>
-        <div>
-          <div className="font-medium mb-3">Platform</div>
-          <ul className="space-y-2 text-muted-foreground">
-            <li><Link to="/dashboard" className="hover:text-foreground">Dashboard</Link></li>
-            <li><Link to="/wallet" className="hover:text-foreground">Wallet</Link></li>
-            <li><Link to="/trade" className="hover:text-foreground">Trade</Link></li>
-            <li><Link to="/referral" className="hover:text-foreground">Referral</Link></li>
-          </ul>
-        </div>
-        <div>
-          <div className="font-medium mb-3">Company</div>
-          <ul className="space-y-2 text-muted-foreground">
-            <li>Security</li>
-            <li>Announcements</li>
-            <li>Support</li>
-            <li>Terms & Privacy</li>
-          </ul>
-        </div>
+    <div className="min-h-screen w-full flex justify-center" style={{ background: "var(--page)" }}>
+      <div className="relative w-full max-w-[480px] min-h-screen bg-background shadow-xl border-x border-border flex flex-col">
+        <main className={`flex-1 ${hideTabs ? "" : "pb-24"}`}>{children}</main>
+        {!hideTabs && <BottomNav pathname={pathname} />}
       </div>
-      <div className="border-t border-border">
-        <div className="mx-auto max-w-7xl px-4 py-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-          <span>© {new Date().getFullYear()} LM Coin. All rights reserved.</span>
-          <span>Demo build · Not investment advice</span>
-        </div>
+    </div>
+  );
+}
+
+function BottomNav({ pathname }: { pathname: string }) {
+  return (
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-background border-t border-border z-40">
+      <div className="grid grid-cols-5">
+        {tabs.map((t) => {
+          const Icon = t.icon;
+          const active = pathname === t.to || (t.to !== "/home" && pathname.startsWith(t.to));
+          return (
+            <Link
+              key={t.to}
+              to={t.to}
+              className={`flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition ${
+                active ? "text-[color:var(--foreground)]" : "text-muted-foreground"
+              }`}
+            >
+              <Icon size={22} strokeWidth={active ? 2.2 : 1.8} className={active ? "text-[color:var(--gold)]" : ""} />
+              <span>{t.label}</span>
+            </Link>
+          );
+        })}
       </div>
-    </footer>
+      <div className="h-[env(safe-area-inset-bottom)]" />
+    </nav>
+  );
+}
+
+export function AppHeader({ title, right }: { title: string; right?: ReactNode }) {
+  return (
+    <header className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
+      <div className="h-14 px-4 flex items-center justify-between">
+        <h1 className="text-lg font-bold">{title}</h1>
+        <div>{right}</div>
+      </div>
+    </header>
   );
 }
