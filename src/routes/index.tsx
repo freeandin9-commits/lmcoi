@@ -47,8 +47,22 @@ function Login() {
 
   return (
     <Shell hideTabs>
+      {/* Custom CSS for Animations */}
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up {
+          animation: fadeUp 0.6s ease-out forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+      `}</style>
+
       <div className="px-6 pt-8">
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-3 opacity-0 animate-fade-up hover:scale-105 transition-transform duration-300 cursor-default">
           {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ (Circle ആക്കിയത്) */}
           <img
             src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
@@ -58,12 +72,16 @@ function Login() {
           <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
         </div>
 
-        <h1 className="mt-10 text-3xl font-extrabold tracking-tight">Account Login</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
+        <div className="opacity-0 animate-fade-up delay-100">
+          <h1 className="mt-10 text-3xl font-extrabold tracking-tight">Account Login</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
+        </div>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-5">
-          <div>
-            <label className="text-sm font-medium">Email</label>
+        <form onSubmit={onSubmit} className="mt-8 space-y-5 opacity-0 animate-fade-up delay-200">
+          <div className="group">
+            <label className="text-sm font-medium transition-colors group-focus-within:text-[color:var(--gold)]">
+              Email
+            </label>
             <input
               type="email"
               autoComplete="email"
@@ -71,13 +89,15 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none text-sm placeholder:text-muted-foreground"
+              className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none text-sm placeholder:text-muted-foreground transition-all duration-300 focus:ring-2 focus:ring-[color:var(--gold)]/50 hover:bg-secondary/80"
             />
           </div>
 
-          <div>
+          <div className="group">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Password</label>
+              <label className="text-sm font-medium transition-colors group-focus-within:text-[color:var(--gold)]">
+                Password
+              </label>
               <button
                 type="button"
                 onClick={async () => {
@@ -88,12 +108,12 @@ function Login() {
                   if (error) toast.error(error.message);
                   else toast.success("Password reset email sent");
                 }}
-                className="text-sm font-semibold text-[color:var(--gold)]"
+                className="text-sm font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 transition-all"
               >
                 Forgot Password?
               </button>
             </div>
-            <div className="mt-2 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3">
+            <div className="mt-2 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3 transition-all duration-300 focus-within:ring-2 focus-within:ring-[color:var(--gold)]/50 hover:bg-secondary/80">
               <input
                 type={show ? "text" : "password"}
                 autoComplete="current-password"
@@ -107,7 +127,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setShow((s) => !s)}
-                className="text-muted-foreground"
+                className="text-muted-foreground hover:text-[color:var(--gold)] hover:scale-110 transition-all duration-200"
                 aria-label="Toggle password"
               >
                 {show ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -117,12 +137,12 @@ function Login() {
 
           <button
             disabled={busy}
-            className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(255,215,0,0.3)] active:scale-95"
           >
             {busy && <Loader2 size={16} className="animate-spin" />} Log In
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 opacity-0 animate-fade-up delay-300">
             <div className="h-px flex-1 bg-border" />
             <span className="text-xs uppercase tracking-widest text-muted-foreground">Or</span>
             <div className="h-px flex-1 bg-border" />
@@ -131,14 +151,17 @@ function Login() {
           <button
             type="button"
             onClick={onGoogle}
-            className="w-full rounded-xl btn-soft py-3.5 text-base font-semibold flex items-center justify-center gap-2"
+            className="w-full rounded-xl btn-soft py-3.5 text-base font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:bg-secondary active:scale-95 opacity-0 animate-fade-up delay-300"
           >
             <GoogleIcon /> Continue with Google
           </button>
 
-          <p className="text-sm pt-2">
+          <p className="text-sm pt-2 text-center opacity-0 animate-fade-up delay-300">
             No Account?{" "}
-            <Link to="/register" className="font-semibold text-[color:var(--gold)]">
+            <Link
+              to="/register"
+              className="font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 inline-block transition-transform"
+            >
               Register Now »
             </Link>
           </p>
