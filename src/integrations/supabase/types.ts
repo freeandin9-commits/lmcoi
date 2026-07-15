@@ -14,13 +14,209 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      announcements: {
+        Row: {
+          body: string | null
+          id: string
+          published_at: string
+          tag: string
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          id?: string
+          published_at?: string
+          tag?: string
+          title: string
+        }
+        Update: {
+          body?: string | null
+          id?: string
+          published_at?: string
+          tag?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      price_ticks: {
+        Row: {
+          price: number
+          t: string
+        }
+        Insert: {
+          price: number
+          t?: string
+        }
+        Update: {
+          price?: number
+          t?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          kyc_status: string
+          referral_code: string
+          referred_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          kyc_status?: string
+          referral_code: string
+          referred_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          kyc_status?: string
+          referral_code?: string
+          referred_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount_inr: number
+          amount_lmc: number
+          created_at: string
+          id: string
+          note: string | null
+          price: number | null
+          status: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount_inr?: number
+          amount_lmc?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          price?: number | null
+          status?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount_inr?: number
+          amount_lmc?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          price?: number | null
+          status?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          inr_balance: number
+          lmc_balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          inr_balance?: number
+          lmc_balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          inr_balance?: number
+          lmc_balance?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_price_tick: { Args: never; Returns: undefined }
+      place_order: {
+        Args: { p_amount_lmc: number; p_price: number; p_side: string }
+        Returns: {
+          amount_inr: number
+          amount_lmc: number
+          created_at: string
+          id: string
+          note: string | null
+          price: number | null
+          status: string
+          type: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      wallet_deposit_inr: {
+        Args: { p_amount: number }
+        Returns: {
+          amount_inr: number
+          amount_lmc: number
+          created_at: string
+          id: string
+          note: string | null
+          price: number | null
+          status: string
+          type: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      wallet_withdraw_inr: {
+        Args: { p_amount: number }
+        Returns: {
+          amount_inr: number
+          amount_lmc: number
+          created_at: string
+          id: string
+          note: string | null
+          price: number | null
+          status: string
+          type: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
