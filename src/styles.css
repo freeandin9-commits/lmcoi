@@ -96,6 +96,10 @@
   background: var(--card);
   border: 1px solid var(--border);
 }
+@utility card-glass {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
 @utility text-gold-gradient {
   background: linear-gradient(120deg, oklch(0.88 0.17 92), oklch(0.72 0.16 78));
   -webkit-background-clip: text;
