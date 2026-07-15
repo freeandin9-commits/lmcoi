@@ -1,103 +1,155 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Shell } from "@/components/lmc/Shell";
-import { useLivePrice, formatINR } from "@/lib/lmc-market";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
+import { useAuth } from "@/hooks/use-auth";
+import { useWallet, usePriceSeries, depositInr, withdrawInr, formatINR, formatLMC } from "@/lib/lmc-api";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/wallet")({
-  component: Wallet,
-  head: () => ({ meta: [{ title: "Wallet · LM Coin" }, { name: "description", content: "Manage your INR and LM Coin wallets, deposit, withdraw and transfer funds." }] }),
+  component: WalletPage,
+  head: () => ({
+    meta: [
+      { title: "Wallet · LM Coin" },
+      { name: "description", content: "Deposit and withdraw INR, view LMC balance." },
+    ],
+  }),
 });
 
 type Tab = "inr" | "lmc";
 
-function Wallet() {
+function WalletPage() {
+  const nav = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [tab, setTab] = useState<Tab>("inr");
-  const { price } = useLivePrice();
+  const { wallet } = useWallet();
+  const { price } = usePriceSeries(20);
+
+  useEffect(() => { if (!authLoading && !user) nav({ to: "/" }); }, [authLoading, user, nav]);
+
+  const inr = Number(wallet?.inr_balance ?? 0);
+  const lmc = Number(wallet?.lmc_balance ?? 0);
+
   return (
     <Shell>
-      <section className="mx-auto max-w-6xl px-4 py-10 md:py-14">
-        <span className="text-xs uppercase tracking-[0.25em] text-[color:var(--gold)]">Wallet</span>
-        <h1 className="mt-1 font-serif text-3xl md:text-5xl">Your assets</h1>
+      <AppHeader title="Wallet" />
+      <div className="px-4 pt-4 space-y-4">
+        <div
+          className="rounded-2xl p-5 text-[oklch(0.2_0.02_260)]"
+          style={{ background: "linear-gradient(135deg, var(--gold) 0%, oklch(0.92 0.11 92) 100%)" }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="text-sm opacity-80">Portfolio</div>
+            <LMCMark size={28} />
+          </div>
+          <div className="mt-2 text-3xl font-extrabold tabular-nums">{formatINR(inr + lmc * price, 2)}</div>
+          <div className="mt-1 text-sm font-medium">
+            {formatINR(inr, 2)} INR · {formatLMC(lmc, 4)} LMC
+          </div>
+        </div>
 
-        <div className="mt-6 inline-flex rounded-xl border border-border bg-secondary/60 p-1">
+        <div className="inline-flex w-full rounded-xl bg-secondary p-1">
           <TabBtn active={tab === "inr"} onClick={() => setTab("inr")}>INR Wallet</TabBtn>
           <TabBtn active={tab === "lmc"} onClick={() => setTab("lmc")}>LMC Wallet</TabBtn>
         </div>
 
-        {tab === "inr" ? (
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-1 card-glass rounded-2xl p-6">
-              <div className="text-xs uppercase tracking-widest text-muted-foreground">Available INR</div>
-              <div className="mt-1 font-mono tabular-nums text-4xl font-semibold text-gold-gradient">{formatINR(12_450.75)}</div>
-              <div className="text-xs text-muted-foreground mt-1">Bank · UPI · IMPS</div>
-              <div className="mt-6 grid grid-cols-2 gap-2">
-                <ActionBtn primary>Deposit</ActionBtn>
-                <ActionBtn>Withdraw</ActionBtn>
-              </div>
-            </div>
-            <div className="lg:col-span-2 card-glass rounded-2xl p-6">
-              <h2 className="font-serif text-xl">Deposit INR</h2>
-              <p className="text-sm text-muted-foreground mt-1">Transfer instantly via UPI or use a linked bank account.</p>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <Field label="Amount (INR)" placeholder="1,000" />
-                <Field label="Method" placeholder="UPI · lmcoin@icici" />
-              </div>
-              <button className="mt-6 rounded-lg btn-gold px-5 py-3 text-sm font-semibold">Continue</button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-1 card-glass rounded-2xl p-6">
-              <div className="text-xs uppercase tracking-widest text-muted-foreground">LMC Balance</div>
-              <div className="mt-1 font-mono tabular-nums text-4xl font-semibold text-gold-gradient">842.35 LMC</div>
-              <div className="text-xs text-muted-foreground mt-1">≈ {formatINR(842.35 * price)}</div>
-              <div className="mt-6 grid grid-cols-2 gap-2">
-                <ActionBtn primary>Send</ActionBtn>
-                <ActionBtn>Receive</ActionBtn>
-              </div>
-            </div>
-            <div className="lg:col-span-2 card-glass rounded-2xl p-6">
-              <h2 className="font-serif text-xl">Send LM Coin</h2>
-              <p className="text-sm text-muted-foreground mt-1">Instant transfer to any LM Coin user or wallet address.</p>
-              <div className="mt-6 grid gap-4">
-                <Field label="Recipient" placeholder="username or wallet address" />
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Amount (LMC)" placeholder="0.00" />
-                  <Field label="Network fee" placeholder="0.001 LMC" readOnly />
-                </div>
-              </div>
-              <button className="mt-6 rounded-lg btn-gold px-5 py-3 text-sm font-semibold">Review transfer</button>
-            </div>
-          </div>
-        )}
-      </section>
+        {tab === "inr" ? <InrPanel balance={inr} /> : <LmcPanel balance={lmc} price={price} />}
+      </div>
     </Shell>
+  );
+}
+
+function InrPanel({ balance }: { balance: number }) {
+  const [mode, setMode] = useState<"deposit" | "withdraw">("deposit");
+  const [amount, setAmount] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    const n = parseFloat(amount);
+    if (!Number.isFinite(n) || n <= 0) return toast.error("Enter a valid amount");
+    setBusy(true);
+    try {
+      if (mode === "deposit") {
+        await depositInr(n);
+        toast.success(`Deposited ${formatINR(n)}`);
+      } else {
+        await withdrawInr(n);
+        toast.success(`Withdrew ${formatINR(n)}`);
+      }
+      setAmount("");
+    } catch (e: unknown) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl card-flat p-4">
+      <div className="text-xs uppercase tracking-widest text-muted-foreground">Available INR</div>
+      <div className="mt-1 text-2xl font-extrabold">{formatINR(balance, 2)}</div>
+
+      <div className="mt-4 inline-flex w-full rounded-xl bg-secondary p-1">
+        <TabBtn active={mode === "deposit"} onClick={() => setMode("deposit")}>Deposit</TabBtn>
+        <TabBtn active={mode === "withdraw"} onClick={() => setMode("withdraw")}>Withdraw</TabBtn>
+      </div>
+
+      <label className="mt-4 block">
+        <span className="text-sm font-medium">Amount (INR)</span>
+        <input
+          value={amount}
+          onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+          inputMode="decimal"
+          placeholder="0.00"
+          className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none font-mono text-lg"
+        />
+      </label>
+
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        {[100, 500, 1000, 5000].map((v) => (
+          <button
+            key={v}
+            onClick={() => setAmount(String(v))}
+            className="text-xs py-1.5 rounded-md bg-secondary hover:brightness-95"
+          >
+            +₹{v}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={submit}
+        disabled={busy}
+        className="mt-4 w-full rounded-xl btn-gold py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+      >
+        {busy && <Loader2 size={16} className="animate-spin" />}
+        {mode === "deposit" ? "Deposit INR" : "Withdraw INR"}
+      </button>
+      <p className="mt-2 text-[11px] text-muted-foreground text-center">Instant simulated settlement.</p>
+    </div>
+  );
+}
+
+function LmcPanel({ balance, price }: { balance: number; price: number }) {
+  return (
+    <div className="rounded-2xl card-flat p-4">
+      <div className="text-xs uppercase tracking-widest text-muted-foreground">LMC Balance</div>
+      <div className="mt-1 text-2xl font-extrabold">{formatLMC(balance, 4)} LMC</div>
+      <div className="text-xs text-muted-foreground">≈ {formatINR(balance * price, 2)}</div>
+      <p className="mt-4 text-sm text-muted-foreground">
+        Buy or sell LMC on the Trade tab. Wallet transfers between users are coming soon.
+      </p>
+    </div>
   );
 }
 
 function TabBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className={`px-4 py-2 rounded-lg text-sm ${active ? "btn-gold" : "text-muted-foreground hover:text-foreground"}`}>
+    <button
+      onClick={onClick}
+      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition ${active ? "btn-gold" : "text-muted-foreground"}`}
+    >
       {children}
     </button>
-  );
-}
-
-function ActionBtn({ children, primary }: { children: React.ReactNode; primary?: boolean }) {
-  return (
-    <button className={`rounded-lg px-4 py-2.5 text-sm font-medium ${primary ? "btn-gold" : "border border-border bg-secondary/60 hover:bg-secondary"}`}>{children}</button>
-  );
-}
-
-function Field({ label, placeholder, readOnly }: { label: string; placeholder?: string; readOnly?: boolean }) {
-  return (
-    <label className="block">
-      <span className="block text-xs uppercase tracking-widest text-muted-foreground mb-1.5">{label}</span>
-      <input
-        placeholder={placeholder}
-        readOnly={readOnly}
-        className="w-full rounded-lg bg-background/60 border border-border px-4 py-3 font-mono text-sm outline-none focus:border-[color:var(--gold)] transition"
-      />
-    </label>
   );
 }

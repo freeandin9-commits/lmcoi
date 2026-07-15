@@ -1,10 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
-import {
-  useLivePrice, generateHistory, TOP_MOVERS, ANNOUNCEMENTS, formatINR,
-} from "@/lib/lmc-market";
 import { Sparkline } from "@/components/lmc/PriceTicker";
+import { useWallet, usePriceSeries, useAnnouncements, formatINR, formatLMC } from "@/lib/lmc-api";
+import { useAuth } from "@/hooks/use-auth";
 import { ArrowDownToLine, ArrowUpFromLine, Repeat, Gift, Bell, Megaphone } from "lucide-react";
 
 export const Route = createFileRoute("/home")({
@@ -18,20 +17,32 @@ export const Route = createFileRoute("/home")({
 });
 
 function HomeApp() {
-  const { price, change24h } = useLivePrice();
-  const history = useMemo(() => generateHistory(80, 60), []);
-  const balanceLmc = 1240.5;
-  const balanceInr = balanceLmc * price;
+  const nav = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { wallet } = useWallet();
+  const { sparkData, price, change } = usePriceSeries(120);
+  const announcements = useAnnouncements();
+
+  useEffect(() => {
+    if (!authLoading && !user) nav({ to: "/" });
+  }, [authLoading, user, nav]);
+
+  const lmc = Number(wallet?.lmc_balance ?? 0);
+  const inr = Number(wallet?.inr_balance ?? 0);
+  const total = lmc * price + inr;
 
   return (
     <Shell>
       <AppHeader
         title="LM Coin"
-        right={<button aria-label="Notifications" className="text-muted-foreground"><Bell size={20} /></button>}
+        right={
+          <button aria-label="Notifications" className="text-muted-foreground">
+            <Bell size={20} />
+          </button>
+        }
       />
 
       <div className="px-4 pt-4 space-y-4">
-        {/* Balance card */}
         <div
           className="rounded-2xl p-5 text-[oklch(0.2_0.02_260)]"
           style={{ background: "linear-gradient(135deg, var(--gold) 0%, oklch(0.92 0.11 92) 100%)" }}
@@ -40,8 +51,10 @@ function HomeApp() {
             <div className="text-sm/none opacity-80">Total Balance</div>
             <LMCMark size={28} />
           </div>
-          <div className="mt-3 text-3xl font-extrabold tabular-nums">{formatINR(balanceInr, 2)}</div>
-          <div className="mt-1 text-sm font-medium">{balanceLmc.toFixed(2)} LMC</div>
+          <div className="mt-3 text-3xl font-extrabold tabular-nums">{formatINR(total, 2)}</div>
+          <div className="mt-1 text-sm font-medium">
+            {formatLMC(lmc, 4)} LMC · {formatINR(inr, 2)}
+          </div>
           <div className="mt-4 grid grid-cols-4 gap-2">
             <QuickAction to="/wallet" icon={<ArrowDownToLine size={18} />} label="Deposit" />
             <QuickAction to="/wallet" icon={<ArrowUpFromLine size={18} />} label="Withdraw" />
@@ -50,7 +63,6 @@ function HomeApp() {
           </div>
         </div>
 
-        {/* Live price */}
         <div className="rounded-2xl card-flat p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -61,51 +73,47 @@ function HomeApp() {
               </div>
             </div>
             <div className="text-right">
-              <div className="font-mono font-semibold">{formatINR(price, 4)}</div>
-              <div className={`text-xs font-medium ${change24h >= 0 ? "text-[color:var(--success)]" : "text-[color:var(--danger)]"}`}>
-                {change24h >= 0 ? "▲" : "▼"} {change24h}%
+              <div className="font-mono font-semibold">{price ? formatINR(price, 4) : "—"}</div>
+              <div className={`text-xs font-medium ${change >= 0 ? "text-[color:var(--success)]" : "text-[color:var(--danger)]"}`}>
+                {change >= 0 ? "▲" : "▼"} {change}%
               </div>
             </div>
           </div>
-          <div className="mt-3">
-            <Sparkline data={history} height={80} />
+          <div className="mt-3 min-h-[80px]">
+            {sparkData.length >= 2 && <Sparkline data={sparkData} height={80} />}
           </div>
-          <Link to="/trade" className="mt-3 block text-center rounded-xl btn-gold py-2.5 text-sm">Buy / Sell LMC</Link>
+          <Link to="/trade" className="mt-3 block text-center rounded-xl btn-gold py-2.5 text-sm">
+            Buy / Sell LMC
+          </Link>
         </div>
 
-        {/* Announcement banner */}
-        <div className="rounded-2xl card-flat p-4 flex items-start gap-3">
-          <span className="grid place-items-center h-9 w-9 rounded-full" style={{ background: "var(--gold-soft)" }}>
-            <Megaphone size={18} />
-          </span>
-          <div className="flex-1">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">Announcement</div>
-            <div className="text-sm font-semibold mt-0.5">{ANNOUNCEMENTS[0].title}</div>
+        {announcements[0] && (
+          <div className="rounded-2xl card-flat p-4 flex items-start gap-3">
+            <span className="grid place-items-center h-9 w-9 rounded-full" style={{ background: "var(--gold-soft)" }}>
+              <Megaphone size={18} />
+            </span>
+            <div className="flex-1">
+              <div className="text-xs uppercase tracking-widest text-muted-foreground">{announcements[0].tag}</div>
+              <div className="text-sm font-semibold mt-0.5">{announcements[0].title}</div>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Market list */}
         <div>
           <div className="flex items-center justify-between px-1 pb-2">
-            <h2 className="text-base font-bold">Market</h2>
-            <Link to="/trade" className="text-xs text-muted-foreground">View all</Link>
+            <h2 className="text-base font-bold">Announcements</h2>
           </div>
           <div className="rounded-2xl card-flat overflow-hidden">
-            {TOP_MOVERS.map((m, i) => (
-              <div key={m.symbol} className={`flex items-center px-4 py-3 ${i === 0 ? "" : "border-t border-border"}`}>
-                {m.symbol === "LMC" ? <LMCMark size={30} /> : (
-                  <span className="h-8 w-8 rounded-full bg-secondary grid place-items-center text-xs font-semibold">{m.symbol[0]}</span>
-                )}
-                <div className="ml-3 flex-1">
-                  <div className="text-sm font-semibold">{m.name}</div>
-                  <div className="text-xs text-muted-foreground">{m.symbol}</div>
+            {announcements.length === 0 && (
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">No announcements yet.</div>
+            )}
+            {announcements.map((a, i) => (
+              <div key={a.id} className={`px-4 py-3 ${i === 0 ? "" : "border-t border-border"}`}>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="rounded-full px-2 py-0.5" style={{ background: "var(--gold-soft)" }}>{a.tag}</span>
+                  <span className="text-muted-foreground">{new Date(a.published_at).toLocaleDateString()}</span>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-mono">{formatINR(m.price, 2)}</div>
-                  <div className={`text-xs font-medium ${m.change >= 0 ? "text-[color:var(--success)]" : "text-[color:var(--danger)]"}`}>
-                    {m.change >= 0 ? "+" : ""}{m.change}%
-                  </div>
-                </div>
+                <div className="mt-1 text-sm font-semibold">{a.title}</div>
               </div>
             ))}
           </div>
