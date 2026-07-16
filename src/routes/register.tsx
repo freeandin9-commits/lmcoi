@@ -108,15 +108,23 @@ function Register() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [captchaInput, setCaptchaInput] = useState("");
+  const captchaRef = useRef<CaptchaHandle>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaRef.current?.verify(captchaInput)) {
+      toast.error("Incorrect security code");
+      captchaRef.current?.refresh();
+      return;
+    }
     const parsed = schema.safeParse({ email, displayName, password: pw, confirm: pw2, invite });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
     setBusy(true);
+
     const { error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
