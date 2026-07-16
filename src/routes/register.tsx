@@ -281,6 +281,13 @@ function Register() {
 
           <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
 
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck size={14} className="text-[color:var(--gold)]" />
+            <span>Captcha, lockout & leaked-password protection are active.</span>
+          </div>
+
+
+
 
 
           <button
