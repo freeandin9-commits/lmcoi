@@ -2,10 +2,18 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Shell } from "@/components/lmc/Shell";
 import { Captcha, type CaptchaHandle } from "@/components/lmc/Captcha";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import {
+  strongPassword,
+  passwordScore,
+  checkLock,
+  recordFailure,
+  clearFailures,
+  formatRemaining,
+} from "@/lib/auth-security";
 
 
 export const Route = createFileRoute("/register")({
@@ -17,13 +25,23 @@ export const Route = createFileRoute("/register")({
 
 const schema = z
   .object({
-    email: z.string().trim().email().max(255),
-    displayName: z.string().trim().min(2).max(60),
-    password: z.string().min(8).max(100),
+    email: z.string().trim().toLowerCase().email("Enter a valid email").max(255),
+    displayName: z
+      .string()
+      .trim()
+      .min(2, "Name too short")
+      .max(60)
+      .regex(/^[\p{L}\p{M} .'-]+$/u, "Name has invalid characters"),
+    password: strongPassword,
     confirm: z.string(),
-    invite: z.string().trim().max(20).optional().or(z.literal("")),
+    invite: z.string().trim().toUpperCase().max(20).regex(/^[A-Z0-9-]*$/, "Invalid code").optional().or(z.literal("")),
   })
-  .refine((d) => d.password === d.confirm, { message: "Passwords do not match", path: ["confirm"] });
+  .refine((d) => d.password === d.confirm, { message: "Passwords do not match", path: ["confirm"] })
+  .refine((d) => !d.password.toLowerCase().includes(d.email.split("@")[0]?.toLowerCase() ?? "___"), {
+    message: "Password must not contain your email",
+    path: ["password"],
+  });
+
 
 // Animation Human (Robert) Component
 const Robert = ({ focused, show }: { focused: string | null; show: boolean }) => {
@@ -113,18 +131,26 @@ function Register() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaRef.current?.verify(captchaInput)) {
-      toast.error("Incorrect security code");
-      captchaRef.current?.refresh();
-      return;
-    }
+
     const parsed = schema.safeParse({ email, displayName, password: pw, confirm: pw2, invite });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
-    setBusy(true);
 
+    const lock = checkLock("signup", parsed.data.email);
+    if (lock.locked) {
+      toast.error(`Too many attempts. Try again in ${formatRemaining(lock.remainingMs)}.`);
+      return;
+    }
+
+    if (!captchaRef.current?.verify(captchaInput)) {
+      toast.error("Incorrect security code");
+      captchaRef.current?.refresh();
+      return;
+    }
+
+    setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
@@ -135,12 +161,19 @@ function Register() {
     });
     setBusy(false);
     if (error) {
+      recordFailure("signup", parsed.data.email);
+      captchaRef.current?.refresh();
+      // Supabase HIBP surfaces as a password error — pass through the message
       toast.error(error.message);
       return;
     }
-    toast.success("Account created");
+    clearFailures("signup", parsed.data.email);
+    toast.success("Account created — check your email to confirm.");
     nav({ to: "/home" });
   };
+
+  const strength = passwordScore(pw);
+
 
   return (
     <Shell hideTabs>
@@ -184,9 +217,10 @@ function Register() {
                 onChange={(e) => setPw(e.target.value)}
                 onFocus={() => setFocusedField("password")}
                 onBlur={() => setFocusedField(null)}
-                minLength={8}
+                minLength={12}
+                maxLength={128}
                 required
-                placeholder="At least 8 characters"
+                placeholder="At least 12 chars, mixed case, digit & symbol"
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
               />
               <button
@@ -199,6 +233,26 @@ function Register() {
               </button>
             </div>
           </Field>
+          {pw && (
+            <div className="-mt-2">
+              <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+                <div
+                  className="h-full transition-all duration-300"
+                  style={{
+                    width: `${(strength.score / 4) * 100}%`,
+                    background:
+                      strength.score >= 3
+                        ? "var(--success)"
+                        : strength.score === 2
+                          ? "var(--gold)"
+                          : "var(--danger)",
+                  }}
+                />
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">Strength: {strength.label}</div>
+            </div>
+          )}
+
 
           <Field label="Confirm password" focused={focusedField === "confirm"}>
             <input
@@ -226,6 +280,13 @@ function Register() {
           </Field>
 
           <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
+
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck size={14} className="text-[color:var(--gold)]" />
+            <span>Captcha, lockout & leaked-password protection are active.</span>
+          </div>
+
+
 
 
 

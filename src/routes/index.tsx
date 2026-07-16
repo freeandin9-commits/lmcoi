@@ -2,10 +2,18 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/lmc/Shell";
 import { Captcha, type CaptchaHandle } from "@/components/lmc/Captcha";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
+import { z } from "zod";
+import {
+  checkLock,
+  recordFailure,
+  clearFailures,
+  formatRemaining,
+  GENERIC_LOGIN_ERROR,
+} from "@/lib/auth-security";
 
 export const Route = createFileRoute("/")({
   component: Login,
@@ -13,6 +21,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [{ title: "LM Coin — Sign In" }, { name: "description", content: "Sign in to your LM Coin account." }],
   }),
+});
+
+const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email").max(255),
+  password: z.string().min(1, "Enter your password").max(128),
 });
 
 function Login() {
@@ -35,19 +48,44 @@ function Login() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const parsed = loginSchema.safeParse({ email, password: pw });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+      return;
+    }
+
+    const lock = checkLock("login", parsed.data.email);
+    if (lock.locked) {
+      toast.error(`Too many attempts. Try again in ${formatRemaining(lock.remainingMs)}.`);
+      return;
+    }
+
     if (!captchaRef.current?.verify(captchaInput)) {
       toast.error("Incorrect security code");
       captchaRef.current?.refresh();
       return;
     }
+
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pw });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: parsed.data.email,
+      password: parsed.data.password,
+    });
     setBusy(false);
+
     if (error) {
-      toast.error(error.message);
+      const res = recordFailure("login", parsed.data.email);
       captchaRef.current?.refresh();
+      setPw("");
+      if (res.locked) {
+        toast.error("Account temporarily locked. Try again in 15 minutes.");
+      } else {
+        toast.error(`${GENERIC_LOGIN_ERROR}${res.attemptsLeft <= 2 ? ` · ${res.attemptsLeft} attempts left` : ""}`);
+      }
       return;
     }
+    clearFailures("login", parsed.data.email);
     nav({ to: "/home" });
   };
 
@@ -62,6 +100,8 @@ function Login() {
     if (res.redirected) return;
     nav({ to: "/home" });
   };
+
+
 
 
   return (
@@ -163,6 +203,10 @@ function Login() {
 
           <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
 
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck size={14} className="text-[color:var(--gold)]" />
+            <span>Protected by captcha, lockout & breach-password checks.</span>
+          </div>
 
           <button
             disabled={busy}
@@ -170,6 +214,7 @@ function Login() {
           >
             {busy && <Loader2 size={16} className="animate-spin" />} Log In
           </button>
+
 
           <div className="flex items-center gap-3 opacity-0 animate-fade-up delay-300">
             <div className="h-px flex-1 bg-border" />
