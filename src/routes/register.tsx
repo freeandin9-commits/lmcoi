@@ -131,18 +131,26 @@ function Register() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaRef.current?.verify(captchaInput)) {
-      toast.error("Incorrect security code");
-      captchaRef.current?.refresh();
-      return;
-    }
+
     const parsed = schema.safeParse({ email, displayName, password: pw, confirm: pw2, invite });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
-    setBusy(true);
 
+    const lock = checkLock("signup", parsed.data.email);
+    if (lock.locked) {
+      toast.error(`Too many attempts. Try again in ${formatRemaining(lock.remainingMs)}.`);
+      return;
+    }
+
+    if (!captchaRef.current?.verify(captchaInput)) {
+      toast.error("Incorrect security code");
+      captchaRef.current?.refresh();
+      return;
+    }
+
+    setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
@@ -153,12 +161,19 @@ function Register() {
     });
     setBusy(false);
     if (error) {
+      recordFailure("signup", parsed.data.email);
+      captchaRef.current?.refresh();
+      // Supabase HIBP surfaces as a password error — pass through the message
       toast.error(error.message);
       return;
     }
-    toast.success("Account created");
+    clearFailures("signup", parsed.data.email);
+    toast.success("Account created — check your email to confirm.");
     nav({ to: "/home" });
   };
+
+  const strength = passwordScore(pw);
+
 
   return (
     <Shell hideTabs>
