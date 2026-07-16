@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/lmc/Shell";
+import { Captcha, type CaptchaHandle } from "@/components/lmc/Captcha";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Login,
+
   head: () => ({
     meta: [{ title: "LM Coin — Sign In" }, { name: "description", content: "Sign in to your LM Coin account." }],
   }),
