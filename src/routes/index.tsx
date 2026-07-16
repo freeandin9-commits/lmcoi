@@ -128,46 +128,54 @@ function Login() {
           50% { transform: translateY(-8px); }
           100% { transform: translateY(0px); }
         }
+        @keyframes glassShimmer {
+          0% { transform: translateX(-150%) skewX(-15deg); }
+          100% { transform: translateX(150%) skewX(-15deg); }
+        }
         .animate-blob1 { animation: blobFloat1 12s infinite alternate ease-in-out; }
         .animate-blob2 { animation: blobFloat2 15s infinite alternate ease-in-out; }
         .animate-blob3 { animation: blobFloat1 18s infinite alternate-reverse ease-in-out; }
         .animate-glass-float { animation: glassFloat 6s ease-in-out infinite; }
+        .animate-glass-shimmer { animation: glassShimmer 4s infinite linear; }
       `}</style>
 
       {/* Main Wrapper with Background Gradients for Glassmorphism Context */}
       <div className="relative w-full min-h-[85vh] flex flex-col items-center justify-center px-4 overflow-hidden">
         {/* Fluid Animated Glowing Background Blobs to enhance Glassmorphism */}
-        <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-[color:var(--gold)]/20 rounded-full mix-blend-multiply filter blur-[80px] animate-blob1" />
-        <div className="absolute bottom-[10%] right-[10%] w-64 h-64 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-[80px] animate-blob2" />
+        <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-[color:var(--gold)]/30 rounded-full mix-blend-multiply filter blur-[80px] animate-blob1" />
+        <div className="absolute bottom-[10%] right-[10%] w-64 h-64 bg-blue-500/20 rounded-full mix-blend-multiply filter blur-[80px] animate-blob2" />
         <div
-          className="absolute top-[50%] left-[50%] w-80 h-80 bg-purple-500/10 rounded-full mix-blend-multiply filter blur-[100px] animate-blob3"
+          className="absolute top-[50%] left-[50%] w-80 h-80 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-[100px] animate-blob3"
           style={{ transform: "translate(-50%, -50%)" }}
         />
 
-        {/* Light Glassmorphism Card Container with Floating Animation */}
-        <div className="relative z-10 w-full max-w-md px-8 py-10 rounded-3xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] transition-all duration-500 animate-glass-float">
+        {/* Enhanced Light Glassmorphism Card Container */}
+        <div className="relative z-10 w-full max-w-md px-8 py-10 rounded-3xl bg-white/30 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_12px_40px_0_rgba(31,38,135,0.25)] transition-all duration-500 animate-glass-float overflow-hidden">
+          {/* Glass Shimmer Effect */}
+          <div className="absolute inset-0 -z-10 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-glass-shimmer pointer-events-none" />
+
           <div className="flex items-center justify-center gap-3 opacity-0 animate-fade-up hover:scale-105 transition-transform duration-300 cursor-default">
             {/* ലോഗോ */}
             <img
               src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
               alt="LM Coin Logo"
-              className="h-11 w-11 rounded-full object-cover shadow-sm border border-white/50"
+              className="h-11 w-11 rounded-full object-cover shadow-md border border-white/60"
             />
-            <span className="text-xl font-extrabold tracking-tight text-gray-900">LM Coin</span>
+            <span className="text-xl font-extrabold tracking-tight text-gray-900 drop-shadow-sm">LM Coin</span>
           </div>
 
           <div className="opacity-0 animate-fade-up delay-100 text-center">
-            <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-gray-900">Account Login</h1>
-            <p className="mt-1 text-sm text-gray-600">Sign in with your email and password.</p>
+            <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-gray-900 drop-shadow-sm">Account Login</h1>
+            <p className="mt-1 text-sm text-gray-700">Sign in with your email and password.</p>
           </div>
 
           {/* Animated Human Component added here */}
           <AnimatedHuman focusedField={focusedField} showPassword={show} />
 
           <form onSubmit={onSubmit} className="mt-4 space-y-5 opacity-0 animate-fade-up delay-200">
-            {/* Glass Email Input */}
+            {/* Enhanced Glass Email Input */}
             <div className="group">
-              <label className="text-sm font-medium text-gray-700 transition-colors group-focus-within:text-yellow-600">
+              <label className="text-sm font-medium text-gray-800 transition-colors group-focus-within:text-yellow-600 drop-shadow-sm">
                 Email
               </label>
               <input
@@ -179,14 +187,14 @@ function Login() {
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
                 placeholder="you@example.com"
-                className="mt-2 w-full rounded-xl bg-white/50 backdrop-blur-md border border-white/70 px-4 py-3 outline-none text-sm text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:ring-2 focus:ring-[color:var(--gold)]/50 focus:bg-white/80 hover:bg-white/60 shadow-sm"
+                className="mt-2 w-full rounded-xl bg-white/40 backdrop-blur-xl border border-white/60 px-4 py-3 outline-none text-sm text-gray-900 placeholder:text-gray-600 transition-all duration-300 focus:ring-2 focus:ring-[color:var(--gold)]/60 focus:bg-white/60 hover:bg-white/50 shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)]"
               />
             </div>
 
-            {/* Glass Password Input */}
+            {/* Enhanced Glass Password Input */}
             <div className="group">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700 transition-colors group-focus-within:text-yellow-600">
+                <label className="text-sm font-medium text-gray-800 transition-colors group-focus-within:text-yellow-600 drop-shadow-sm">
                   Password
                 </label>
                 <button
@@ -199,12 +207,12 @@ function Login() {
                     if (error) toast.error(error.message);
                     else toast.success("Password reset email sent");
                   }}
-                  className="text-sm font-semibold text-yellow-600 hover:underline hover:scale-105 transition-all"
+                  className="text-sm font-bold text-yellow-600 hover:underline hover:scale-105 transition-all drop-shadow-sm"
                 >
                   Forgot Password?
                 </button>
               </div>
-              <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/50 backdrop-blur-md border border-white/70 px-4 py-3 transition-all duration-300 focus-within:ring-2 focus-within:ring-[color:var(--gold)]/50 focus-within:bg-white/80 hover:bg-white/60 shadow-sm">
+              <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/40 backdrop-blur-xl border border-white/60 px-4 py-3 transition-all duration-300 focus-within:ring-2 focus-within:ring-[color:var(--gold)]/60 focus-within:bg-white/60 hover:bg-white/50 shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)]">
                 <input
                   type={show ? "text" : "password"}
                   autoComplete="current-password"
@@ -215,12 +223,12 @@ function Login() {
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Password"
-                  className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-500"
+                  className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-600"
                 />
                 <button
                   type="button"
                   onClick={() => setShow((s) => !s)}
-                  className="text-gray-500 hover:text-yellow-600 hover:scale-110 transition-all duration-200"
+                  className="text-gray-600 hover:text-yellow-600 hover:scale-110 transition-all duration-200"
                   aria-label="Toggle password"
                 >
                   {show ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -229,42 +237,43 @@ function Login() {
             </div>
 
             {/* Captcha Wrapper for Glass UI */}
-            <div className="rounded-xl overflow-hidden backdrop-blur-md">
+            <div className="rounded-xl overflow-hidden backdrop-blur-xl bg-white/30 border border-white/50 p-1 shadow-sm">
               <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-gray-600 font-medium">
+            <div className="flex items-center gap-2 text-xs text-gray-700 font-semibold drop-shadow-sm">
               <ShieldCheck size={14} className="text-yellow-600" />
               <span>Protected by captcha, lockout & breach-password checks.</span>
             </div>
 
             <button
               disabled={busy}
-              className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 hover:scale-[1.02] shadow-[0_4px_15px_rgba(255,215,0,0.25)] active:scale-95 border border-[color:var(--gold)]/30 backdrop-blur-md text-gray-900"
+              className="w-full rounded-xl btn-gold py-3.5 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_8px_25px_rgba(255,215,0,0.4)] shadow-[0_4px_15px_rgba(255,215,0,0.25)] active:scale-95 border border-[color:var(--gold)]/40 backdrop-blur-xl text-gray-900 overflow-hidden relative"
             >
+              <div className="absolute inset-0 w-full h-full bg-white/20 animate-glass-shimmer pointer-events-none" />
               {busy && <Loader2 size={16} className="animate-spin" />} Log In
             </button>
 
             <div className="flex items-center gap-3 opacity-0 animate-fade-up delay-300">
-              <div className="h-px flex-1 bg-gray-300" />
-              <span className="text-xs uppercase tracking-widest text-gray-500 font-bold">Or</span>
-              <div className="h-px flex-1 bg-gray-300" />
+              <div className="h-px flex-1 bg-gray-400/40" />
+              <span className="text-xs uppercase tracking-widest text-gray-600 font-extrabold drop-shadow-sm">Or</span>
+              <div className="h-px flex-1 bg-gray-400/40" />
             </div>
 
-            {/* Glass Google Button */}
+            {/* Enhanced Glass Google Button */}
             <button
               type="button"
               onClick={onGoogle}
-              className="w-full rounded-xl bg-white/60 backdrop-blur-md border border-gray-200 py-3.5 text-base font-semibold text-gray-900 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:bg-white/80 active:scale-95 opacity-0 animate-fade-up delay-300 shadow-sm"
+              className="w-full rounded-xl bg-white/40 backdrop-blur-xl border border-white/70 py-3.5 text-base font-bold text-gray-900 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:bg-white/60 hover:shadow-[0_8px_25px_rgba(255,255,255,0.5)] active:scale-95 opacity-0 animate-fade-up delay-300 shadow-md"
             >
               <GoogleIcon /> Continue with Google
             </button>
 
-            <p className="text-sm pt-2 text-center text-gray-600 opacity-0 animate-fade-up delay-300">
+            <p className="text-sm pt-2 text-center text-gray-700 opacity-0 animate-fade-up delay-300 font-medium">
               No Account?{" "}
               <Link
                 to="/register"
-                className="font-semibold text-yellow-600 hover:underline hover:scale-105 inline-block transition-transform"
+                className="font-bold text-yellow-600 hover:underline hover:scale-105 inline-block transition-transform drop-shadow-sm"
               >
                 Register Now »
               </Link>
