@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react"; // useState ചേർത്തു
+import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
 import { useWallet, usePriceSeries, useAnnouncements, formatINR, formatLMC } from "@/lib/lmc-api";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowDownToLine, ArrowUpFromLine, Repeat, Gift, Bell, Megaphone, X } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Repeat, Gift, Bell, Megaphone } from "lucide-react";
 
 export const Route = createFileRoute("/home")({
   component: HomeApp,
@@ -21,7 +21,6 @@ function HomeApp() {
   const { wallet } = useWallet();
   const { price } = usePriceSeries(120);
   const announcements = useAnnouncements();
-  const [showCoinModel, setShowCoinModel] = useState(false); // Modal visibility state
 
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/" });
@@ -31,63 +30,16 @@ function HomeApp() {
   const inr = Number(wallet?.inr_balance ?? 0);
   const total = lmc * price + inr;
 
-  // Clickable Logo Component
-  const Logo = () => (
-    <button
-      onClick={() => setShowCoinModel(true)}
-      className="flex items-center gap-2 text-xl font-bold"
-      aria-label="View LM Coin 3D model"
-    >
-      <img
-        src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
-        alt="LM Coin Logo"
-        className="h-9 w-9 rounded-full object-cover"
-      />
-      LM Coin
-    </button>
-  );
-
   return (
     <Shell>
       <AppHeader
-        title={<Logo />} // Passing Logo component instead of text
+        title="LM Coin"
         right={
           <button aria-label="Notifications" className="text-muted-foreground">
             <Bell size={20} />
           </button>
         }
       />
-
-      {/* 3D Coin Model Modal */}
-      {showCoinModel && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-          onClick={() => setShowCoinModel(false)}
-        >
-          <div
-            className="w-[80vw] h-[80vh] rounded-2xl bg-background p-6 relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowCoinModel(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
-            >
-              <X size={24} />
-            </button>
-            <div className="w-full h-full rounded-xl overflow-hidden">
-              {/* 3D Model Viewer - using a placeholder for .glb file */}
-              <model-viewer
-                src="/lmc-coin.glb"
-                alt="A 3D model of LM Coin"
-                auto-rotate
-                camera-controls
-                style={{ width: "100%", height: "100%" }}
-              ></model-viewer>
-            </div>
-            <p className="text-center text-sm text-muted-foreground mt-4">3D model of LM Coin</p>
-          </div>
-        </div>
-      )}
 
       <div className="px-4 pt-4 space-y-4">
         <div
