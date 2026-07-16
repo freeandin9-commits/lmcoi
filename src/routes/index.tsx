@@ -7,13 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { z } from "zod";
-import {
-  checkLock,
-  recordFailure,
-  clearFailures,
-  formatRemaining,
-  GENERIC_LOGIN_ERROR,
-} from "@/lib/auth-security";
+import { checkLock, recordFailure, clearFailures, formatRemaining, GENERIC_LOGIN_ERROR } from "@/lib/auth-security";
 
 export const Route = createFileRoute("/")({
   component: Login,
@@ -101,9 +95,6 @@ function Login() {
     nav({ to: "/home" });
   };
 
-
-
-
   return (
     <Shell hideTabs>
       {/* Custom CSS for Animations */}
@@ -120,126 +111,140 @@ function Login() {
         .delay-300 { animation-delay: 300ms; }
       `}</style>
 
-      <div className="px-6 pt-8">
-        <div className="flex items-center justify-center gap-3 opacity-0 animate-fade-up hover:scale-105 transition-transform duration-300 cursor-default">
-          {/* നിങ്ങൾ നൽകിയ ലിങ്കിൽ നിന്നുള്ള ലോഗോ (Circle ആക്കിയത്) */}
-          <img
-            src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
-            alt="LM Coin Logo"
-            className="h-11 w-11 rounded-full object-cover"
-          />
-          <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
-        </div>
+      {/* Main Wrapper with Background Gradients for Glassmorphism Context */}
+      <div className="relative w-full min-h-[85vh] flex flex-col items-center justify-center px-4 overflow-hidden">
+        {/* Glowing Background Blobs to enhance Glassmorphism */}
+        <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-[color:var(--gold)]/20 rounded-full mix-blend-screen filter blur-[80px] animate-pulse" />
+        <div className="absolute bottom-[10%] right-[10%] w-64 h-64 bg-blue-500/20 rounded-full mix-blend-screen filter blur-[80px] animate-pulse delay-1000" />
+        <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-500/10 rounded-full mix-blend-screen filter blur-[100px]" />
 
-        <div className="opacity-0 animate-fade-up delay-100">
-          <h1 className="mt-10 text-3xl font-extrabold tracking-tight">Account Login</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in with your email and password.</p>
-        </div>
-
-        {/* Animated Human Component added here */}
-        <AnimatedHuman focusedField={focusedField} showPassword={show} />
-
-        <form onSubmit={onSubmit} className="mt-4 space-y-5 opacity-0 animate-fade-up delay-200">
-          <div className="group">
-            <label className="text-sm font-medium transition-colors group-focus-within:text-[color:var(--gold)]">
-              Email
-            </label>
-            <input
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setFocusedField("email")}
-              onBlur={() => setFocusedField(null)}
-              placeholder="you@example.com"
-              className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none text-sm placeholder:text-muted-foreground transition-all duration-300 focus:ring-2 focus:ring-[color:var(--gold)]/50 hover:bg-secondary/80"
+        {/* Glassmorphism Card Container */}
+        <div className="relative z-10 w-full max-w-md px-8 py-10 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+          <div className="flex items-center justify-center gap-3 opacity-0 animate-fade-up hover:scale-105 transition-transform duration-300 cursor-default">
+            {/* ലോഗോ */}
+            <img
+              src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
+              alt="LM Coin Logo"
+              className="h-11 w-11 rounded-full object-cover shadow-lg border border-white/20"
             />
+            <span className="text-xl font-extrabold tracking-tight text-white drop-shadow-md">LM Coin</span>
           </div>
 
-          <div className="group">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium transition-colors group-focus-within:text-[color:var(--gold)]">
-                Password
+          <div className="opacity-0 animate-fade-up delay-100 text-center">
+            <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">Account Login</h1>
+            <p className="mt-1 text-sm text-gray-300">Sign in with your email and password.</p>
+          </div>
+
+          {/* Animated Human Component added here */}
+          <AnimatedHuman focusedField={focusedField} showPassword={show} />
+
+          <form onSubmit={onSubmit} className="mt-4 space-y-5 opacity-0 animate-fade-up delay-200">
+            {/* Glass Email Input */}
+            <div className="group">
+              <label className="text-sm font-medium text-gray-200 transition-colors group-focus-within:text-[color:var(--gold)]">
+                Email
               </label>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!email) return toast.error("Enter your email first");
-                  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-                    redirectTo: `${window.location.origin}/reset-password`,
-                  });
-                  if (error) toast.error(error.message);
-                  else toast.success("Password reset email sent");
-                }}
-                className="text-sm font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 transition-all"
-              >
-                Forgot Password?
-              </button>
-            </div>
-            <div className="mt-2 flex items-center gap-2 rounded-xl bg-secondary px-4 py-3 transition-all duration-300 focus-within:ring-2 focus-within:ring-[color:var(--gold)]/50 hover:bg-secondary/80">
               <input
-                type={show ? "text" : "password"}
-                autoComplete="current-password"
+                type="email"
+                autoComplete="email"
                 required
-                minLength={6}
-                value={pw}
-                onChange={(e) => setPw(e.target.value)}
-                onFocus={() => setFocusedField("password")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
-                placeholder="Password"
-                className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+                placeholder="you@example.com"
+                className="mt-2 w-full rounded-xl bg-white/5 backdrop-blur-md border border-white/10 px-4 py-3 outline-none text-sm text-white placeholder:text-gray-400 transition-all duration-300 focus:ring-2 focus:ring-[color:var(--gold)]/50 focus:bg-white/10 hover:bg-white/10 shadow-inner"
               />
-              <button
-                type="button"
-                onClick={() => setShow((s) => !s)}
-                className="text-muted-foreground hover:text-[color:var(--gold)] hover:scale-110 transition-all duration-200"
-                aria-label="Toggle password"
-              >
-                {show ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
             </div>
-          </div>
 
-          <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
+            {/* Glass Password Input */}
+            <div className="group">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-200 transition-colors group-focus-within:text-[color:var(--gold)]">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!email) return toast.error("Enter your email first");
+                    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+                      redirectTo: `${window.location.origin}/reset-password`,
+                    });
+                    if (error) toast.error(error.message);
+                    else toast.success("Password reset email sent");
+                  }}
+                  className="text-sm font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 transition-all drop-shadow-sm"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 px-4 py-3 transition-all duration-300 focus-within:ring-2 focus-within:ring-[color:var(--gold)]/50 focus-within:bg-white/10 hover:bg-white/10 shadow-inner">
+                <input
+                  type={show ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  minLength={6}
+                  value={pw}
+                  onChange={(e) => setPw(e.target.value)}
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="Password"
+                  className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShow((s) => !s)}
+                  className="text-gray-400 hover:text-[color:var(--gold)] hover:scale-110 transition-all duration-200"
+                  aria-label="Toggle password"
+                >
+                  {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck size={14} className="text-[color:var(--gold)]" />
-            <span>Protected by captcha, lockout & breach-password checks.</span>
-          </div>
+            {/* Captcha Wrapper for Glass UI */}
+            <div className="rounded-xl overflow-hidden backdrop-blur-md">
+              <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
+            </div>
 
-          <button
-            disabled={busy}
-            className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(255,215,0,0.3)] active:scale-95"
-          >
-            {busy && <Loader2 size={16} className="animate-spin" />} Log In
-          </button>
+            <div className="flex items-center gap-2 text-xs text-gray-300 font-medium">
+              <ShieldCheck size={14} className="text-[color:var(--gold)] drop-shadow-sm" />
+              <span>Protected by captcha, lockout & breach-password checks.</span>
+            </div>
 
-
-          <div className="flex items-center gap-3 opacity-0 animate-fade-up delay-300">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">Or</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <button
-            type="button"
-            onClick={onGoogle}
-            className="w-full rounded-xl btn-soft py-3.5 text-base font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:bg-secondary active:scale-95 opacity-0 animate-fade-up delay-300"
-          >
-            <GoogleIcon /> Continue with Google
-          </button>
-
-          <p className="text-sm pt-2 text-center opacity-0 animate-fade-up delay-300">
-            No Account?{" "}
-            <Link
-              to="/register"
-              className="font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 inline-block transition-transform"
+            <button
+              disabled={busy}
+              className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 hover:scale-[1.02] shadow-[0_4px_20px_rgba(255,215,0,0.3)] active:scale-95 border border-[color:var(--gold)]/50 backdrop-blur-md"
             >
-              Register Now »
-            </Link>
-          </p>
-        </form>
+              {busy && <Loader2 size={16} className="animate-spin" />} Log In
+            </button>
+
+            <div className="flex items-center gap-3 opacity-0 animate-fade-up delay-300">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-xs uppercase tracking-widest text-gray-400 font-medium">Or</span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+
+            {/* Glass Google Button */}
+            <button
+              type="button"
+              onClick={onGoogle}
+              className="w-full rounded-xl bg-white/5 backdrop-blur-md border border-white/10 py-3.5 text-base font-semibold text-white flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:bg-white/10 active:scale-95 opacity-0 animate-fade-up delay-300 shadow-sm"
+            >
+              <GoogleIcon /> Continue with Google
+            </button>
+
+            <p className="text-sm pt-2 text-center text-gray-300 opacity-0 animate-fade-up delay-300">
+              No Account?{" "}
+              <Link
+                to="/register"
+                className="font-semibold text-[color:var(--gold)] hover:underline hover:scale-105 inline-block transition-transform drop-shadow-sm"
+              >
+                Register Now »
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
     </Shell>
   );
@@ -329,7 +334,7 @@ function AnimatedHuman({
         {/* --- BACKGROUND (House - Visible when trading) --- */}
         <g style={{ opacity: idleState === "trading" ? 1 : 0, transition: "opacity 1s ease-in-out" }}>
           {/* Home Wall */}
-          <rect x="10" y="10" width="180" height="110" rx="8" fill="var(--secondary, #1E293B)" opacity="0.4" />
+          <rect x="10" y="10" width="180" height="110" rx="8" fill="rgba(255, 255, 255, 0.05)" />
           {/* Window */}
           <rect
             x="130"
@@ -337,11 +342,11 @@ function AnimatedHuman({
             width="40"
             height="40"
             rx="4"
-            fill="#0F172A"
-            stroke="var(--border, #334155)"
+            fill="rgba(0, 0, 0, 0.2)"
+            stroke="rgba(255, 255, 255, 0.1)"
             strokeWidth="2"
           />
-          <path d="M 150 25 L 150 65 M 130 45 L 170 45" stroke="var(--border, #334155)" strokeWidth="2" />
+          <path d="M 150 25 L 150 65 M 130 45 L 170 45" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="2" />
           {/* Chart on Wall */}
           <rect
             x="30"
@@ -349,8 +354,8 @@ function AnimatedHuman({
             width="50"
             height="30"
             rx="2"
-            fill="#0F172A"
-            stroke="var(--border, #334155)"
+            fill="rgba(0, 0, 0, 0.2)"
+            stroke="rgba(255, 255, 255, 0.1)"
             strokeWidth="1"
           />
           <polyline
@@ -386,7 +391,7 @@ function AnimatedHuman({
           {/* Road Group */}
           <g>
             {/* Base Road */}
-            <rect x="-20" y="105" width="240" height="15" fill="#334155" />
+            <rect x="-20" y="105" width="240" height="15" fill="rgba(255, 255, 255, 0.1)" />
             {/* Moving Dashed Line on the road */}
             <line
               x1="-20"
@@ -526,16 +531,16 @@ function AnimatedHuman({
             <path
               d="M 30 75 L 170 75 L 180 110 L 20 110 Z"
               fill="var(--gold, #FFD700)"
-              stroke="var(--border, #334155)"
+              stroke="rgba(255, 255, 255, 0.2)"
               strokeWidth="3"
             />
             {/* Car Headlight */}
             <circle cx="170" cy="90" r="6" fill="#FACC15" />
             <path d="M 175 90 L 195 85 L 195 95 Z" fill="#FACC15" opacity="0.5" />
             {/* Wheels */}
-            <circle cx="60" cy="110" r="14" fill="#1E293B" stroke="var(--border, #334155)" strokeWidth="3" />
+            <circle cx="60" cy="110" r="14" fill="#1E293B" stroke="rgba(255, 255, 255, 0.2)" strokeWidth="3" />
             <circle cx="60" cy="110" r="6" fill="#94A3B8" />
-            <circle cx="140" cy="110" r="14" fill="#1E293B" stroke="var(--border, #334155)" strokeWidth="3" />
+            <circle cx="140" cy="110" r="14" fill="#1E293B" stroke="rgba(255, 255, 255, 0.2)" strokeWidth="3" />
             <circle cx="140" cy="110" r="6" fill="#94A3B8" />
           </g>
         </g>
@@ -549,8 +554,8 @@ function AnimatedHuman({
             width="110"
             height="15"
             rx="4"
-            fill="#334155"
-            stroke="var(--border, #334155)"
+            fill="rgba(255, 255, 255, 0.1)"
+            stroke="rgba(255, 255, 255, 0.1)"
             strokeWidth="2"
           />
 
@@ -561,8 +566,8 @@ function AnimatedHuman({
             width="50"
             height="35"
             rx="4"
-            fill="#94A3B8"
-            stroke="var(--border, #334155)"
+            fill="rgba(255, 255, 255, 0.5)"
+            stroke="rgba(255, 255, 255, 0.2)"
             strokeWidth="2"
           />
           <rect
@@ -572,7 +577,7 @@ function AnimatedHuman({
             height="5"
             rx="2"
             fill="#CBD5E1"
-            stroke="var(--border, #334155)"
+            stroke="rgba(255, 255, 255, 0.2)"
             strokeWidth="1"
           />
 
