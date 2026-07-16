@@ -217,9 +217,10 @@ function Register() {
                 onChange={(e) => setPw(e.target.value)}
                 onFocus={() => setFocusedField("password")}
                 onBlur={() => setFocusedField(null)}
-                minLength={8}
+                minLength={12}
+                maxLength={128}
                 required
-                placeholder="At least 8 characters"
+                placeholder="At least 12 chars, mixed case, digit & symbol"
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
               />
               <button
@@ -232,6 +233,26 @@ function Register() {
               </button>
             </div>
           </Field>
+          {pw && (
+            <div className="-mt-2">
+              <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+                <div
+                  className="h-full transition-all duration-300"
+                  style={{
+                    width: `${(strength.score / 4) * 100}%`,
+                    background:
+                      strength.score >= 3
+                        ? "var(--success)"
+                        : strength.score === 2
+                          ? "var(--gold)"
+                          : "var(--danger)",
+                  }}
+                />
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">Strength: {strength.label}</div>
+            </div>
+          )}
+
 
           <Field label="Confirm password" focused={focusedField === "confirm"}>
             <input
