@@ -74,9 +74,6 @@ function HomeApp() {
             </div>
             <div className="text-right">
               <div className="font-mono font-semibold">{price ? formatINR(price, 4) : "—"}</div>
-              <div className={`text-xs font-medium ${change >= 0 ? "text-[color:var(--success)]" : "text-[color:var(--danger)]"}`}>
-                {change >= 0 ? "▲" : "▼"} {change}%
-              </div>
             </div>
           </div>
           <div className="mt-3 min-h-[80px]">
