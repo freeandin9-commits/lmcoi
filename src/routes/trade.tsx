@@ -68,9 +68,6 @@ function Trade() {
             <div>
               <div className="text-xs uppercase tracking-widest text-muted-foreground">LMC / INR</div>
               <div className="mt-1 text-3xl font-extrabold font-mono">{price ? formatINR(price, 4) : "—"}</div>
-              <div className={`text-xs font-medium ${change >= 0 ? "text-[color:var(--success)]" : "text-[color:var(--danger)]"}`}>
-                {change >= 0 ? "▲" : "▼"} {change}% <span className="text-muted-foreground">recent</span>
-              </div>
             </div>
           </div>
           <div className="mt-3 min-h-[160px]">
