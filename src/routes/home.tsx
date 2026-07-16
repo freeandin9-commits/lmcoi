@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
-import { Sparkline } from "@/components/lmc/PriceTicker";
 import { useWallet, usePriceSeries, useAnnouncements, formatINR, formatLMC } from "@/lib/lmc-api";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowDownToLine, ArrowUpFromLine, Repeat, Gift, Bell, Megaphone } from "lucide-react";
@@ -20,7 +19,7 @@ function HomeApp() {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { wallet } = useWallet();
-  const { sparkData, price, change } = usePriceSeries(120);
+  const { price } = usePriceSeries(120);
   const announcements = useAnnouncements();
 
   useEffect(() => {
@@ -63,27 +62,6 @@ function HomeApp() {
           </div>
         </div>
 
-        <div className="rounded-2xl card-flat p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <LMCMark size={28} />
-              <div>
-                <div className="font-semibold text-sm">LMC / INR</div>
-                <div className="text-xs text-muted-foreground">Live price</div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="font-mono font-semibold">{price ? formatINR(price, 4) : "—"}</div>
-            </div>
-          </div>
-          <div className="mt-3 min-h-[80px]">
-            {sparkData.length >= 2 && <Sparkline data={sparkData} height={80} />}
-          </div>
-          <Link to="/trade" className="mt-3 block text-center rounded-xl btn-gold py-2.5 text-sm">
-            Buy / Sell LMC
-          </Link>
-        </div>
-
         {announcements[0] && (
           <div className="rounded-2xl card-flat p-4 flex items-start gap-3">
             <span className="grid place-items-center h-9 w-9 rounded-full" style={{ background: "var(--gold-soft)" }}>
@@ -107,7 +85,9 @@ function HomeApp() {
             {announcements.map((a, i) => (
               <div key={a.id} className={`px-4 py-3 ${i === 0 ? "" : "border-t border-border"}`}>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="rounded-full px-2 py-0.5" style={{ background: "var(--gold-soft)" }}>{a.tag}</span>
+                  <span className="rounded-full px-2 py-0.5" style={{ background: "var(--gold-soft)" }}>
+                    {a.tag}
+                  </span>
                   <span className="text-muted-foreground">{new Date(a.published_at).toLocaleDateString()}</span>
                 </div>
                 <div className="mt-1 text-sm font-semibold">{a.title}</div>
