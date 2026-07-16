@@ -225,6 +225,10 @@ function Register() {
             />
           </Field>
 
+          <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
+
+
+
           <button
             disabled={busy}
             className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60 transition-transform active:scale-95"
