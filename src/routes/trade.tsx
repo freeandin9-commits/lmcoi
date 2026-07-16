@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
-import { Sparkline } from "@/components/lmc/PriceTicker";
 import { useAuth } from "@/hooks/use-auth";
 import { useWallet, usePriceSeries, placeOrder, formatINR, formatLMC } from "@/lib/lmc-api";
 import { Loader2 } from "lucide-react";
@@ -10,20 +9,19 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/trade")({
   component: Trade,
   head: () => ({
-    meta: [
-      { title: "Trade · LM Coin" },
-      { name: "description", content: "Buy and sell LMC at live market price." },
-    ],
+    meta: [{ title: "Trade · LM Coin" }, { name: "description", content: "Buy and sell LMC at live market price." }],
   }),
 });
 
 function Trade() {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  useEffect(() => { if (!authLoading && !user) nav({ to: "/" }); }, [authLoading, user, nav]);
+  useEffect(() => {
+    if (!authLoading && !user) nav({ to: "/" });
+  }, [authLoading, user, nav]);
 
   const { wallet } = useWallet();
-  const { sparkData, price, change } = usePriceSeries(180);
+  const { price } = usePriceSeries(180);
 
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState(""); // input in LMC
@@ -69,9 +67,6 @@ function Trade() {
               <div className="text-xs uppercase tracking-widest text-muted-foreground">LMC / INR</div>
               <div className="mt-1 text-3xl font-extrabold font-mono">{price ? formatINR(price, 4) : "—"}</div>
             </div>
-          </div>
-          <div className="mt-3 min-h-[160px]">
-            {sparkData.length >= 2 && <Sparkline data={sparkData} height={160} />}
           </div>
         </div>
 
