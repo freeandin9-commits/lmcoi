@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Shell } from "@/components/lmc/Shell";
+import { Captcha, type CaptchaHandle } from "@/components/lmc/Captcha";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+
 
 export const Route = createFileRoute("/register")({
   component: Register,
@@ -106,15 +108,23 @@ function Register() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [captchaInput, setCaptchaInput] = useState("");
+  const captchaRef = useRef<CaptchaHandle>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaRef.current?.verify(captchaInput)) {
+      toast.error("Incorrect security code");
+      captchaRef.current?.refresh();
+      return;
+    }
     const parsed = schema.safeParse({ email, displayName, password: pw, confirm: pw2, invite });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
     setBusy(true);
+
     const { error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
@@ -214,6 +224,10 @@ function Register() {
               className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
             />
           </Field>
+
+          <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
+
+
 
           <button
             disabled={busy}
