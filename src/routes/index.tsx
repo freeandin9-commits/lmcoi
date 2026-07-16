@@ -161,6 +161,9 @@ function Login() {
             </div>
           </div>
 
+          <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
+
+
           <button
             disabled={busy}
             className="w-full rounded-xl btn-gold py-3.5 text-base font-semibold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(255,215,0,0.3)] active:scale-95"
