@@ -62,15 +62,6 @@ function Trade() {
       <AppHeader title="Trade" />
       <div className="px-4 pt-4 space-y-4">
         <div className="rounded-2xl card-flat p-4">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="text-xs uppercase tracking-widest text-muted-foreground">LMC / INR</div>
-              <div className="mt-1 text-3xl font-extrabold font-mono">{price ? formatINR(price, 4) : "—"}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl card-flat p-4">
           <div className="grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
             <button
               onClick={() => setSide("buy")}
