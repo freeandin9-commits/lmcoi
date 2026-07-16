@@ -21,6 +21,8 @@ function Login() {
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [captchaInput, setCaptchaInput] = useState("");
+  const captchaRef = useRef<CaptchaHandle>(null);
 
   // New state to track which input field is currently focused
   const [focusedField, setFocusedField] = useState<"email" | "password" | null>(null);
@@ -33,22 +35,34 @@ function Login() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!captchaRef.current?.verify(captchaInput)) {
+      toast.error("Incorrect security code");
+      captchaRef.current?.refresh();
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pw });
     setBusy(false);
     if (error) {
       toast.error(error.message);
+      captchaRef.current?.refresh();
       return;
     }
     nav({ to: "/home" });
   };
 
   const onGoogle = async () => {
+    if (!captchaRef.current?.verify(captchaInput)) {
+      toast.error("Complete the security check first");
+      captchaRef.current?.refresh();
+      return;
+    }
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (res.error) toast.error(res.error.message ?? "Google sign-in failed");
     if (res.redirected) return;
     nav({ to: "/home" });
   };
+
 
   return (
     <Shell hideTabs>
