@@ -109,17 +109,43 @@ function Login() {
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
         .delay-300 { animation-delay: 300ms; }
+
+        /* New Glassmorphism Background & Floating Animations */
+        @keyframes blobFloat1 {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes blobFloat2 {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(-30px, 50px) scale(1.2); }
+          66% { transform: translate(20px, -20px) scale(0.8); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes glassFloat {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+          100% { transform: translateY(0px); }
+        }
+        .animate-blob1 { animation: blobFloat1 12s infinite alternate ease-in-out; }
+        .animate-blob2 { animation: blobFloat2 15s infinite alternate ease-in-out; }
+        .animate-blob3 { animation: blobFloat1 18s infinite alternate-reverse ease-in-out; }
+        .animate-glass-float { animation: glassFloat 6s ease-in-out infinite; }
       `}</style>
 
       {/* Main Wrapper with Background Gradients for Glassmorphism Context */}
       <div className="relative w-full min-h-[85vh] flex flex-col items-center justify-center px-4 overflow-hidden">
-        {/* Glowing Background Blobs to enhance Glassmorphism */}
-        <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-[color:var(--gold)]/20 rounded-full mix-blend-multiply filter blur-[80px] animate-pulse" />
-        <div className="absolute bottom-[10%] right-[10%] w-64 h-64 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-[80px] animate-pulse delay-1000" />
-        <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-500/10 rounded-full mix-blend-multiply filter blur-[100px]" />
+        {/* Fluid Animated Glowing Background Blobs to enhance Glassmorphism */}
+        <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-[color:var(--gold)]/20 rounded-full mix-blend-multiply filter blur-[80px] animate-blob1" />
+        <div className="absolute bottom-[10%] right-[10%] w-64 h-64 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-[80px] animate-blob2" />
+        <div
+          className="absolute top-[50%] left-[50%] w-80 h-80 bg-purple-500/10 rounded-full mix-blend-multiply filter blur-[100px] animate-blob3"
+          style={{ transform: "translate(-50%, -50%)" }}
+        />
 
-        {/* Light Glassmorphism Card Container */}
-        <div className="relative z-10 w-full max-w-md px-8 py-10 rounded-3xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]">
+        {/* Light Glassmorphism Card Container with Floating Animation */}
+        <div className="relative z-10 w-full max-w-md px-8 py-10 rounded-3xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] transition-all duration-500 animate-glass-float">
           <div className="flex items-center justify-center gap-3 opacity-0 animate-fade-up hover:scale-105 transition-transform duration-300 cursor-default">
             {/* ലോഗോ */}
             <img
