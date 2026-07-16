@@ -203,6 +203,10 @@ function Login() {
 
           <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
 
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck size={14} className="text-[color:var(--gold)]" />
+            <span>Protected by captcha, lockout & breach-password checks.</span>
+          </div>
 
           <button
             disabled={busy}
@@ -210,6 +214,7 @@ function Login() {
           >
             {busy && <Loader2 size={16} className="animate-spin" />} Log In
           </button>
+
 
           <div className="flex items-center gap-3 opacity-0 animate-fade-up delay-300">
             <div className="h-px flex-1 bg-border" />
