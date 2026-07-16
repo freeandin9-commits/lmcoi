@@ -2,10 +2,18 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Shell } from "@/components/lmc/Shell";
 import { Captcha, type CaptchaHandle } from "@/components/lmc/Captcha";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import {
+  strongPassword,
+  passwordScore,
+  checkLock,
+  recordFailure,
+  clearFailures,
+  formatRemaining,
+} from "@/lib/auth-security";
 
 
 export const Route = createFileRoute("/register")({
@@ -17,13 +25,23 @@ export const Route = createFileRoute("/register")({
 
 const schema = z
   .object({
-    email: z.string().trim().email().max(255),
-    displayName: z.string().trim().min(2).max(60),
-    password: z.string().min(8).max(100),
+    email: z.string().trim().toLowerCase().email("Enter a valid email").max(255),
+    displayName: z
+      .string()
+      .trim()
+      .min(2, "Name too short")
+      .max(60)
+      .regex(/^[\p{L}\p{M} .'-]+$/u, "Name has invalid characters"),
+    password: strongPassword,
     confirm: z.string(),
-    invite: z.string().trim().max(20).optional().or(z.literal("")),
+    invite: z.string().trim().toUpperCase().max(20).regex(/^[A-Z0-9-]*$/, "Invalid code").optional().or(z.literal("")),
   })
-  .refine((d) => d.password === d.confirm, { message: "Passwords do not match", path: ["confirm"] });
+  .refine((d) => d.password === d.confirm, { message: "Passwords do not match", path: ["confirm"] })
+  .refine((d) => !d.password.toLowerCase().includes(d.email.split("@")[0]?.toLowerCase() ?? "___"), {
+    message: "Password must not contain your email",
+    path: ["password"],
+  });
+
 
 // Animation Human (Robert) Component
 const Robert = ({ focused, show }: { focused: string | null; show: boolean }) => {
