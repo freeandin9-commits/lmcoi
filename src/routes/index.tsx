@@ -32,6 +32,9 @@ function Login() {
   const [captchaInput, setCaptchaInput] = useState("");
   const captchaRef = useRef<CaptchaHandle>(null);
 
+  // New state to display inline errors (Email/Password wrong)
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   // New state to track which input field is currently focused
   const [focusedField, setFocusedField] = useState<"email" | "password" | null>(null);
 
@@ -55,21 +58,28 @@ function Login() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null); // Clear previous errors on new submission
 
     const parsed = loginSchema.safeParse({ email, password: pw });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
+      const errorMsg = parsed.error.issues[0]?.message ?? "Invalid input";
+      toast.error(errorMsg);
+      setLoginError(errorMsg);
       return;
     }
 
     const lock = checkLock("login", parsed.data.email);
     if (lock.locked) {
-      toast.error(`Too many attempts. Try again in ${formatRemaining(lock.remainingMs)}.`);
+      const lockMsg = `Too many attempts. Try again in ${formatRemaining(lock.remainingMs)}.`;
+      toast.error(lockMsg);
+      setLoginError(lockMsg);
       return;
     }
 
     if (!captchaRef.current?.verify(captchaInput)) {
-      toast.error("Incorrect security code");
+      const captchaMsg = "Incorrect security code";
+      toast.error(captchaMsg);
+      setLoginError(captchaMsg);
       captchaRef.current?.refresh();
       return;
     }
@@ -85,6 +95,10 @@ function Login() {
       const res = recordFailure("login", parsed.data.email);
       captchaRef.current?.refresh();
       setPw("");
+
+      // Set the display error explicitly for wrong email/password
+      setLoginError("Invalid Email or Password.");
+
       if (res.locked) {
         toast.error("Account temporarily locked. Try again in 15 minutes.");
       } else {
@@ -97,13 +111,20 @@ function Login() {
   };
 
   const onGoogle = async () => {
+    setLoginError(null);
     if (!captchaRef.current?.verify(captchaInput)) {
-      toast.error("Complete the security check first");
+      const captchaMsg = "Complete the security check first";
+      toast.error(captchaMsg);
+      setLoginError(captchaMsg);
       captchaRef.current?.refresh();
       return;
     }
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (res.error) toast.error(res.error.message ?? "Google sign-in failed");
+    if (res.error) {
+      const errMsg = res.error.message ?? "Google sign-in failed";
+      toast.error(errMsg);
+      setLoginError(errMsg);
+    }
     if (res.redirected) return;
     nav({ to: "/home" });
   };
@@ -235,6 +256,14 @@ function Login() {
           <AnimatedHuman focusedField={focusedField} showPassword={show} />
 
           <form onSubmit={onSubmit} className="mt-4 space-y-5 opacity-0 animate-fade-up delay-200">
+            {/* INLINE ERROR DISPLAY */}
+            {loginError && (
+              <div className="p-3 text-sm font-semibold text-red-700 bg-red-100/80 backdrop-blur-md border border-red-300 rounded-xl animate-fade-up shadow-sm flex items-center gap-2">
+                <ShieldCheck size={16} className="text-red-600" />
+                {loginError}
+              </div>
+            )}
+
             {/* Enhanced Glass Email Input */}
             <div className="group">
               <label className="text-sm font-medium text-gray-800 transition-colors group-focus-within:text-yellow-600 drop-shadow-sm">
