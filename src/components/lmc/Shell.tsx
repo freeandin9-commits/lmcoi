@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Home, LineChart, Wallet, Users, User } from "lucide-react";
+import logoAsset from "@/assets/lm-coin-logo.png.asset.json";
 
 const tabs = [
   { to: "/home", label: "Home", icon: Home },
@@ -12,18 +13,14 @@ const tabs = [
 
 export function LMCMark({ size = 32 }: { size?: number }) {
   return (
-    <span
-      className="grid place-items-center rounded-full font-bold"
-      style={{
-        width: size,
-        height: size,
-        background: "var(--gold)",
-        color: "oklch(0.2 0.02 260)",
-        fontSize: size * 0.44,
-      }}
-    >
-      L
-    </span>
+    <img
+      src={logoAsset.url}
+      alt="LM Coin"
+      width={size}
+      height={size}
+      className="rounded-full object-cover"
+      style={{ width: size, height: size }}
+    />
   );
 }
 
