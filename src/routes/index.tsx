@@ -156,10 +156,11 @@ function Login() {
           <div className="absolute inset-0 -z-10 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-glass-shimmer pointer-events-none" />
 
           <div className="flex items-center justify-center gap-3 opacity-0 animate-fade-up hover:scale-105 transition-transform duration-300 cursor-default">
-            {/* ലോഗോ */}
             <img
-              src="https://i.supaimg.com/a0e6e974-7179-457d-b73d-5f2febbbc7db/d0909bd0-b695-4eba-a668-8db9774fe0d7.jpg"
+              src={logoAsset.url}
               alt="LM Coin Logo"
+              width={44}
+              height={44}
               className="h-11 w-11 rounded-full object-cover shadow-md border border-white/60"
             />
             <span className="text-xl font-extrabold tracking-tight text-gray-900 drop-shadow-sm">LM Coin</span>
