@@ -30,11 +30,11 @@ function Login() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  // State for Email/Password Captcha
+  // State for Email/Password Captcha ONLY
   const [captchaInput, setCaptchaInput] = useState("");
   const captchaRef = useRef<CaptchaHandle>(null);
 
-  // New State for Google Login Captcha
+  // State for Google Login Captcha ONLY
   const [googleCaptchaInput, setGoogleCaptchaInput] = useState("");
   const googleCaptchaRef = useRef<CaptchaHandle>(null);
 
@@ -82,6 +82,7 @@ function Login() {
       return;
     }
 
+    // Email/Password Login ONLY checks its own Captcha
     if (!captchaRef.current?.verify(captchaInput)) {
       const captchaMsg = "Incorrect security code";
       toast.error(captchaMsg);
@@ -119,7 +120,7 @@ function Login() {
   const onGoogle = async () => {
     setLoginError(null);
 
-    // Check separate Google Captcha
+    // Google Sign-in ONLY checks the Google Captcha
     if (!googleCaptchaRef.current?.verify(googleCaptchaInput)) {
       const captchaMsg = "Complete the Google security check first";
       toast.error(captchaMsg);
@@ -339,7 +340,7 @@ function Login() {
               </div>
             </div>
 
-            {/* Captcha Wrapper for Password Login Glass UI */}
+            {/* Captcha Wrapper for Password Login ONLY */}
             <div className="rounded-xl overflow-hidden backdrop-blur-xl bg-white/30 border border-white/50 p-1 shadow-sm">
               <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
             </div>
@@ -363,12 +364,12 @@ function Login() {
               <div className="h-px flex-1 bg-gray-400/40" />
             </div>
 
-            {/* Captcha Wrapper exclusively for Google Sign-in */}
+            {/* Captcha Wrapper EXCLUSIVELY for Google Sign-in */}
             <div className="rounded-xl overflow-hidden backdrop-blur-xl bg-white/30 border border-white/50 p-1 shadow-sm opacity-0 animate-fade-up delay-300">
               <Captcha ref={googleCaptchaRef} value={googleCaptchaInput} onChange={setGoogleCaptchaInput} />
             </div>
 
-            {/* Enhanced Glass Google Button */}
+            {/* Enhanced Glass Google Button (Uses type="button" to avoid triggering Form validation) */}
             <button
               type="button"
               disabled={busy}
