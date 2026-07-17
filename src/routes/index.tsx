@@ -128,7 +128,10 @@ function Login() {
       return;
     }
 
+    setBusy(true);
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    setBusy(false);
+
     if (res.error) {
       const errMsg = res.error.message ?? "Google sign-in failed";
       toast.error(errMsg);
@@ -368,9 +371,11 @@ function Login() {
             {/* Enhanced Glass Google Button */}
             <button
               type="button"
+              disabled={busy}
               onClick={onGoogle}
-              className="w-full rounded-xl bg-white/40 backdrop-blur-xl border border-white/70 py-3.5 text-base font-bold text-gray-900 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:bg-white/60 hover:shadow-[0_8px_25px_rgba(255,255,255,0.5)] active:scale-95 opacity-0 animate-fade-up delay-300 shadow-md"
+              className="w-full rounded-xl bg-white/40 backdrop-blur-xl border border-white/70 py-3.5 text-base font-bold text-gray-900 flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:bg-white/60 hover:shadow-[0_8px_25px_rgba(255,255,255,0.5)] active:scale-95 opacity-0 animate-fade-up delay-300 shadow-md disabled:opacity-60 relative overflow-hidden"
             >
+              <div className="absolute inset-0 w-full h-full bg-white/20 animate-glass-shimmer pointer-events-none" />
               <GoogleIcon /> Continue with Google
             </button>
 
