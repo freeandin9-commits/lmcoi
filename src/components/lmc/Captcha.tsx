@@ -77,17 +77,17 @@ export const Captcha = forwardRef<CaptchaHandle, { value: string; onChange: (v: 
     return (
       <div>
         <label className="text-sm font-medium">Security check</label>
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           <canvas
             ref={canvasRef}
             width={140}
             height={48}
-            className="rounded-lg border border-border select-none"
+            className="rounded-lg border border-border select-none shrink-0"
           />
           <button
             type="button"
             onClick={refresh}
-            className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition"
+            className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition shrink-0"
             aria-label="Refresh captcha"
           >
             <RefreshCw size={16} />
@@ -98,7 +98,7 @@ export const Captcha = forwardRef<CaptchaHandle, { value: string; onChange: (v: 
             placeholder="Enter code"
             maxLength={6}
             required
-            className="flex-1 rounded-xl bg-secondary px-4 py-3 outline-none text-sm tracking-widest uppercase focus:ring-2 focus:ring-[color:var(--gold)]/50"
+            className="flex-1 min-w-0 basis-full sm:basis-0 rounded-xl bg-secondary px-4 py-3 outline-none text-sm tracking-widest uppercase focus:ring-2 focus:ring-[color:var(--gold)]/50"
           />
         </div>
       </div>
