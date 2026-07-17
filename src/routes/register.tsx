@@ -14,12 +14,13 @@ import {
   clearFailures,
   formatRemaining,
 } from "@/lib/auth-security";
+import logoAsset from "@/assets/lm-coin-logo.png.asset.json";
 
 
 export const Route = createFileRoute("/register")({
   component: Register,
   head: () => ({
-    meta: [{ title: "Create account" }, { name: "description", content: "Create your account." }],
+    meta: [{ title: "LM Coin — Create account" }, { name: "description", content: "Create your LM Coin account." }],
   }),
 });
 
