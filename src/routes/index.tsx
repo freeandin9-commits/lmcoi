@@ -8,6 +8,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { z } from "zod";
 import { checkLock, recordFailure, clearFailures, formatRemaining, GENERIC_LOGIN_ERROR } from "@/lib/auth-security";
+import logoAsset from "@/assets/lm-coin-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Login,
