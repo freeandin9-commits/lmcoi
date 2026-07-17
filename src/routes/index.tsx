@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/lmc/Shell";
 import { Captcha, type CaptchaHandle } from "@/components/lmc/Captcha";
-import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck, Users, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
@@ -34,6 +34,18 @@ function Login() {
 
   // New state to track which input field is currently focused
   const [focusedField, setFocusedField] = useState<"email" | "password" | null>(null);
+
+  // Mock states for Users Statistics
+  const [onlineUsers, setOnlineUsers] = useState(1243);
+  const [registeredUsers] = useState(45892);
+
+  // Effect to simulate live online users fluctuation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setOnlineUsers((prev) => prev + Math.floor(Math.random() * 7) - 3); // Fluctuates between -3 and +3
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -281,6 +293,32 @@ function Login() {
               </Link>
             </p>
           </form>
+
+          {/* User Stats Mock Data Section */}
+          <div className="mt-7 flex justify-between items-center px-4 py-4 rounded-xl bg-white/30 backdrop-blur-md border border-white/40 shadow-inner opacity-0 animate-fade-up delay-300">
+            <div className="flex flex-col items-center gap-1 w-1/2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-green-700 uppercase tracking-wider drop-shadow-sm">
+                <Activity size={14} className="animate-pulse" />
+                <span>Online Users</span>
+              </div>
+              <span className="text-lg font-extrabold text-gray-900 drop-shadow-sm">
+                {onlineUsers.toLocaleString()}
+              </span>
+            </div>
+
+            <div className="w-px h-10 bg-gray-400/40" />
+
+            <div className="flex flex-col items-center gap-1 w-1/2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-blue-700 uppercase tracking-wider drop-shadow-sm">
+                <Users size={14} />
+                <span>Registered</span>
+              </div>
+              <span className="text-lg font-extrabold text-gray-900 drop-shadow-sm">
+                {registeredUsers.toLocaleString()}
+              </span>
+            </div>
+          </div>
+          {/* End of User Stats */}
         </div>
       </div>
     </Shell>
