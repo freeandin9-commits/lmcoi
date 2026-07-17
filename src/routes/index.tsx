@@ -145,6 +145,27 @@ function Login() {
           0% { transform: translateX(-150%) skewX(-15deg); }
           100% { transform: translateX(150%) skewX(-15deg); }
         }
+        
+        /* New Animations for LM Coins during Login */
+        @keyframes orbitRotate {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes coinFlip {
+          0% { transform: rotateY(0deg); }
+          100% { transform: rotateY(360deg); }
+        }
+        .animate-orbit {
+          animation: orbitRotate 3s linear infinite;
+        }
+        .animate-flip-coin {
+          animation: coinFlip 1s ease-in-out infinite;
+          transform-style: preserve-3d;
+        }
+        .animate-flip-coin-delay-1 { animation-delay: 0.2s; }
+        .animate-flip-coin-delay-2 { animation-delay: 0.4s; }
+        .animate-flip-coin-delay-3 { animation-delay: 0.6s; }
+
         .animate-blob1 { animation: blobFloat1 12s infinite alternate ease-in-out; }
         .animate-blob2 { animation: blobFloat2 15s infinite alternate ease-in-out; }
         .animate-blob3 { animation: blobFloat1 18s infinite alternate-reverse ease-in-out; }
@@ -164,6 +185,33 @@ function Login() {
 
         {/* Enhanced Light Glassmorphism Card Container */}
         <div className="relative z-10 w-full max-w-md px-8 py-10 rounded-3xl bg-white/30 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_12px_40px_0_rgba(31,38,135,0.25)] transition-all duration-500 animate-glass-float overflow-hidden">
+          {/* Busy State Overlay: 4 LM Coins Flip & Orbit Animation */}
+          {busy && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-md rounded-3xl transition-opacity duration-300">
+              <div className="relative w-24 h-24 animate-orbit flex items-center justify-center">
+                {/* Top Coin */}
+                <div className="absolute -top-4 animate-flip-coin">
+                  <LMCoinIcon />
+                </div>
+                {/* Right Coin */}
+                <div className="absolute -right-4 animate-flip-coin animate-flip-coin-delay-1">
+                  <LMCoinIcon />
+                </div>
+                {/* Bottom Coin */}
+                <div className="absolute -bottom-4 animate-flip-coin animate-flip-coin-delay-2">
+                  <LMCoinIcon />
+                </div>
+                {/* Left Coin */}
+                <div className="absolute -left-4 animate-flip-coin animate-flip-coin-delay-3">
+                  <LMCoinIcon />
+                </div>
+              </div>
+              <span className="mt-10 text-sm font-extrabold text-gray-900 drop-shadow-sm animate-pulse tracking-wide">
+                Authenticating...
+              </span>
+            </div>
+          )}
+
           {/* Glass Shimmer Effect */}
           <div className="absolute inset-0 -z-10 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-glass-shimmer pointer-events-none" />
 
@@ -322,6 +370,28 @@ function Login() {
         </div>
       </div>
     </Shell>
+  );
+}
+
+// Icon Component for the rotating LM Coins
+function LMCoinIcon() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 100 100" className="drop-shadow-lg">
+      <circle cx="50" cy="50" r="45" fill="#FFD700" stroke="#B45309" strokeWidth="5" />
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#B45309" strokeWidth="2" strokeDasharray="4 4" opacity="0.6" />
+      <text
+        x="50"
+        y="54"
+        fontSize="30"
+        fill="#B45309"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontWeight="900"
+        fontFamily="sans-serif"
+      >
+        LM
+      </text>
+    </svg>
   );
 }
 
