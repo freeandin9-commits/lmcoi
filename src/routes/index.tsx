@@ -29,8 +29,14 @@ function Login() {
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  // State for Email/Password Captcha
   const [captchaInput, setCaptchaInput] = useState("");
   const captchaRef = useRef<CaptchaHandle>(null);
+
+  // New State for Google Login Captcha
+  const [googleCaptchaInput, setGoogleCaptchaInput] = useState("");
+  const googleCaptchaRef = useRef<CaptchaHandle>(null);
 
   // New state to display inline errors (Email/Password wrong)
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -112,13 +118,16 @@ function Login() {
 
   const onGoogle = async () => {
     setLoginError(null);
-    if (!captchaRef.current?.verify(captchaInput)) {
-      const captchaMsg = "Complete the security check first";
+
+    // Check separate Google Captcha
+    if (!googleCaptchaRef.current?.verify(googleCaptchaInput)) {
+      const captchaMsg = "Complete the Google security check first";
       toast.error(captchaMsg);
       setLoginError(captchaMsg);
-      captchaRef.current?.refresh();
+      googleCaptchaRef.current?.refresh();
       return;
     }
+
     const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (res.error) {
       const errMsg = res.error.message ?? "Google sign-in failed";
@@ -327,7 +336,7 @@ function Login() {
               </div>
             </div>
 
-            {/* Captcha Wrapper for Glass UI */}
+            {/* Captcha Wrapper for Password Login Glass UI */}
             <div className="rounded-xl overflow-hidden backdrop-blur-xl bg-white/30 border border-white/50 p-1 shadow-sm">
               <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
             </div>
@@ -349,6 +358,11 @@ function Login() {
               <div className="h-px flex-1 bg-gray-400/40" />
               <span className="text-xs uppercase tracking-widest text-gray-600 font-extrabold drop-shadow-sm">Or</span>
               <div className="h-px flex-1 bg-gray-400/40" />
+            </div>
+
+            {/* Captcha Wrapper exclusively for Google Sign-in */}
+            <div className="rounded-xl overflow-hidden backdrop-blur-xl bg-white/30 border border-white/50 p-1 shadow-sm opacity-0 animate-fade-up delay-300">
+              <Captcha ref={googleCaptchaRef} value={googleCaptchaInput} onChange={setGoogleCaptchaInput} />
             </div>
 
             {/* Enhanced Glass Google Button */}
