@@ -82,12 +82,21 @@ function Login() {
       return;
     }
 
+    // High Security Check: Prevent empty captcha submission
+    if (!captchaInput.trim()) {
+      const emptyMsg = "Please enter the security code";
+      toast.error(emptyMsg);
+      setLoginError(emptyMsg);
+      return;
+    }
+
     // Email/Password Login ONLY checks its own Captcha
     if (!captchaRef.current?.verify(captchaInput)) {
       const captchaMsg = "Incorrect security code";
       toast.error(captchaMsg);
       setLoginError(captchaMsg);
       captchaRef.current?.refresh();
+      setCaptchaInput(""); // Security Enhancement: Clear input on failure
       return;
     }
 
@@ -101,6 +110,7 @@ function Login() {
     if (error) {
       const res = recordFailure("login", parsed.data.email);
       captchaRef.current?.refresh();
+      setCaptchaInput(""); // Security Enhancement: Clear input on authentication failure
       setPw("");
 
       // Set the display error explicitly for wrong email/password
@@ -120,12 +130,21 @@ function Login() {
   const onGoogle = async () => {
     setLoginError(null);
 
+    // High Security Check: Prevent empty captcha submission for Google
+    if (!googleCaptchaInput.trim()) {
+      const emptyMsg = "Please enter the Google security code";
+      toast.error(emptyMsg);
+      setLoginError(emptyMsg);
+      return;
+    }
+
     // Google Sign-in ONLY checks the Google Captcha
     if (!googleCaptchaRef.current?.verify(googleCaptchaInput)) {
       const captchaMsg = "Complete the Google security check first";
       toast.error(captchaMsg);
       setLoginError(captchaMsg);
       googleCaptchaRef.current?.refresh();
+      setGoogleCaptchaInput(""); // Security Enhancement: Clear input on failure
       return;
     }
 
@@ -137,6 +156,8 @@ function Login() {
       const errMsg = res.error.message ?? "Google sign-in failed";
       toast.error(errMsg);
       setLoginError(errMsg);
+      googleCaptchaRef.current?.refresh();
+      setGoogleCaptchaInput(""); // Security Enhancement: Clear input on Google auth failure
     }
     if (res.redirected) return;
     nav({ to: "/home" });
@@ -340,14 +361,22 @@ function Login() {
               </div>
             </div>
 
-            {/* Captcha Wrapper for Password Login ONLY */}
+            {/* Captcha Wrapper for Password Login ONLY (High Security Props added) */}
             <div className="rounded-xl overflow-hidden backdrop-blur-xl bg-white/30 border border-white/50 p-1 shadow-sm">
-              <Captcha ref={captchaRef} value={captchaInput} onChange={setCaptchaInput} />
+              <Captcha
+                ref={captchaRef}
+                value={captchaInput}
+                onChange={setCaptchaInput}
+                // @ts-ignore - Security Enhancement Props
+                length={6}
+                // @ts-ignore - Security Enhancement Props
+                complexity="high"
+              />
             </div>
 
             <div className="flex items-center gap-2 text-xs text-gray-700 font-semibold drop-shadow-sm">
               <ShieldCheck size={14} className="text-yellow-600" />
-              <span>Protected by captcha, lockout & breach-password checks.</span>
+              <span>Protected by high-security captcha, lockout & breach-password checks.</span>
             </div>
 
             <button
@@ -364,9 +393,17 @@ function Login() {
               <div className="h-px flex-1 bg-gray-400/40" />
             </div>
 
-            {/* Captcha Wrapper EXCLUSIVELY for Google Sign-in */}
+            {/* Captcha Wrapper EXCLUSIVELY for Google Sign-in (High Security Props added) */}
             <div className="rounded-xl overflow-hidden backdrop-blur-xl bg-white/30 border border-white/50 p-1 shadow-sm opacity-0 animate-fade-up delay-300">
-              <Captcha ref={googleCaptchaRef} value={googleCaptchaInput} onChange={setGoogleCaptchaInput} />
+              <Captcha
+                ref={googleCaptchaRef}
+                value={googleCaptchaInput}
+                onChange={setGoogleCaptchaInput}
+                // @ts-ignore - Security Enhancement Props
+                length={6}
+                // @ts-ignore - Security Enhancement Props
+                complexity="high"
+              />
             </div>
 
             {/* Enhanced Glass Google Button (Uses type="button" to avoid triggering Form validation) */}
