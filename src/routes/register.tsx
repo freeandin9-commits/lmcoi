@@ -179,7 +179,17 @@ function Register() {
   return (
     <Shell hideTabs>
       <div className="px-6 pt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h1 className="text-3xl font-extrabold tracking-tight">Create account</h1>
+        <div className="flex items-center justify-center gap-3">
+          <img
+            src={logoAsset.url}
+            alt="LM Coin Logo"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-full object-cover shadow-md border border-white/60"
+          />
+          <span className="text-xl font-extrabold tracking-tight">LM Coin</span>
+        </div>
+        <h1 className="mt-4 text-3xl font-extrabold tracking-tight">Create account</h1>
 
         <Robert focused={focusedField} show={show} />
 
