@@ -171,7 +171,7 @@ function PaymentPassword() {
                 {confirmPin.map((digit, idx) => (
                   <input
                     key={idx}
-                    ref={(el) => (confirmPinRefs.current[idx] = el)}
+                    ref={(el) => { confirmPinRefs.current[idx] = el; }}
                     type={showPassword ? "text" : "password"}
                     inputMode="numeric"
                     maxLength={1}
