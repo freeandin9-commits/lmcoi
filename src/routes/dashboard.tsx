@@ -337,6 +337,7 @@ function Dashboard() {
               <LogOut size={30} className="text-red-500 drop-shadow-md" />
             </div>
 
+            {/* Confirmation Message */}
             <div>
               <h2 className="text-xl font-extrabold text-foreground drop-shadow-md mb-1">Sign Out</h2>
               <p className="text-muted-foreground text-sm font-medium px-2">
