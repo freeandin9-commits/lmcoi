@@ -48,11 +48,11 @@ function HomeApp() {
         >
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm/none opacity-80">Total Balance</div>
-              {/* LMC Price Badge Added Here */}
+              {/* LMC Price Badge Moved Here (Above Total Balance) */}
               <div className="text-[10px] font-bold bg-black/10 px-2 py-0.5 rounded-full inline-flex w-fit items-center border border-black/5">
                 1 INR = 1.25 LMC
               </div>
+              <div className="text-sm/none opacity-80">Total Balance</div>
             </div>
             <LMCMark size={28} />
           </div>
