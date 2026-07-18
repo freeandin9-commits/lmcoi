@@ -28,7 +28,7 @@ function HomeApp() {
 
   const lmc = Number(wallet?.lmc_balance ?? 0);
   const inr = Number(wallet?.inr_balance ?? 0);
-  const hold = Number(wallet?.hold_balance ?? 0);
+  const hold = Number((wallet as { hold_balance?: number } | null)?.hold_balance ?? 0);
   const total = lmc * price + inr;
 
   return (
