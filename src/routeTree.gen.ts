@@ -20,6 +20,7 @@ import { Route as PaymentPasswordRouteImport } from './routes/payment-password'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CollectionRouteImport } from './routes/collection'
+import { Route as BuyTutorialRouteImport } from './routes/buy-tutorial'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -78,6 +79,11 @@ const CollectionRoute = CollectionRouteImport.update({
   path: '/collection',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BuyTutorialRoute = BuyTutorialRouteImport.update({
+  id: '/buy-tutorial',
+  path: '/buy-tutorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BuyRoute = BuyRouteImport.update({
   id: '/buy',
   path: '/buy',
@@ -92,6 +98,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/buy': typeof BuyRoute
+  '/buy-tutorial': typeof BuyTutorialRoute
   '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/buy': typeof BuyRoute
+  '/buy-tutorial': typeof BuyTutorialRoute
   '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/buy': typeof BuyRoute
+  '/buy-tutorial': typeof BuyTutorialRoute
   '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/buy'
+    | '/buy-tutorial'
     | '/collection'
     | '/dashboard'
     | '/home'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/buy'
+    | '/buy-tutorial'
     | '/collection'
     | '/dashboard'
     | '/home'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/buy'
+    | '/buy-tutorial'
     | '/collection'
     | '/dashboard'
     | '/home'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BuyRoute: typeof BuyRoute
+  BuyTutorialRoute: typeof BuyTutorialRoute
   CollectionRoute: typeof CollectionRoute
   DashboardRoute: typeof DashboardRoute
   HomeRoute: typeof HomeRoute
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollectionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/buy-tutorial': {
+      id: '/buy-tutorial'
+      path: '/buy-tutorial'
+      fullPath: '/buy-tutorial'
+      preLoaderRoute: typeof BuyTutorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/buy': {
       id: '/buy'
       path: '/buy'
@@ -298,6 +318,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BuyRoute: BuyRoute,
+  BuyTutorialRoute: BuyTutorialRoute,
   CollectionRoute: CollectionRoute,
   DashboardRoute: DashboardRoute,
   HomeRoute: HomeRoute,
