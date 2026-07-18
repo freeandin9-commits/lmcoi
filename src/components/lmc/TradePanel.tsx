@@ -35,29 +35,40 @@ export function TradePanel({ side }: { side: Side }) {
 
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
-  const qty = parseFloat(amount) || 0;
-  const total = qty * price;
+
+  // യൂസർ എന്റർ ചെയ്ത വാല്യൂ
+  const enteredAmt = parseFloat(amount) || 0;
 
   const submit = async () => {
-    if (qty <= 0) return toast.error("Enter LMC quantity");
-    if (side === "buy" && total > inr) return toast.error("Insufficient INR");
-    if (side === "sell" && qty > lmc) return toast.error("Insufficient LMC");
+    if (side === "buy") {
+      if (enteredAmt <= 0) return toast.error("Enter INR amount");
+      if (enteredAmt > inr) return toast.error("Insufficient INR");
+    } else {
+      if (enteredAmt <= 0) return toast.error("Enter LMC quantity");
+      if (enteredAmt > lmc) return toast.error("Insufficient LMC");
+    }
 
     setBusy(true);
     try {
       let orderId = "";
+      let qtyToProcess = 0;
+
       if (side === "buy") {
         orderId = generateBuyOrderId();
-        console.log("Generated Buy Order ID:", orderId); // കാണാൻ വേണ്ടി കൺസോളിൽ നൽകുന്നു
+        console.log("Generated Buy Order ID:", orderId);
+        // Buy ചെയ്യുമ്പോൾ 1 INR = 1.25 LMC ആയതുകൊണ്ട് LMC Quantity കാൽക്കുലേറ്റ് ചെയ്യുന്നു
+        qtyToProcess = enteredAmt * 1.25;
+      } else {
+        qtyToProcess = enteredAmt;
       }
 
-      await placeOrder(side, qty, price);
+      await placeOrder(side, qtyToProcess, price);
 
       if (side === "buy") {
         // Buy സക്സസ് ആകുമ്പോൾ ഓർഡർ ഐഡി കൂടി കാണിക്കുന്നു
-        toast.success(`Bought ${formatLMC(qty)} LMC. Order ID: ${orderId}`);
+        toast.success(`Bought ${formatLMC(qtyToProcess)} LMC. Order ID: ${orderId}`);
       } else {
-        toast.success(`Sold ${formatLMC(qty)} LMC`);
+        toast.success(`Sold ${formatLMC(qtyToProcess)} LMC`);
       }
 
       setAmount("");
@@ -76,8 +87,9 @@ export function TradePanel({ side }: { side: Side }) {
 
   const setPct = (p: number) => {
     if (side === "buy") {
-      const maxQty = inr / (price || 1);
-      setAmount((maxQty * p).toFixed(4));
+      // നിലവിൽ Percentage buy-ൽ ഹൈഡ് ചെയ്തിരിക്കുകയാണ്, എങ്കിലും ഫംഗ്ഷൻ നിലനിർത്തുന്നു
+      const maxQty = inr;
+      setAmount((maxQty * p).toFixed(2));
     } else {
       setAmount((lmc * p).toFixed(4));
     }
@@ -135,37 +147,52 @@ export function TradePanel({ side }: { side: Side }) {
           {side === "sell" || (side === "buy" && buyMode === "custom") ? (
             <>
               <label className="mt-4 block">
-                <span className="text-sm font-medium">Quantity (LMC)</span>
+                <span className="text-sm font-medium">
+                  {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC)"}
+                </span>
                 <input
                   value={amount}
                   onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
                   inputMode="decimal"
-                  placeholder="0.00"
+                  placeholder={side === "buy" ? "Enter INR Amount" : "0.00"}
                   className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none font-mono text-lg"
                 />
               </label>
 
-              <div className="mt-3 grid grid-cols-4 gap-2">
-                {[0.25, 0.5, 0.75, 1].map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPct(p)}
-                    className="text-xs py-1.5 rounded-md bg-secondary hover:brightness-95"
-                  >
-                    {p === 1 ? "MAX" : `${p * 100}%`}
-                  </button>
-                ))}
-              </div>
+              {/* Sell ചെയ്യുമ്പോൾ മാത്രം Percentage കാണിക്കാൻ മാറ്റം വരുത്തി */}
+              {side === "sell" && (
+                <div className="mt-3 grid grid-cols-4 gap-2">
+                  {[0.25, 0.5, 0.75, 1].map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPct(p)}
+                      className="text-xs py-1.5 rounded-md bg-secondary hover:brightness-95"
+                    >
+                      {p === 1 ? "MAX" : `${p * 100}%`}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="mt-4 rounded-xl bg-secondary p-3 text-sm space-y-1.5">
-                <Row k="Price" v={formatINR(price, 4)} />
-                <Row k={side === "buy" ? "You pay" : "You receive"} v={formatINR(total, 2)} />
-                <Row k="Balance" v={side === "buy" ? formatINR(inr, 2) + " INR" : formatLMC(lmc, 4) + " LMC"} />
+                {side === "buy" ? (
+                  <>
+                    <Row k="Price" v="1 INR = ₹1.25 LMC" />
+                    <Row k="You pay" v={formatINR(enteredAmt, 2)} />
+                    <Row k="You will received Amount" v={formatLMC(enteredAmt * 1.25, 4) + " LMC"} />
+                  </>
+                ) : (
+                  <>
+                    <Row k="Price" v={formatINR(price, 4)} />
+                    <Row k="You receive" v={formatINR(enteredAmt * price, 2)} />
+                    <Row k="Balance" v={formatLMC(lmc, 4) + " LMC"} />
+                  </>
+                )}
               </div>
 
               <button
                 onClick={submit}
-                disabled={busy || !price}
+                disabled={busy || (!price && side === "sell")}
                 className={`mt-4 w-full rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 ${
                   side === "buy" ? "btn-gold" : "bg-[color:var(--danger)] text-white"
                 }`}
