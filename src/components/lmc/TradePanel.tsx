@@ -194,8 +194,8 @@ export function TradePanel({ side }: { side: Side }) {
                   <>
                     <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
                     <Row k="You receive" v={enteredAmt.toString()} />
-                    {/* Sell ചെയ്യുമ്പോൾ home.tsx കോഡിൽ ഉള്ളതുപോലെ വാലറ്റ് ബാലൻസുകൾ ഇവിടെ കാണിക്കുന്നു */}
-                    <Row k="LMC Balance" v={formatLMC(lmc, 4) + " LMC"} />
+                    {/* Sell ചെയ്യുമ്പോൾ LMC Balance-ൽ Total Balance-ന്റെ വാല്യൂ തന്നെ നൽകിയിരിക്കുന്നു */}
+                    <Row k="LMC Balance" v={formatLMC(total, 4) + " LMC"} />
                     <Row k="Hold Balance" v={formatINR(hold, 2)} />
                     <Row k="Total Balance" v={formatINR(total, 2)} />
                   </>
