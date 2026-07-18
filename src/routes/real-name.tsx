@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useRef } from "react";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
-import { Upload, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { Upload, ArrowLeft, Image as ImageIcon, CheckCircle, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/real-name")({
   component: RealNameKYC,
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/real-name")({
 function RealNameKYC() {
   const nav = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [aadhaarName, setAadhaarName] = useState("");
   const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -75,21 +75,18 @@ function RealNameKYC() {
 
       <div className="px-4 pt-6 pb-12 relative z-10 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          
           {/* Identity Card Upload Section */}
           <div className="glass-card p-5 rounded-[2rem] bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-            <h3 className="text-base font-bold text-foreground mb-4 drop-shadow-md">
-              Front of Aadhaar ID Card
-            </h3>
-            
-            <div 
+            <h3 className="text-base font-bold text-foreground mb-4 drop-shadow-md">Front of Aadhaar ID Card</h3>
+
+            <div
               className="relative w-full h-48 rounded-2xl border-2 border-dashed border-[color:var(--gold-soft)]/50 bg-black/10 dark:bg-white/5 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-black/20 dark:hover:bg-white/10 transition-all duration-300 group"
               onClick={() => fileInputRef.current?.click()}
             >
               {selectedImage ? (
-                <img 
-                  src={selectedImage} 
-                  alt="Aadhaar Front Preview" 
+                <img
+                  src={selectedImage}
+                  alt="Aadhaar Front Preview"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
@@ -101,16 +98,16 @@ function RealNameKYC() {
                   <p className="text-xs text-muted-foreground mt-1">Clear photo of your original ID</p>
                 </div>
               )}
-              
+
               {/* Hidden file input */}
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleImageChange} 
-                accept="image/jpeg, image/png, image/jpg" 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/jpeg, image/png, image/jpg"
+                className="hidden"
               />
-              
+
               {/* Upload Overlay on Hover */}
               {selectedImage && (
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
@@ -120,11 +117,61 @@ function RealNameKYC() {
                 </div>
               )}
             </div>
+
+            {/* --- NEW: Photo Upload Guidelines (Demo Photos) --- */}
+            <div className="mt-5">
+              <h4 className="text-[11px] font-bold text-muted-foreground/80 mb-3 uppercase tracking-wider">
+                Photo Guidelines
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Correct Demo */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative w-full aspect-[1.6] rounded-xl border border-green-500/60 bg-green-500/10 dark:bg-green-500/5 overflow-hidden flex items-center justify-center">
+                    {/* Placeholder for real ID photo - using styled div for generic demo */}
+                    <div className="w-3/4 h-2/3 bg-foreground/20 rounded flex items-center p-2 gap-2">
+                      <div className="w-8 h-8 bg-foreground/30 rounded-full"></div>
+                      <div className="flex-1 space-y-1">
+                        <div className="h-2 w-full bg-foreground/30 rounded"></div>
+                        <div className="h-2 w-2/3 bg-foreground/30 rounded"></div>
+                      </div>
+                    </div>
+                    {/* Status Badge */}
+                    <div className="absolute -bottom-px -right-px bg-green-500 rounded-tl-xl p-1 text-white shadow-md">
+                      <CheckCircle size={14} strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-semibold text-green-600 dark:text-green-400 text-center leading-tight">
+                    Good: Clear & Full
+                  </span>
+                </div>
+
+                {/* Incorrect Demo */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative w-full aspect-[1.6] rounded-xl border border-red-500/60 bg-red-500/10 dark:bg-red-500/5 overflow-hidden flex items-center justify-center">
+                    {/* Placeholder for Blurry/Cut ID */}
+                    <div className="w-[120%] h-[120%] bg-foreground/20 rounded flex items-center p-2 gap-2 blur-[2px] translate-x-4 translate-y-4 opacity-70">
+                      <div className="w-10 h-10 bg-foreground/30 rounded-full"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 w-full bg-foreground/30 rounded"></div>
+                        <div className="h-3 w-2/3 bg-foreground/30 rounded"></div>
+                      </div>
+                    </div>
+                    {/* Status Badge */}
+                    <div className="absolute -bottom-px -right-px bg-red-500 rounded-tl-xl p-1 text-white shadow-md">
+                      <XCircle size={14} strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-semibold text-red-600 dark:text-red-400 text-center leading-tight">
+                    Bad: Blurry or Cut
+                  </span>
+                </div>
+              </div>
+            </div>
+            {/* --- END OF NEW ADDITION --- */}
           </div>
 
           {/* Form Inputs Section */}
           <div className="glass-card p-5 rounded-[2rem] space-y-5 bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-            
             {/* Aadhaar Name Input */}
             <div className="group">
               <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
@@ -155,7 +202,6 @@ function RealNameKYC() {
                 className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300 tracking-wider"
               />
             </div>
-
           </div>
 
           {/* Submit Button */}
