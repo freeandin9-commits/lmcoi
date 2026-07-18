@@ -75,7 +75,7 @@ function Dashboard() {
       // This is a placeholder for the actual backend call (e.g., supabase.rpc('delete_user_account'))
       // After deletion on the backend, we sign the user out.
       
-      const { error } = await supabase.rpc('delete_user_account'); // Example RPC call
+      const { error } = await (supabase.rpc as any)('delete_user_account'); // Example RPC call
       if (error) console.error("Error deleting account backend:", error);
 
       await supabase.auth.signOut();
