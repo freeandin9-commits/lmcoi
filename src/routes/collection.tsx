@@ -13,10 +13,10 @@ export const Route = createFileRoute("/collection")({
 function CollectionDetails() {
   const nav = useNavigate();
 
-  // State for Session 1
+  // UPI Details State
   const [upiId, setUpiId] = useState("");
 
-  // State for Session 2
+  // Bank Account Details State
   const [accountName, setAccountName] = useState("");
   const [bankName, setBankName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -25,11 +25,8 @@ function CollectionDetails() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log({
-      upiId,
-      accountName,
-      bankName,
-      accountNumber,
-      ifsc,
+      upiDetails: { upiId },
+      bankDetails: { accountName, bankName, accountNumber, ifsc },
     });
     alert("Collection details saved successfully!");
   };
@@ -75,15 +72,14 @@ function CollectionDetails() {
 
       <div className="px-4 pt-6 pb-12 relative z-10">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* ================= SESSION 1: UPI ID ================= */}
-          <div className="glass-card p-5 rounded-[2rem] bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
+          {/* UPI DETAILS SECTION */}
+          <section className="glass-card p-5 rounded-[2rem] bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-[color:var(--gold-soft)]/20 flex items-center justify-center text-[color:var(--gold-soft)]">
                 <Wallet size={16} />
               </div>
               <h3 className="text-base font-bold text-foreground drop-shadow-md">UPI Details</h3>
             </div>
-
             <div className="group">
               <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
                 UPI ID
@@ -96,10 +92,10 @@ function CollectionDetails() {
                 className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
               />
             </div>
-          </div>
+          </section>
 
-          {/* ================= SESSION 2: BANK DETAILS ================= */}
-          <div className="glass-card p-5 rounded-[2rem] space-y-5 bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
+          {/* BANK ACCOUNT DETAILS SECTION */}
+          <section className="glass-card p-5 rounded-[2rem] space-y-5 bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-full bg-[color:var(--gold-soft)]/20 flex items-center justify-center text-[color:var(--gold-soft)]">
                 <Landmark size={16} />
@@ -107,9 +103,8 @@ function CollectionDetails() {
               <h3 className="text-base font-bold text-foreground drop-shadow-md">Bank Account</h3>
             </div>
 
-            {/* Account Holder Name */}
             <div className="group">
-              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
+              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200">
                 Account Holder Name
               </label>
               <input
@@ -117,27 +112,23 @@ function CollectionDetails() {
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
                 placeholder="Name as per bank record"
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] text-black dark:text-white transition-all duration-300"
               />
             </div>
 
-            {/* Bank Name */}
             <div className="group">
-              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
-                Bank Name
-              </label>
+              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200">Bank Name</label>
               <input
                 type="text"
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
                 placeholder="e.g. State Bank of India"
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] text-black dark:text-white transition-all duration-300"
               />
             </div>
 
-            {/* Bank Account Number */}
             <div className="group">
-              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
+              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200">
                 Bank Account Number
               </label>
               <input
@@ -145,24 +136,21 @@ function CollectionDetails() {
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
                 placeholder="Enter account number"
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] text-black dark:text-white transition-all duration-300"
               />
             </div>
 
-            {/* IFSC Code */}
             <div className="group">
-              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
-                IFSC Code
-              </label>
+              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200">IFSC Code</label>
               <input
                 type="text"
                 value={ifsc}
                 onChange={(e) => setIfsc(e.target.value.toUpperCase())}
                 placeholder="e.g. SBIN0001234"
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300 uppercase tracking-wider"
+                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] text-black dark:text-white uppercase transition-all duration-300"
               />
             </div>
-          </div>
+          </section>
 
           {/* Submit Button */}
           <button
