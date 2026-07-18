@@ -68,14 +68,14 @@ function Dashboard() {
   const handleDeleteAccount = async () => {
     const userEmail = profile?.email || user?.email;
     if (deleteEmailInput !== userEmail) return;
-
+    
     setIsDeleting(true);
     try {
       // Note: Deleting a user securely usually requires a Supabase Edge Function or RPC.
       // This is a placeholder for the actual backend call (e.g., supabase.rpc('delete_user_account'))
       // After deletion on the backend, we sign the user out.
-
-      const { error } = await (supabase.rpc as unknown as (fn: string) => Promise<{ error: unknown }>)("delete_user_account");
+      
+      const { error } = await supabase.rpc('delete_user_account'); // Example RPC call
       if (error) console.error("Error deleting account backend:", error);
 
       await supabase.auth.signOut();
@@ -314,10 +314,10 @@ function Dashboard() {
 
           <div className="animate-modal glass-shine relative z-10 w-full max-w-md rounded-[2rem] p-6 space-y-6 backdrop-blur-3xl bg-white/20 dark:bg-black/50 border border-white/40 dark:border-white/20 shadow-[0_8px_40px_0_rgba(31,38,135,0.3)]">
             <div className="flex justify-between items-center pb-4 border-b border-white/30 dark:border-white/10">
-              <h2 className="text-xl font-extrabold text-foreground drop-shadow-md">Edit Profile</h2>
+              <h2 className="text-xl font-extrabold text-black dark:text-white drop-shadow-md">Edit Profile</h2>
               <button
                 onClick={() => setIsEditing(false)}
-                className="p-2 rounded-full hover:bg-white/30 dark:hover:bg-white/20 hover:rotate-90 text-muted-foreground hover:text-foreground transition-all duration-300 shadow-sm border border-transparent hover:border-white/20"
+                className="p-2 rounded-full hover:bg-white/30 dark:hover:bg-white/20 hover:rotate-90 text-gray-500 hover:text-black dark:hover:text-white transition-all duration-300 shadow-sm border border-transparent hover:border-white/20"
               >
                 <X size={20} />
               </button>
@@ -325,7 +325,7 @@ function Dashboard() {
 
             {/* Name Input */}
             <div className="group">
-              <label className="text-sm font-bold mb-2 block text-foreground/90 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
+              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
                 Display Name
               </label>
               <input
@@ -333,13 +333,13 @@ function Dashboard() {
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 placeholder="Enter your name"
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-foreground placeholder:text-muted-foreground transition-all duration-300"
+                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
               />
             </div>
 
             {/* Avatar Selection Grid */}
             <div>
-              <label className="text-sm font-bold mb-2 block text-foreground/90 drop-shadow-sm">Choose Avatar</label>
+              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm">Choose Avatar</label>
               <div className="grid grid-cols-5 gap-3 max-h-52 overflow-y-auto p-3 scrollbar-hide rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 shadow-inner">
                 {AVATARS.map((url, idx) => (
                   <img
@@ -376,14 +376,17 @@ function Dashboard() {
           <div className="absolute inset-0 bg-gradient-to-tr from-red-500/10 via-transparent to-orange-500/10 z-0"></div>
 
           <div className="animate-modal glass-shine relative z-10 w-full max-w-sm rounded-[2rem] p-6 space-y-5 backdrop-blur-3xl bg-white/20 dark:bg-black/50 border border-white/40 dark:border-white/20 shadow-[0_8px_40px_0_rgba(31,38,135,0.3)] text-center flex flex-col items-center">
+            
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-1 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
               <LogOut size={30} className="text-red-500 drop-shadow-md" />
             </div>
-
+            
             {/* Confirmation Message */}
             <div>
-              <h2 className="text-xl font-extrabold text-foreground drop-shadow-md mb-1">Sign Out</h2>
-              <p className="text-muted-foreground text-sm font-medium px-2">
+              {/* Fix: Changed text-foreground to text-black dark:text-white */}
+              <h2 className="text-xl font-extrabold text-black dark:text-white drop-shadow-md mb-1">Sign Out</h2>
+              {/* Fix: Changed text-muted-foreground to text-gray-800 dark:text-gray-200 */}
+              <p className="text-gray-800 dark:text-gray-200 text-sm font-medium px-2">
                 Are you sure you want to sign out of your account?
               </p>
             </div>
@@ -391,7 +394,7 @@ function Dashboard() {
             <div className="flex gap-3 w-full pt-2">
               <button
                 onClick={() => setIsSignOutModalOpen(false)}
-                className="flex-1 py-3 rounded-2xl font-bold backdrop-blur-xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 text-foreground hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
+                className="flex-1 py-3 rounded-2xl font-bold backdrop-blur-xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 text-black dark:text-white hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
               >
                 Cancel
               </button>
@@ -412,20 +415,20 @@ function Dashboard() {
           <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 via-transparent to-red-900/10 z-0"></div>
 
           <div className="animate-modal glass-shine relative z-10 w-full max-w-sm rounded-[2rem] p-6 space-y-5 backdrop-blur-3xl bg-white/10 dark:bg-black/60 border border-red-500/40 shadow-[0_8px_40px_0_rgba(239,68,68,0.2)] text-center flex flex-col items-center">
+            
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-1 border border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
               <Trash2 size={30} className="text-red-500 drop-shadow-md" />
             </div>
-
+            
             <div>
               <h2 className="text-xl font-extrabold text-red-500 drop-shadow-md mb-2">Delete Account</h2>
-              <p className="text-muted-foreground text-sm font-medium px-1">
-                This action is <span className="font-bold text-foreground">permanent</span> and cannot be undone. All
-                your data will be lost.
+              {/* Fix: Changed text-muted-foreground and text-foreground to gray/black/white */}
+              <p className="text-gray-800 dark:text-gray-200 text-sm font-medium px-1">
+                This action is <span className="font-bold text-black dark:text-white">permanent</span> and cannot be undone. All your data will be lost.
               </p>
-              <p className="text-muted-foreground text-xs mt-3">
-                Please type your email to confirm:
-                <br />
-                <span className="font-bold text-foreground block mt-1">{profile?.email || user?.email}</span>
+              <p className="text-gray-800 dark:text-gray-300 text-xs mt-3">
+                Please type your email to confirm:<br/>
+                <span className="font-bold text-black dark:text-white block mt-1">{profile?.email || user?.email}</span>
               </p>
             </div>
 
@@ -435,7 +438,8 @@ function Dashboard() {
                 value={deleteEmailInput}
                 onChange={(e) => setDeleteEmailInput(e.target.value)}
                 placeholder="Type your email"
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-red-500/30 focus:border-red-500 focus:bg-white/30 focus:shadow-[0_0_15px_rgba(239,68,68,0.2)] text-foreground placeholder:text-muted-foreground transition-all duration-300"
+                {/* Fix: Explicit text colors for input and placeholder */}
+                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-red-500/30 focus:border-red-500 focus:bg-white/30 focus:shadow-[0_0_15px_rgba(239,68,68,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
               />
             </div>
 
@@ -445,7 +449,7 @@ function Dashboard() {
                   setIsDeleteModalOpen(false);
                   setDeleteEmailInput(""); // reset input on cancel
                 }}
-                className="flex-1 py-3 rounded-2xl font-bold backdrop-blur-xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 text-foreground hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
+                className="flex-1 py-3 rounded-2xl font-bold backdrop-blur-xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 text-black dark:text-white hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
               >
                 Cancel
               </button>
