@@ -38,6 +38,7 @@ export function TradePanel({ side }: { side: Side }) {
   const pricePerLmcInr = 1 / lmcPerInr;
 
   const enteredAmt = parseFloat(amount) || 0;
+  const canSubmit = enteredAmt > 0 && (side === "buy" ? enteredAmt <= inr : enteredAmt <= lmc);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
@@ -187,7 +188,7 @@ export function TradePanel({ side }: { side: Side }) {
 
               <button
                 onClick={handleInitialSubmit}
-                disabled={busy}
+                disabled={busy || !canSubmit}
                 className={`mt-6 w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 shadow-lg hover:shadow-xl ${
                   side === "buy"
                     ? "btn-gold"
