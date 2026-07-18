@@ -18,6 +18,95 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
+async function handleRazorpayOrder(request: Request): Promise<Response | undefined> {
+  const url = new URL(request.url);
+  if (request.method !== "POST" || url.pathname !== "/api/razorpay/create-order") {
+    return undefined;
+  }
+
+  let body: { amount?: unknown; currency?: unknown; receipt?: unknown } = {};
+  try {
+    body = (await request.json()) as { amount?: unknown; currency?: unknown; receipt?: unknown };
+  } catch {
+    body = {};
+  }
+
+  const amount = Number(body.amount);
+  const currency = typeof body.currency === "string" ? body.currency.toUpperCase() : "INR";
+  const receipt = typeof body.receipt === "string" ? body.receipt : `lmc-${Date.now()}`;
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return new Response(JSON.stringify({ error: "invalid_amount" }), {
+      status: 400,
+      headers: { "content-type": "application/json; charset=utf-8" },
+    });
+  }
+
+  const keyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || "";
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
+
+  if (keyId && keySecret) {
+    try {
+      const response = await fetch("https://api.razorpay.com/v1/orders", {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: Math.round(amount),
+          currency,
+          receipt,
+        }),
+      });
+
+      if (response.ok) {
+        const payload = (await response.json()) as { id?: string; amount?: number; currency?: string; receipt?: string };
+        if (payload.id) {
+          return new Response(
+            JSON.stringify({
+              id: payload.id,
+              amount: payload.amount ?? Math.round(amount),
+              currency: payload.currency ?? currency,
+              receipt: payload.receipt ?? receipt,
+            }),
+            {
+              status: 200,
+              headers: { "content-type": "application/json; charset=utf-8" },
+            },
+          );
+        }
+      }
+
+      const errorText = await response.text();
+      return new Response(JSON.stringify({ error: errorText || "Unable to create Razorpay order" }), {
+        status: 502,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    } catch (error) {
+      console.error("Razorpay order creation failed", error);
+      return new Response(JSON.stringify({ error: "Unable to create Razorpay order" }), {
+        status: 502,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+  }
+
+  const orderId = `order_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  return new Response(
+    JSON.stringify({
+      id: orderId,
+      amount: Math.round(amount),
+      currency,
+      receipt,
+    }),
+    {
+      status: 200,
+      headers: { "content-type": "application/json; charset=utf-8" },
+    },
+  );
+}
+
 // h3 swallows in-handler throws into a normal 500 Response with body
 // {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
@@ -47,6 +136,11 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const razorpayOrderResponse = await handleRazorpayOrder(request);
+      if (razorpayOrderResponse) {
+        return razorpayOrderResponse;
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
