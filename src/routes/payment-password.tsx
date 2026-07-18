@@ -148,7 +148,7 @@ function PaymentPassword() {
                 {newPin.map((digit, idx) => (
                   <input
                     key={idx}
-                    ref={(el) => { newPinRefs.current[idx] = el; }}
+                    ref={(el) => (newPinRefs.current[idx] = el)}
                     type={showPassword ? "text" : "password"}
                     inputMode="numeric"
                     maxLength={1}
@@ -156,7 +156,7 @@ function PaymentPassword() {
                     onChange={(e) => handlePinChange(idx, e.target.value, false)}
                     onKeyDown={(e) => handleKeyDown(idx, e, false)}
                     required
-                    className="w-[3.25rem] h-[3.5rem] sm:w-14 sm:h-16 text-center text-2xl font-bold outline-none rounded-2xl backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white transition-all duration-300"
+                    className="w-[3.25rem] h-[3.5rem] sm:w-14 sm:h-16 text-center text-2xl font-bold outline-none rounded-2xl bg-white/70 dark:bg-gray-800/80 border-2 border-gray-300/80 dark:border-gray-500/50 shadow-sm focus:border-[color:var(--gold-soft)] focus:bg-white/90 dark:focus:bg-gray-800 focus:shadow-[0_0_20px_rgba(255,215,0,0.3)] text-black dark:text-white transition-all duration-300"
                   />
                 ))}
               </div>
@@ -171,7 +171,7 @@ function PaymentPassword() {
                 {confirmPin.map((digit, idx) => (
                   <input
                     key={idx}
-                    ref={(el) => { confirmPinRefs.current[idx] = el; }}
+                    ref={(el) => (confirmPinRefs.current[idx] = el)}
                     type={showPassword ? "text" : "password"}
                     inputMode="numeric"
                     maxLength={1}
@@ -179,7 +179,7 @@ function PaymentPassword() {
                     onChange={(e) => handlePinChange(idx, e.target.value, true)}
                     onKeyDown={(e) => handleKeyDown(idx, e, true)}
                     required
-                    className="w-[3.25rem] h-[3.5rem] sm:w-14 sm:h-16 text-center text-2xl font-bold outline-none rounded-2xl backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white transition-all duration-300"
+                    className="w-[3.25rem] h-[3.5rem] sm:w-14 sm:h-16 text-center text-2xl font-bold outline-none rounded-2xl bg-white/70 dark:bg-gray-800/80 border-2 border-gray-300/80 dark:border-gray-500/50 shadow-sm focus:border-[color:var(--gold-soft)] focus:bg-white/90 dark:focus:bg-gray-800 focus:shadow-[0_0_20px_rgba(255,215,0,0.3)] text-black dark:text-white transition-all duration-300"
                   />
                 ))}
               </div>
@@ -200,7 +200,7 @@ function PaymentPassword() {
                 value={recoveryHint}
                 onChange={(e) => setRecoveryHint(e.target.value)}
                 placeholder="e.g. 1999 or Birth year"
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none bg-white/70 dark:bg-gray-800/80 border-2 border-gray-300/80 dark:border-gray-500/50 shadow-sm focus:border-[color:var(--gold-soft)] focus:bg-white/90 dark:focus:bg-gray-800 focus:shadow-[0_0_20px_rgba(255,215,0,0.3)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
               />
             </div>
           </section>
