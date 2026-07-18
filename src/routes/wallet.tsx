@@ -28,25 +28,50 @@ function WalletPage() {
 
   return (
     <Shell>
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-20px) scale(1.05); }
+        }
+        .bg-blob {
+          position: fixed;
+          border-radius: 50%;
+          filter: blur(90px);
+          z-index: 0;
+          opacity: 0.4;
+          animation: float 8s ease-in-out infinite;
+          pointer-events: none;
+        }
+      `}</style>
+
+      {/* Ambient Background Blobs */}
+      <div className="bg-blob w-72 h-72 bg-purple-500/30 top-10 left-[-10%]"></div>
+      <div className="bg-blob w-80 h-80 bg-blue-500/20 bottom-10 right-[-10%]" style={{ animationDelay: "2s" }}></div>
+
       <AppHeader title="Wallet" />
-      <div className="px-4 pt-4 space-y-4">
-        {/* Wallet Overview */}
-        <div
-          className="rounded-2xl p-5 text-[oklch(0.2_0.02_260)]"
-          style={{ background: "linear-gradient(135deg, var(--gold) 0%, oklch(0.92 0.11 92) 100%)" }}
-        >
-          <div className="flex items-center justify-between">
-            <div className="text-sm opacity-80">Wallet</div>
-            <LMCMark size={28} />
+
+      <div className="px-4 pt-4 space-y-4 relative z-10">
+        {/* Wallet Overview - Glassmorphism */}
+        <div className="rounded-[2rem] p-6 backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] bg-white/10 dark:bg-black/20">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm font-semibold opacity-70 text-foreground">Wallet</div>
+            <div className="backdrop-blur-md bg-white/20 p-2 rounded-full border border-white/20">
+              <LMCMark size={24} />
+            </div>
           </div>
 
-          {/* LMC Price Added Here */}
-          <div className="mt-2 text-sm font-medium opacity-90">1 INR = 1.25 LMC</div>
+          {/* LMC Price */}
+          <div className="mt-2 text-sm font-bold opacity-80 text-foreground">1 INR = 1.25 LMC</div>
 
-          <div className="mt-1 text-3xl font-extrabold tabular-nums">{formatINR(inr + lmc * price, 2)}</div>
+          {/* Total Balance */}
+          <div className="mt-1 text-4xl font-extrabold tabular-nums text-foreground drop-shadow-sm">
+            {formatINR(inr + lmc * price, 2)}
+          </div>
 
-          {/* Removed previous LMC/INR balance and Added Hold Balance */}
-          <div className="mt-1 text-sm font-medium">Hold Balance: {formatLMC(holdBalance, 4)} LMC</div>
+          {/* Hold Balance */}
+          <div className="mt-4 pt-4 border-t border-white/20 text-sm font-bold text-foreground/90">
+            Hold Balance: <span className="font-extrabold">{formatLMC(holdBalance, 4)} LMC</span>
+          </div>
         </div>
       </div>
     </Shell>
