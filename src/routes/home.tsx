@@ -57,9 +57,6 @@ function HomeApp() {
             <LMCMark size={28} />
           </div>
           <div className="mt-3 text-3xl font-extrabold tabular-nums">{formatINR(total, 2)}</div>
-          <div className="mt-1 text-sm font-medium">
-            {formatLMC(lmc, 4)} LMC · {formatINR(inr, 2)}
-          </div>
           <div className="mt-4 grid grid-cols-3 gap-2">
             <QuickAction to="/wallet" icon={<ArrowDownToLine size={18} />} label="Buy" />
             <QuickAction to="/wallet" icon={<ArrowUpFromLine size={18} />} label="Sell" />
