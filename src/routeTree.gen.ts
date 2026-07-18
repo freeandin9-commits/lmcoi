@@ -14,6 +14,7 @@ import { Route as TradeRouteImport } from './routes/trade'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ReferralRouteImport } from './routes/referral'
+import { Route as RealNameRouteImport } from './routes/real-name'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BuyRouteImport } from './routes/buy'
@@ -44,6 +45,11 @@ const ReferralRoute = ReferralRouteImport.update({
   path: '/referral',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RealNameRoute = RealNameRouteImport.update({
+  id: '/real-name',
+  path: '/real-name',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/buy': typeof BuyRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
+  '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/buy': typeof BuyRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
+  '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/buy': typeof BuyRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
+  '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/buy'
     | '/dashboard'
     | '/home'
+    | '/real-name'
     | '/referral'
     | '/register'
     | '/sell'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/buy'
     | '/dashboard'
     | '/home'
+    | '/real-name'
     | '/referral'
     | '/register'
     | '/sell'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/buy'
     | '/dashboard'
     | '/home'
+    | '/real-name'
     | '/referral'
     | '/register'
     | '/sell'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   BuyRoute: typeof BuyRoute
   DashboardRoute: typeof DashboardRoute
   HomeRoute: typeof HomeRoute
+  RealNameRoute: typeof RealNameRoute
   ReferralRoute: typeof ReferralRoute
   RegisterRoute: typeof RegisterRoute
   SellRoute: typeof SellRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReferralRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/real-name': {
+      id: '/real-name'
+      path: '/real-name'
+      fullPath: '/real-name'
+      preLoaderRoute: typeof RealNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/home': {
       id: '/home'
       path: '/home'
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   BuyRoute: BuyRoute,
   DashboardRoute: DashboardRoute,
   HomeRoute: HomeRoute,
+  RealNameRoute: RealNameRoute,
   ReferralRoute: ReferralRoute,
   RegisterRoute: RegisterRoute,
   SellRoute: SellRoute,

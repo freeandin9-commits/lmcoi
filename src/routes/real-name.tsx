@@ -13,15 +13,24 @@ export const Route = createFileRoute("/real-name")({
 function RealNameKYC() {
   const nav = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [aadhaarName, setAadhaarName] = useState("");
   const [aadhaarNumber, setAadhaarNumber] = useState("");
+
+  // selectedImage: ഉപയോക്താവ് അപ്‌ലോഡ് ചെയ്യുന്ന ഫോട്ടോയുടെ URL
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Handle Image Upload
+  // DEMO IMAGE URL (നിങ്ങൾക്ക് ഇഷ്ടമുള്ള ഒരു ഡെമോ ലിങ്ക് ഇവിടെ നൽകാം)
+  const DEMO_IMAGE = "https://images.unsplash.com/photo-1594963338395-483ef7067b12?q=80&w=400&auto=format&fit=crop";
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      // File validation: ഫോട്ടോ മാത്രമാണോ എന്ന് ഉറപ്പാക്കാൻ
+      if (!file.type.startsWith("image/")) {
+        alert("Please select a valid image file.");
+        return;
+      }
       const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
     }
@@ -29,44 +38,27 @@ function RealNameKYC() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Add your submit logic here (e.g., Supabase upload)
+    if (!selectedImage) {
+      alert("Please upload your Aadhaar photo!");
+      return;
+    }
+    // ഇവിടെ നിങ്ങളുടെ ഫോട്ടോ സെർവറിലേക്ക് അപ്‌ലോഡ് ചെയ്യാനുള്ള ലോജിക് (Supabase/API) ചേർക്കുക
     console.log({ aadhaarName, aadhaarNumber, selectedImage });
-    alert("KYC Details Submitted!");
+    alert("KYC Details Submitted Successfully!");
   };
 
   return (
     <Shell>
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-20px) scale(1.05); }
-        }
-        .bg-blob {
-          position: fixed;
-          border-radius: 50%;
-          filter: blur(90px);
-          z-index: 0;
-          opacity: 0.4;
-          animation: float 8s ease-in-out infinite;
-          pointer-events: none;
-        }
-        .glass-card {
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-        }
+        .glass-card { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
       `}</style>
-
-      {/* Background Orbs */}
-      <div className="bg-blob w-64 h-64 bg-purple-500/30 top-10 left-[-10%]"></div>
-      <div className="bg-blob w-72 h-72 bg-blue-500/20 bottom-20 right-[-10%]" style={{ animationDelay: "2s" }}></div>
 
       <AppHeader
         title="Real Name Authentication"
         left={
           <button
             onClick={() => nav({ to: "/dashboard" })}
-            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110 active:scale-95"
-            aria-label="Go back"
+            className="p-2 -ml-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft size={24} />
           </button>
@@ -75,76 +67,47 @@ function RealNameKYC() {
 
       <div className="px-4 pt-6 pb-12 relative z-10 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          
-          {/* Identity Card Upload Section */}
-          <div className="glass-card p-5 rounded-[2rem] bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-            <h3 className="text-base font-bold text-foreground mb-4 drop-shadow-md">
-              Front of Aadhaar ID Card
-            </h3>
-            
-            <div 
-              className="relative w-full h-48 rounded-2xl border-2 border-dashed border-[color:var(--gold-soft)]/50 bg-black/10 dark:bg-white/5 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-black/20 dark:hover:bg-white/10 transition-all duration-300 group"
+          <div className="glass-card p-5 rounded-[2rem] bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-lg">
+            <h3 className="text-base font-bold text-foreground mb-4">Front of Aadhaar ID Card</h3>
+
+            <div
+              className="relative w-full h-48 rounded-2xl border-2 border-dashed border-[color:var(--gold-soft)]/50 bg-black/10 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-black/20 transition-all duration-300 group"
               onClick={() => fileInputRef.current?.click()}
             >
-              {selectedImage ? (
-                <img 
-                  src={selectedImage} 
-                  alt="Aadhaar Front Preview" 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <div className="flex flex-col items-center text-center p-4">
-                  <div className="w-12 h-12 rounded-full bg-[color:var(--gold-soft)]/20 flex items-center justify-center mb-3 text-[color:var(--gold-soft)] group-hover:scale-110 transition-transform duration-300">
-                    <ImageIcon size={24} />
-                  </div>
-                  <p className="text-sm font-semibold text-foreground/80">Tap to Upload</p>
-                  <p className="text-xs text-muted-foreground mt-1">Clear photo of your original ID</p>
-                </div>
-              )}
-              
-              {/* Hidden file input */}
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleImageChange} 
-                accept="image/jpeg, image/png, image/jpg" 
-                className="hidden" 
+              {/* ഫോട്ടോ സെലക്ട് ചെയ്തിട്ടുണ്ടെങ്കിൽ അത് കാണിക്കുക, ഇല്ലെങ്കിൽ ഡെമോ കാണിക്കുക */}
+              <img
+                src={selectedImage || DEMO_IMAGE}
+                alt="Aadhaar Preview"
+                className={`w-full h-full object-cover transition-opacity duration-300 ${selectedImage ? "opacity-100" : "opacity-40"}`}
               />
-              
-              {/* Upload Overlay on Hover */}
-              {selectedImage && (
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-                  <div className="flex items-center gap-2 text-white font-semibold">
-                    <Upload size={18} /> Change Photo
-                  </div>
+
+              {/* Overlay Text */}
+              {!selectedImage && (
+                <div className="absolute flex flex-col items-center text-[color:var(--gold-soft)]">
+                  <ImageIcon size={32} />
+                  <span className="text-sm font-bold mt-2">Click to Upload Aadhaar</span>
                 </div>
               )}
+
+              <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
             </div>
           </div>
 
-          {/* Form Inputs Section */}
-          <div className="glass-card p-5 rounded-[2rem] space-y-5 bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-            
-            {/* Aadhaar Name Input */}
+          <div className="glass-card p-5 rounded-[2rem] space-y-5 bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-lg">
             <div className="group">
-              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
-                Aadhaar Name
-              </label>
+              <label className="text-sm font-bold mb-2 block text-gray-200">Aadhaar Name</label>
               <input
                 type="text"
                 value={aadhaarName}
                 onChange={(e) => setAadhaarName(e.target.value)}
                 placeholder="Name exactly as on Aadhaar"
                 required
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+                className="w-full rounded-2xl px-4 py-3.5 bg-white/20 border border-white/10 text-white outline-none focus:border-[color:var(--gold-soft)]"
               />
             </div>
 
-            {/* Aadhaar Number Input */}
             <div className="group">
-              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
-                Aadhaar Number
-              </label>
+              <label className="text-sm font-bold mb-2 block text-gray-200">Aadhaar Number</label>
               <input
                 type="text"
                 value={aadhaarNumber}
@@ -152,16 +115,14 @@ function RealNameKYC() {
                 placeholder="0000 0000 0000"
                 maxLength={14}
                 required
-                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:bg-white/30 focus:shadow-[0_0_20px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300 tracking-wider"
+                className="w-full rounded-2xl px-4 py-3.5 bg-white/20 border border-white/10 text-white outline-none focus:border-[color:var(--gold-soft)] tracking-wider"
               />
             </div>
-
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-4 rounded-2xl font-extrabold flex justify-center items-center gap-2 text-black transition-all duration-300 shadow-[0_4px_15px_0_rgba(0,0,0,0.2)] hover:shadow-[0_8px_25px_rgba(255,255,0,0.5)] hover:-translate-y-1 active:translate-y-0 text-base"
+            className="w-full py-4 rounded-2xl font-extrabold text-black hover:scale-[1.02] active:scale-[0.98] transition-all"
             style={{ background: "var(--gold-soft)" }}
           >
             Submit for Verification
