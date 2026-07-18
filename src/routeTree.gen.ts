@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TradeRouteImport } from './routes/trade'
+import { Route as SellTutorialRouteImport } from './routes/sell-tutorial'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ReferralRouteImport } from './routes/referral'
@@ -37,6 +38,11 @@ const TransactionsRoute = TransactionsRouteImport.update({
 const TradeRoute = TradeRouteImport.update({
   id: '/trade',
   path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellTutorialRoute = SellTutorialRouteImport.update({
+  id: '/sell-tutorial',
+  path: '/sell-tutorial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SellRoute = SellRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
+  '/sell-tutorial': typeof SellTutorialRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
   '/wallet': typeof WalletRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
+  '/sell-tutorial': typeof SellTutorialRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
   '/wallet': typeof WalletRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
+  '/sell-tutorial': typeof SellTutorialRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
   '/wallet': typeof WalletRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/referral'
     | '/register'
     | '/sell'
+    | '/sell-tutorial'
     | '/trade'
     | '/transactions'
     | '/wallet'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/referral'
     | '/register'
     | '/sell'
+    | '/sell-tutorial'
     | '/trade'
     | '/transactions'
     | '/wallet'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/referral'
     | '/register'
     | '/sell'
+    | '/sell-tutorial'
     | '/trade'
     | '/transactions'
     | '/wallet'
@@ -207,6 +219,7 @@ export interface RootRouteChildren {
   ReferralRoute: typeof ReferralRoute
   RegisterRoute: typeof RegisterRoute
   SellRoute: typeof SellRoute
+  SellTutorialRoute: typeof SellTutorialRoute
   TradeRoute: typeof TradeRoute
   TransactionsRoute: typeof TransactionsRoute
   WalletRoute: typeof WalletRoute
@@ -233,6 +246,13 @@ declare module '@tanstack/react-router' {
       path: '/trade'
       fullPath: '/trade'
       preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sell-tutorial': {
+      id: '/sell-tutorial'
+      path: '/sell-tutorial'
+      fullPath: '/sell-tutorial'
+      preLoaderRoute: typeof SellTutorialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sell': {
@@ -327,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReferralRoute: ReferralRoute,
   RegisterRoute: RegisterRoute,
   SellRoute: SellRoute,
+  SellTutorialRoute: SellTutorialRoute,
   TradeRoute: TradeRoute,
   TransactionsRoute: TransactionsRoute,
   WalletRoute: WalletRoute,
