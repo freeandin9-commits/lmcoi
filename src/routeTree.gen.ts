@@ -15,6 +15,7 @@ import { Route as SellRouteImport } from './routes/sell'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as RealNameRouteImport } from './routes/real-name'
+import { Route as PaymentPasswordRouteImport } from './routes/payment-password'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CollectionRouteImport } from './routes/collection'
@@ -51,6 +52,11 @@ const RealNameRoute = RealNameRouteImport.update({
   path: '/real-name',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaymentPasswordRoute = PaymentPasswordRouteImport.update({
+  id: '/payment-password',
+  path: '/payment-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
+  '/payment-password': typeof PaymentPasswordRoute
   '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
+  '/payment-password': typeof PaymentPasswordRoute
   '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
+  '/payment-password': typeof PaymentPasswordRoute
   '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/collection'
     | '/dashboard'
     | '/home'
+    | '/payment-password'
     | '/real-name'
     | '/referral'
     | '/register'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/collection'
     | '/dashboard'
     | '/home'
+    | '/payment-password'
     | '/real-name'
     | '/referral'
     | '/register'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/collection'
     | '/dashboard'
     | '/home'
+    | '/payment-password'
     | '/real-name'
     | '/referral'
     | '/register'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   CollectionRoute: typeof CollectionRoute
   DashboardRoute: typeof DashboardRoute
   HomeRoute: typeof HomeRoute
+  PaymentPasswordRoute: typeof PaymentPasswordRoute
   RealNameRoute: typeof RealNameRoute
   ReferralRoute: typeof ReferralRoute
   RegisterRoute: typeof RegisterRoute
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RealNameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payment-password': {
+      id: '/payment-password'
+      path: '/payment-password'
+      fullPath: '/payment-password'
+      preLoaderRoute: typeof PaymentPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/home': {
       id: '/home'
       path: '/home'
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   CollectionRoute: CollectionRoute,
   DashboardRoute: DashboardRoute,
   HomeRoute: HomeRoute,
+  PaymentPasswordRoute: PaymentPasswordRoute,
   RealNameRoute: RealNameRoute,
   ReferralRoute: ReferralRoute,
   RegisterRoute: RegisterRoute,
