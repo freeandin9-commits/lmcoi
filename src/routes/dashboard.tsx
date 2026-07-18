@@ -19,6 +19,7 @@ import {
   Edit2,
   X,
   Trash2,
+  FileText, // <-- പുതുതായി ചേർത്തത് (For My Appeal icon)
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -234,9 +235,10 @@ function Dashboard() {
             { icon: CreditCard, label: "Collection", path: "/collection" },
             { icon: Lock, label: "Payment Password", path: "/payment-password" },
             { icon: History, label: "Transaction", path: "/transactions" },
+            { icon: FileText, label: "My Appeal", path: "/my-appeal" }, // <-- പുതുതായി ചേർത്തത്
             { icon: PlayCircle, label: "Buy Tutorial", path: "/buy-tutorial" },
             { icon: PlayCircle, label: "Sell Tutorial", path: "/sell-tutorial" },
-            { icon: Bell, label: "User Notice", path: "/user-notice" }, // ---- PATH ADDED HERE ----
+            { icon: Bell, label: "User Notice", path: "/user-notice" },
             { icon: Gift, label: "Rewards Card" },
             { icon: Users, label: "Team Center" },
             { icon: Settings, label: "Settings" },

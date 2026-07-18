@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as UserNoticeRouteImport } from './routes/user-notice'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TradeRouteImport } from './routes/trade'
 import { Route as SellTutorialRouteImport } from './routes/sell-tutorial'
@@ -28,6 +29,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserNoticeRoute = UserNoticeRouteImport.update({
+  id: '/user-notice',
+  path: '/user-notice',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TransactionsRoute = TransactionsRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/sell-tutorial': typeof SellTutorialRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
+  '/user-notice': typeof UserNoticeRoute
   '/wallet': typeof WalletRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/sell-tutorial': typeof SellTutorialRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
+  '/user-notice': typeof UserNoticeRoute
   '/wallet': typeof WalletRoute
 }
 export interface FileRoutesById {
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/sell-tutorial': typeof SellTutorialRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
+  '/user-notice': typeof UserNoticeRoute
   '/wallet': typeof WalletRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/sell-tutorial'
     | '/trade'
     | '/transactions'
+    | '/user-notice'
     | '/wallet'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/sell-tutorial'
     | '/trade'
     | '/transactions'
+    | '/user-notice'
     | '/wallet'
   id:
     | '__root__'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/sell-tutorial'
     | '/trade'
     | '/transactions'
+    | '/user-notice'
     | '/wallet'
   fileRoutesById: FileRoutesById
 }
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   SellTutorialRoute: typeof SellTutorialRoute
   TradeRoute: typeof TradeRoute
   TransactionsRoute: typeof TransactionsRoute
+  UserNoticeRoute: typeof UserNoticeRoute
   WalletRoute: typeof WalletRoute
 }
 
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       path: '/wallet'
       fullPath: '/wallet'
       preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user-notice': {
+      id: '/user-notice'
+      path: '/user-notice'
+      fullPath: '/user-notice'
+      preLoaderRoute: typeof UserNoticeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/transactions': {
@@ -350,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellTutorialRoute: SellTutorialRoute,
   TradeRoute: TradeRoute,
   TransactionsRoute: TransactionsRoute,
+  UserNoticeRoute: UserNoticeRoute,
   WalletRoute: WalletRoute,
 }
 export const routeTree = rootRouteImport
