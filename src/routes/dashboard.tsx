@@ -231,8 +231,8 @@ function Dashboard() {
         <div className="animate-glass-2 rounded-2xl overflow-hidden backdrop-blur-2xl bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)] transition-all duration-500">
           {[
             { icon: User, label: "Real Name", path: "/real-name" },
-            { icon: CreditCard, label: "Collection", path: "/collection" }, // ---- NEW PATH ADDED HERE ----
-            { icon: Lock, label: "Payment Password" },
+            { icon: CreditCard, label: "Collection", path: "/collection" },
+            { icon: Lock, label: "Payment Password", path: "/payment-password" }, // ---- PATH ADDED HERE ----
             { icon: History, label: "Transaction" },
             { icon: PlayCircle, label: "Buy Tutorial" },
             { icon: PlayCircle, label: "Sell Tutorial" },
