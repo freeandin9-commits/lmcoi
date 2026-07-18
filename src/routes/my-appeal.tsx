@@ -64,10 +64,25 @@ function MyAppeal() {
       />
 
       <div className="px-4 pt-6 pb-8 relative z-10 animate-fade-in">
-        <form 
-          onSubmit={handleSubmit} 
+        <form
+          onSubmit={handleSubmit}
           className="rounded-[2rem] p-6 space-y-5 backdrop-blur-2xl bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]"
         >
+          {/* Order ID */}
+          <div className="space-y-2 group">
+            <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
+              Order ID
+            </label>
+            <input
+              type="text"
+              required
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+              placeholder="Enter Order ID"
+              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:shadow-[0_0_15px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+            />
+          </div>
+
           {/* Type: Buy or Sell */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm">Type</label>
@@ -99,7 +114,9 @@ function MyAppeal() {
 
           {/* Amount */}
           <div className="space-y-2 group">
-            <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">Amount</label>
+            <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
+              Amount
+            </label>
             <input
               type="number"
               required
@@ -112,7 +129,9 @@ function MyAppeal() {
 
           {/* UTR Number */}
           <div className="space-y-2 group">
-            <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">UTR Number</label>
+            <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
+              UTR Number
+            </label>
             <input
               type="text"
               required
@@ -125,25 +144,14 @@ function MyAppeal() {
 
           {/* Date and Time */}
           <div className="space-y-2 group">
-            <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">Date and Time</label>
+            <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
+              Date and Time
+            </label>
             <input
               type="datetime-local"
               required
               value={dateTime}
               onChange={(e) => setDateTime(e.target.value)}
-              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:shadow-[0_0_15px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
-            />
-          </div>
-
-          {/* Order ID */}
-          <div className="space-y-2 group">
-            <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">Order ID</label>
-            <input
-              type="text"
-              required
-              value={orderId}
-              onChange={(e) => setOrderId(e.target.value)}
-              placeholder="Enter Order ID"
               className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:shadow-[0_0_15px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
             />
           </div>
