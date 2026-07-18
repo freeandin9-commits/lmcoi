@@ -75,18 +75,15 @@ function CollectionDetails() {
 
       <div className="px-4 pt-6 pb-12 relative z-10">
         <form onSubmit={handleSubmit} className="space-y-6">
-          
           {/* ================= SESSION 1: UPI ID ================= */}
           <div className="glass-card p-5 rounded-[2rem] bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-[color:var(--gold-soft)]/20 flex items-center justify-center text-[color:var(--gold-soft)]">
                 <Wallet size={16} />
               </div>
-              <h3 className="text-base font-bold text-foreground drop-shadow-md">
-                Session 1: UPI Details
-              </h3>
+              <h3 className="text-base font-bold text-foreground drop-shadow-md">UPI Details</h3>
             </div>
-            
+
             <div className="group">
               <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
                 UPI ID
@@ -107,9 +104,7 @@ function CollectionDetails() {
               <div className="w-8 h-8 rounded-full bg-[color:var(--gold-soft)]/20 flex items-center justify-center text-[color:var(--gold-soft)]">
                 <Landmark size={16} />
               </div>
-              <h3 className="text-base font-bold text-foreground drop-shadow-md">
-                Session 2: Bank Account
-              </h3>
+              <h3 className="text-base font-bold text-foreground drop-shadow-md">Bank Account</h3>
             </div>
 
             {/* Account Holder Name */}

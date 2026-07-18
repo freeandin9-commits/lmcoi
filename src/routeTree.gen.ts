@@ -17,6 +17,7 @@ import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as RealNameRouteImport } from './routes/real-name'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CollectionRouteImport } from './routes/collection'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -60,6 +61,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollectionRoute = CollectionRouteImport.update({
+  id: '/collection',
+  path: '/collection',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BuyRoute = BuyRouteImport.update({
   id: '/buy',
   path: '/buy',
@@ -74,6 +80,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/buy': typeof BuyRoute
+  '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
   '/real-name': typeof RealNameRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/buy': typeof BuyRoute
+  '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
   '/real-name': typeof RealNameRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/buy': typeof BuyRoute
+  '/collection': typeof CollectionRoute
   '/dashboard': typeof DashboardRoute
   '/home': typeof HomeRoute
   '/real-name': typeof RealNameRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/buy'
+    | '/collection'
     | '/dashboard'
     | '/home'
     | '/real-name'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/buy'
+    | '/collection'
     | '/dashboard'
     | '/home'
     | '/real-name'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/buy'
+    | '/collection'
     | '/dashboard'
     | '/home'
     | '/real-name'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BuyRoute: typeof BuyRoute
+  CollectionRoute: typeof CollectionRoute
   DashboardRoute: typeof DashboardRoute
   HomeRoute: typeof HomeRoute
   RealNameRoute: typeof RealNameRoute
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/collection': {
+      id: '/collection'
+      path: '/collection'
+      fullPath: '/collection'
+      preLoaderRoute: typeof CollectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/buy': {
       id: '/buy'
       path: '/buy'
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BuyRoute: BuyRoute,
+  CollectionRoute: CollectionRoute,
   DashboardRoute: DashboardRoute,
   HomeRoute: HomeRoute,
   RealNameRoute: RealNameRoute,
