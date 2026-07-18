@@ -148,7 +148,7 @@ export function TradePanel({ side }: { side: Side }) {
             <>
               <label className="mt-4 block">
                 <span className="text-sm font-medium">
-                  {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC)"}
+                  {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC - INR)"}
                 </span>
                 <input
                   value={amount}
@@ -183,8 +183,8 @@ export function TradePanel({ side }: { side: Side }) {
                   </>
                 ) : (
                   <>
-                    <Row k="Price" v={formatINR(price, 4)} />
-                    <Row k="You receive" v={formatINR(enteredAmt * price, 2)} />
+                    <Row k="Price" v="1 INR = ₹1.25 LMC" />
+                    <Row k="You receive" v={enteredAmt.toString()} />
                     <Row k="Balance" v={formatLMC(lmc, 4) + " LMC"} />
                   </>
                 )}
