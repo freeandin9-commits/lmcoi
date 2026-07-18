@@ -39,15 +39,13 @@ export function TradePanel({ side }: { side: Side }) {
   const pricePerLmcInr = 1 / lmcPerInr;
 
   const enteredAmt = parseFloat(amount) || 0;
+  // Buy ചെയ്യുമ്പോൾ ബാലൻസ് ചെക്ക് ചെയ്യേണ്ടതില്ല, Sell ചെയ്യുമ്പോൾ LMC ബാലൻസ് ചെക്ക് ചെയ്യും
   const canSubmit = enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= lmc);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
       if (enteredAmt <= 0) return toast.error("Enter INR amount");
-      if (enteredAmt > inr) {
-        toast.error("Insufficient INR");
-        return;
-      }
+      // Buy ചെയ്യുമ്പോൾ Wallet Amount ചെക്ക് ചെയ്യുന്നത് ഒഴിവാക്കി
       setShowConfirm(true);
       return;
     }
@@ -188,6 +186,7 @@ export function TradePanel({ side }: { side: Side }) {
                   <>
                     <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
                     <Row k="You receive" v={enteredAmt.toString()} />
+                    {/* Sell ചെയ്യുമ്പോൾ LMC Balance ഇവിടെ കാണിക്കും */}
                     <Row k="Balance" v={formatLMC(lmc, 4) + " LMC"} />
                   </>
                 )}
