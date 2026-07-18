@@ -28,6 +28,7 @@ function HomeApp() {
 
   const lmc = Number(wallet?.lmc_balance ?? 0);
   const inr = Number(wallet?.inr_balance ?? 0);
+  const hold = Number(wallet?.hold_balance ?? 0);
   const total = lmc * price + inr;
 
   return (
@@ -57,6 +58,10 @@ function HomeApp() {
             <LMCMark size={28} />
           </div>
           <div className="mt-3 text-3xl font-extrabold tabular-nums">{formatINR(total, 2)}</div>
+
+          {/* Hold Balance Added Here */}
+          <div className="mt-1 text-sm font-medium opacity-90">Hold Balance: {formatINR(hold, 2)}</div>
+
           <div className="mt-4 grid grid-cols-3 gap-2">
             <QuickAction to="/wallet" icon={<ArrowDownToLine size={18} />} label="Buy" />
             <QuickAction to="/wallet" icon={<ArrowUpFromLine size={18} />} label="Sell" />
