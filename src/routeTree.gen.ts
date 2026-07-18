@@ -13,6 +13,7 @@ import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as UserNoticeRouteImport } from './routes/user-notice'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TradeRouteImport } from './routes/trade'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as SellTutorialRouteImport } from './routes/sell-tutorial'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -45,6 +46,11 @@ const TransactionsRoute = TransactionsRouteImport.update({
 const TradeRoute = TradeRouteImport.update({
   id: '/trade',
   path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SellTutorialRoute = SellTutorialRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/sell-tutorial': typeof SellTutorialRoute
+  '/team': typeof TeamRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
   '/user-notice': typeof UserNoticeRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/sell-tutorial': typeof SellTutorialRoute
+  '/team': typeof TeamRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
   '/user-notice': typeof UserNoticeRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/sell-tutorial': typeof SellTutorialRoute
+  '/team': typeof TeamRoute
   '/trade': typeof TradeRoute
   '/transactions': typeof TransactionsRoute
   '/user-notice': typeof UserNoticeRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sell'
     | '/sell-tutorial'
+    | '/team'
     | '/trade'
     | '/transactions'
     | '/user-notice'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sell'
     | '/sell-tutorial'
+    | '/team'
     | '/trade'
     | '/transactions'
     | '/user-notice'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sell'
     | '/sell-tutorial'
+    | '/team'
     | '/trade'
     | '/transactions'
     | '/user-notice'
@@ -245,6 +257,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SellRoute: typeof SellRoute
   SellTutorialRoute: typeof SellTutorialRoute
+  TeamRoute: typeof TeamRoute
   TradeRoute: typeof TradeRoute
   TransactionsRoute: typeof TransactionsRoute
   UserNoticeRoute: typeof UserNoticeRoute
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/trade'
       fullPath: '/trade'
       preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sell-tutorial': {
@@ -389,6 +409,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SellRoute: SellRoute,
   SellTutorialRoute: SellTutorialRoute,
+  TeamRoute: TeamRoute,
   TradeRoute: TradeRoute,
   TransactionsRoute: TransactionsRoute,
   UserNoticeRoute: UserNoticeRoute,

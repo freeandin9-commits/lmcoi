@@ -5,7 +5,7 @@ import logoAsset from "@/assets/lm-coin-logo.png.asset.json";
 
 const tabs = [
   { to: "/home", label: "Home", icon: Home },
-  { to: "/buy", label: "Order", icon: Receipt },
+  { to: "/transactions", label: "Order", icon: Receipt }, // <-- Changed from "/buy" to "/transactions"
   { to: "/wallet", label: "Wallet", icon: Wallet },
   { to: "/referral", label: "Referral", icon: Users },
   { to: "/dashboard", label: "Me", icon: User },
