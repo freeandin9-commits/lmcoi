@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as TradeRouteImport } from './routes/trade'
+import { Route as SellRouteImport } from './routes/sell'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as HomeRouteImport } from './routes/home'
@@ -26,6 +27,11 @@ const WalletRoute = WalletRouteImport.update({
 const TradeRoute = TradeRouteImport.update({
   id: '/trade',
   path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellRoute = SellRouteImport.update({
+  id: '/sell',
+  path: '/sell',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
+  '/sell': typeof SellRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
+  '/sell': typeof SellRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
+  '/sell': typeof SellRoute
   '/trade': typeof TradeRoute
   '/wallet': typeof WalletRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/referral'
     | '/register'
+    | '/sell'
     | '/trade'
     | '/wallet'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/referral'
     | '/register'
+    | '/sell'
     | '/trade'
     | '/wallet'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/referral'
     | '/register'
+    | '/sell'
     | '/trade'
     | '/wallet'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   ReferralRoute: typeof ReferralRoute
   RegisterRoute: typeof RegisterRoute
+  SellRoute: typeof SellRoute
   TradeRoute: typeof TradeRoute
   WalletRoute: typeof WalletRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/trade'
       fullPath: '/trade'
       preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sell': {
+      id: '/sell'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof SellRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   ReferralRoute: ReferralRoute,
   RegisterRoute: RegisterRoute,
+  SellRoute: SellRoute,
   TradeRoute: TradeRoute,
   WalletRoute: WalletRoute,
 }
