@@ -70,11 +70,10 @@ function TransactionsPage() {
     try {
       // Create canvas from the specific transaction div
       const canvas = await html2canvas(element, {
-        backgroundColor: null, // Set to null for transparent/default background
+        backgroundColor: null, // Keep background transparent
         scale: 2, // Better image quality
-        useCORS: true, // Fixes potential cross-origin image issues
-        allowTaint: true, // Helps with rendering issues
-        logging: false,
+        useCORS: true, // Crucial for loading external fonts/icons securely
+        logging: false, // Turn off console logs from html2canvas
       });
 
       // Convert canvas to Blob safely
