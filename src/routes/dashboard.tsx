@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile, useTransactions, formatINR, formatLMC } from "@/lib/lmc-api";
@@ -16,6 +16,8 @@ import {
   Bell,
   Gift,
   Users,
+  Edit2, // NEW ICON
+  X, // NEW ICON
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -37,9 +39,21 @@ const TYPE_LABEL: Record<string, string> = {
   referral: "Referral reward",
 };
 
+// Generate 20 distinct avatar URLs (using DiceBear API for beautiful avatars)
+const AVATARS = Array.from({ length: 20 }).map(
+  (_, i) => `https://api.dicebear.com/7.x/avataaars/svg?seed=LMCoinUser${i + 1}`,
+);
+
 function Dashboard() {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
+
+  // States for Profile Editing
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editAvatar, setEditAvatar] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/" });
   }, [authLoading, user, nav]);
@@ -50,6 +64,41 @@ function Dashboard() {
   const signOut = async () => {
     await supabase.auth.signOut();
     nav({ to: "/" });
+  };
+
+  // Open Edit Modal and set current values
+  const handleEditClick = () => {
+    setEditName(profile?.display_name || "");
+    // If user has an avatar, use it. Otherwise, default to the first one in the list.
+    setEditAvatar(profile?.avatar_url || AVATARS[0]);
+    setIsEditing(true);
+  };
+
+  // Save profile changes to Supabase
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          display_name: editName,
+          avatar_url: editAvatar,
+        })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      // Close modal and refresh the page to fetch the updated profile
+      // (Or you can use your custom API hook mutation if available)
+      setIsEditing(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -64,14 +113,33 @@ function Dashboard() {
       />
       <div className="px-4 pt-4 space-y-4">
         {/* Profile Info */}
-        <div className="rounded-2xl card-flat p-4 flex items-center gap-3">
-          <span
-            className="grid place-items-center h-12 w-12 rounded-full font-bold text-lg"
-            style={{ background: "var(--gold-soft)" }}
+        <div className="rounded-2xl card-flat p-4 flex items-center gap-3 relative">
+          {/* Edit Button */}
+          <button
+            onClick={handleEditClick}
+            className="absolute top-4 right-4 p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors"
+            aria-label="Edit Profile"
           >
-            {(profile?.display_name ?? profile?.email ?? "?").charAt(0).toUpperCase()}
-          </span>
-          <div className="flex-1 min-w-0">
+            <Edit2 size={16} />
+          </button>
+
+          {/* Profile Picture / Avatar */}
+          {profile?.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt="Profile Avatar"
+              className="h-12 w-12 rounded-full object-cover bg-secondary border border-border"
+            />
+          ) : (
+            <span
+              className="grid place-items-center h-12 w-12 rounded-full font-bold text-lg"
+              style={{ background: "var(--gold-soft)" }}
+            >
+              {(profile?.display_name ?? profile?.email ?? "?").charAt(0).toUpperCase()}
+            </span>
+          )}
+
+          <div className="flex-1 min-w-0 pr-8">
             <div className="font-semibold truncate">{profile?.display_name ?? "—"}</div>
             <div className="text-xs text-muted-foreground truncate">{profile?.email}</div>
           </div>
@@ -156,6 +224,65 @@ function Dashboard() {
           <LogOut size={16} /> Sign out
         </button>
       </div>
+
+      {/* EDIT PROFILE MODAL */}
+      {isEditing && (
+        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card w-full max-w-md rounded-2xl p-5 space-y-5 border border-border shadow-xl">
+            <div className="flex justify-between items-center pb-2 border-b border-border">
+              <h2 className="text-lg font-bold">Edit Profile</h2>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="p-1 rounded-full hover:bg-secondary text-muted-foreground"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Name Input */}
+            <div>
+              <label className="text-sm font-semibold mb-2 block">Display Name</label>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Enter your name"
+                className="w-full bg-background rounded-xl px-4 py-3 text-sm outline-none border border-border focus:border-[color:var(--gold-soft)]"
+              />
+            </div>
+
+            {/* Avatar Selection Grid */}
+            <div>
+              <label className="text-sm font-semibold mb-2 block">Choose Avatar</label>
+              <div className="grid grid-cols-5 gap-3 max-h-48 overflow-y-auto p-1 scrollbar-hide">
+                {AVATARS.map((url, idx) => (
+                  <img
+                    key={idx}
+                    src={url}
+                    alt={`Avatar ${idx + 1}`}
+                    onClick={() => setEditAvatar(url)}
+                    className={`h-12 w-12 rounded-full cursor-pointer object-cover transition-all ${
+                      editAvatar === url
+                        ? "ring-2 ring-[color:var(--gold-soft)] ring-offset-2 ring-offset-background scale-110"
+                        : "opacity-70 hover:opacity-100"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <button
+              onClick={handleSaveProfile}
+              disabled={isSaving}
+              className="w-full py-3 rounded-xl font-bold flex justify-center items-center gap-2 text-black transition-opacity disabled:opacity-50"
+              style={{ background: "var(--gold-soft)" }}
+            >
+              {isSaving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </div>
+      )}
     </Shell>
   );
 }
