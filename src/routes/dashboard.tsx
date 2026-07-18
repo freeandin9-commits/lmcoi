@@ -236,13 +236,13 @@ function Dashboard() {
             { icon: CreditCard, label: "Collection", path: "/collection" },
             { icon: Lock, label: "Payment Password", path: "/payment-password" },
             { icon: History, label: "Transaction", path: "/transactions" },
-            { icon: FileText, label: "My Appeal", path: "/my-appeal" }, // <-- പുതുതായി ചേർത്തത്
+            { icon: FileText, label: "My Appeal", path: "/my-appeal" },
             { icon: PlayCircle, label: "Buy Tutorial", path: "/buy-tutorial" },
             { icon: PlayCircle, label: "Sell Tutorial", path: "/sell-tutorial" },
             { icon: Bell, label: "User Notice", path: "/user-notice" },
-            { icon: Gift, label: "Rewards Card" },
-            { icon: Users, label: "Team Center" },
-            { icon: Settings, label: "Settings" },
+            { icon: Gift, label: "Rewards Card", path: "/referral" }, // Linked to referral.tsx
+            { icon: Users, label: "Team Center", path: "/team" }, // Linked to new team.tsx
+            { icon: Settings, label: "Settings", path: "/settings" },
           ].map((item, idx) => (
             <button
               key={item.label}
