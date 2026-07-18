@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
@@ -19,7 +19,11 @@ interface RazorpayOptions {
   name: string;
   description: string;
   order_id?: string;
-  handler?: (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => void;
+  handler?: (response: {
+    razorpay_payment_id: string;
+    razorpay_order_id: string;
+    razorpay_signature: string;
+  }) => void;
   prefill?: {
     name?: string;
     email?: string;
@@ -71,8 +75,7 @@ export function TradePanel({ side }: { side: Side }) {
   const parsedAmount = Number(amount.replace(/[^\d.]/g, "")) || 0;
   const minBuyAmount = 1;
   const maxBuyAmount = 5000000;
-  const canSubmit =
-    parsedAmount >= minBuyAmount && parsedAmount <= maxBuyAmount && (side === "buy" ? true : parsedAmount <= lmc);
+  const canSubmit = parsedAmount >= minBuyAmount && parsedAmount <= maxBuyAmount && (side === "buy" ? true : parsedAmount <= lmc);
 
   const openRazorpayCheckout = async () => {
     const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_live_TEzx6uRaoHmQeY";
@@ -160,6 +163,24 @@ export function TradePanel({ side }: { side: Side }) {
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleInitialSubmit = async () => {
+    if (side === "buy") {
+      if (parsedAmount < minBuyAmount) return toast.error(`Minimum buy amount is ₹${minBuyAmount}`);
+      if (parsedAmount > maxBuyAmount) return toast.error(`Maximum buy amount is ₹${maxBuyAmount.toLocaleString("en-IN")}`);
+      if (parsedAmount > inr) {
+        toast.error("Insufficient INR");
+        return;
+      }
+      setShowConfirm(true);
+      return;
+    }
+
+    if (parsedAmount <= 0) return toast.error("Enter LMC quantity");
+    if (parsedAmount > lmc) return toast.error("Insufficient LMC");
+
+    await submit();
   };
 
   const submit = async () => {
@@ -306,7 +327,7 @@ export function TradePanel({ side }: { side: Side }) {
               </div>
 
               <button
-                onClick={() => (side === "buy" ? setShowConfirm(true) : void submit())}
+                onClick={handleInitialSubmit}
                 disabled={busy || !canSubmit}
                 className={`mt-6 w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 shadow-lg hover:shadow-xl ${
                   side === "buy"
@@ -372,10 +393,7 @@ export function TradePanel({ side }: { side: Side }) {
               >
                 Cancel
               </button>
-              <button
-                onClick={() => void handleConfirmPurchase()}
-                className="flex-1 py-3 text-sm font-bold rounded-xl btn-gold"
-              >
+              <button onClick={() => void handleConfirmPurchase()} className="flex-1 py-3 text-sm font-bold rounded-xl btn-gold">
                 Pay with Razorpay
               </button>
             </div>
@@ -394,3 +412,6 @@ function Row({ k, v }: { k: string; v: string }) {
     </div>
   );
 }
+
+
+
