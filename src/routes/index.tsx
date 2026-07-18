@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
   component: Login,
 
   head: () => ({
-    meta: [{ title: "LM Coin — Sign In" }, { name: "description", content: "Sign in to your LM Coin account." }],
+    meta: [{ title: "LM Wallet" }, { name: "description", content: "Sign in to your LM Coin account." }],
   }),
 });
 
