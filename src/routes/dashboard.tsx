@@ -113,16 +113,7 @@ function Dashboard() {
       />
       <div className="px-4 pt-4 space-y-4">
         {/* Profile Info */}
-        <div className="rounded-2xl card-flat p-4 flex items-center gap-3 relative">
-          {/* Edit Button */}
-          <button
-            onClick={handleEditClick}
-            className="absolute top-4 right-4 p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors"
-            aria-label="Edit Profile"
-          >
-            <Edit2 size={16} />
-          </button>
-
+        <div className="rounded-2xl card-flat p-4 flex items-center gap-3">
           {/* Profile Picture / Avatar */}
           {profile?.avatar_url ? (
             <img
@@ -139,19 +130,31 @@ function Dashboard() {
             </span>
           )}
 
-          <div className="flex-1 min-w-0 pr-8">
+          {/* Name & Email Details */}
+          <div className="flex-1 min-w-0">
             <div className="font-semibold truncate">{profile?.display_name ?? "—"}</div>
             <div className="text-xs text-muted-foreground truncate">{profile?.email}</div>
           </div>
-          <span
-            className={`text-[11px] rounded-full px-2 py-0.5 ${
-              profile?.kyc_status === "verified"
-                ? "bg-[color:var(--success)]/15 text-[color:var(--success)]"
-                : "bg-secondary text-muted-foreground"
-            }`}
-          >
-            KYC: {profile?.kyc_status ?? "unverified"}
-          </span>
+
+          {/* Edit Button & KYC Wrapper aligned to right side */}
+          <div className="flex flex-col items-end gap-1.5">
+            <button
+              onClick={handleEditClick}
+              className="p-1.5 text-muted-foreground hover:bg-secondary rounded-full transition-colors"
+              aria-label="Edit Profile"
+            >
+              <Edit2 size={16} />
+            </button>
+            <span
+              className={`text-[11px] rounded-full px-2 py-0.5 ${
+                profile?.kyc_status === "verified"
+                  ? "bg-[color:var(--success)]/15 text-[color:var(--success)]"
+                  : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              KYC: {profile?.kyc_status ?? "unverified"}
+            </span>
+          </div>
         </div>
 
         {/* NEW SETTINGS & MENU BUTTONS */}
