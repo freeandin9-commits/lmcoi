@@ -157,9 +157,18 @@ export function TradePanel({ side }: { side: Side }) {
           {side === "sell" || (side === "buy" && buyMode === "custom") ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
               <label className="mt-5 block">
-                <span className="text-sm font-medium text-foreground/80 pl-1">
-                  {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC - INR)"}
-                </span>
+                {/* Amount എന്റർ ചെയ്യുന്ന ഇൻപുട്ടിന് മുകളിലായി LMC Balance കാണിക്കുന്ന ഭാഗം */}
+                <div className="flex justify-between items-center pl-1">
+                  <span className="text-sm font-medium text-foreground/80">
+                    {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC - INR)"}
+                  </span>
+                  {side === "sell" && (
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Balance:{" "}
+                      <span className="font-mono font-bold text-[color:var(--gold)]">{formatLMC(lmc, 4)} LMC</span>
+                    </span>
+                  )}
+                </div>
                 <input
                   value={amount}
                   onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
