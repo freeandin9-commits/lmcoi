@@ -47,7 +47,13 @@ function HomeApp() {
           style={{ background: "linear-gradient(135deg, var(--gold) 0%, oklch(0.92 0.11 92) 100%)" }}
         >
           <div className="flex items-center justify-between">
-            <div className="text-sm/none opacity-80">Total Balance</div>
+            <div className="flex flex-col gap-1.5">
+              <div className="text-sm/none opacity-80">Total Balance</div>
+              {/* LMC Price Badge Added Here */}
+              <div className="text-[10px] font-bold bg-black/10 px-2 py-0.5 rounded-full inline-flex w-fit items-center border border-black/5">
+                1 INR = 1.25 LMC
+              </div>
+            </div>
             <LMCMark size={28} />
           </div>
           <div className="mt-3 text-3xl font-extrabold tabular-nums">{formatINR(total, 2)}</div>
