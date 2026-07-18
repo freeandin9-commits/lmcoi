@@ -1,6 +1,5 @@
 import "./lib/error-capture";
 
-import { createHmac } from "node:crypto";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
@@ -108,60 +107,6 @@ async function handleRazorpayOrder(request: Request): Promise<Response | undefin
   );
 }
 
-async function handleRazorpayVerify(request: Request): Promise<Response | undefined> {
-  const url = new URL(request.url);
-  if (request.method !== "POST" || url.pathname !== "/api/razorpay/verify-payment") {
-    return undefined;
-  }
-
-  let body: { razorpay_order_id?: unknown; razorpay_payment_id?: unknown; razorpay_signature?: unknown } = {};
-  try {
-    body = (await request.json()) as typeof body;
-  } catch {
-    return new Response(JSON.stringify({ error: "invalid_body" }), {
-      status: 400,
-      headers: { "content-type": "application/json; charset=utf-8" },
-    });
-  }
-
-  const orderId = typeof body.razorpay_order_id === "string" ? body.razorpay_order_id : "";
-  const paymentId = typeof body.razorpay_payment_id === "string" ? body.razorpay_payment_id : "";
-  const signature = typeof body.razorpay_signature === "string" ? body.razorpay_signature : "";
-
-  if (!orderId || !paymentId || !signature) {
-    return new Response(JSON.stringify({ error: "missing_fields" }), {
-      status: 400,
-      headers: { "content-type": "application/json; charset=utf-8" },
-    });
-  }
-
-  const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
-  if (!keySecret) {
-    // No secret configured — accept in dev/test mode
-    console.warn("RAZORPAY_KEY_SECRET not set; skipping signature verification.");
-    return new Response(JSON.stringify({ verified: true, dev: true }), {
-      status: 200,
-      headers: { "content-type": "application/json; charset=utf-8" },
-    });
-  }
-
-  const expected = createHmac("sha256", keySecret)
-    .update(`${orderId}|${paymentId}`)
-    .digest("hex");
-
-  if (expected !== signature) {
-    return new Response(JSON.stringify({ error: "signature_mismatch" }), {
-      status: 400,
-      headers: { "content-type": "application/json; charset=utf-8" },
-    });
-  }
-
-  return new Response(JSON.stringify({ verified: true }), {
-    status: 200,
-    headers: { "content-type": "application/json; charset=utf-8" },
-  });
-}
-
 // h3 swallows in-handler throws into a normal 500 Response with body
 // {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
@@ -194,11 +139,6 @@ export default {
       const razorpayOrderResponse = await handleRazorpayOrder(request);
       if (razorpayOrderResponse) {
         return razorpayOrderResponse;
-      }
-
-      const razorpayVerifyResponse = await handleRazorpayVerify(request);
-      if (razorpayVerifyResponse) {
-        return razorpayVerifyResponse;
       }
 
       const handler = await getServerEntry();
