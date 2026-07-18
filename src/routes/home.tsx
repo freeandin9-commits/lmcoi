@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
 import { useWallet, usePriceSeries, useAnnouncements, formatINR, formatLMC } from "@/lib/lmc-api";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowDownToLine, ArrowUpFromLine, Repeat, Gift, Bell, Megaphone } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Gift, Bell, Megaphone } from "lucide-react";
 
 export const Route = createFileRoute("/home")({
   component: HomeApp,
@@ -54,10 +54,9 @@ function HomeApp() {
           <div className="mt-1 text-sm font-medium">
             {formatLMC(lmc, 4)} LMC · {formatINR(inr, 2)}
           </div>
-          <div className="mt-4 grid grid-cols-4 gap-2">
-            <QuickAction to="/wallet" icon={<ArrowDownToLine size={18} />} label="Deposit" />
-            <QuickAction to="/wallet" icon={<ArrowUpFromLine size={18} />} label="Withdraw" />
-            <QuickAction to="/trade" icon={<Repeat size={18} />} label="Trade" />
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <QuickAction to="/wallet" icon={<ArrowDownToLine size={18} />} label="Buy" />
+            <QuickAction to="/wallet" icon={<ArrowUpFromLine size={18} />} label="Sell" />
             <QuickAction to="/referral" icon={<Gift size={18} />} label="Refer" />
           </div>
         </div>
