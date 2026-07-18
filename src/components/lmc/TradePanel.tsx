@@ -72,7 +72,7 @@ export function TradePanel({ side }: { side: Side }) {
   const canSubmit = parsedAmount >= minBuyAmount && parsedAmount <= maxBuyAmount && (side === "buy" ? true : parsedAmount <= lmc);
 
   const openRazorpayCheckout = async () => {
-    const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_12345678";
+    const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_live_TEzx6uRaoHmQeY";
     if (!keyId || keyId.includes("placeholder")) {
       throw new Error("Razorpay is not configured yet.");
     }
