@@ -105,24 +105,25 @@ export function TradePanel({ side }: { side: Side }) {
     <Shell>
       <AppHeader title={side === "buy" ? "Buy LMC" : "Sell LMC"} />
       <div className="px-4 pt-4 space-y-4">
-        <div className="rounded-2xl card-flat p-4">
-          <div className="grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
+        {/* Glassmorphism Main Card */}
+        <div className="rounded-3xl bg-background/60 backdrop-blur-2xl border border-white/10 shadow-2xl p-5">
+          <div className="grid grid-cols-2 gap-3 rounded-xl overflow-hidden p-1 bg-foreground/5 backdrop-blur-md border border-foreground/10">
             <Link
               to="/buy"
-              className={`py-2.5 text-sm font-semibold rounded-lg text-center ${side === "buy" ? "btn-gold" : "bg-secondary text-muted-foreground"}`}
+              className={`py-2.5 text-sm font-semibold rounded-lg text-center transition-all duration-300 ${side === "buy" ? "btn-gold shadow-lg" : "text-muted-foreground hover:bg-foreground/5"}`}
             >
               Buy
             </Link>
             <Link
               to="/sell"
-              className={`py-2.5 text-sm font-semibold rounded-lg text-center ${side === "sell" ? "btn-gold" : "bg-secondary text-muted-foreground"}`}
+              className={`py-2.5 text-sm font-semibold rounded-lg text-center transition-all duration-300 ${side === "sell" ? "btn-gold shadow-lg" : "text-muted-foreground hover:bg-foreground/5"}`}
             >
               Sell
             </Link>
           </div>
 
           {side === "buy" && (
-            <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="mt-5 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {[
                 { id: "custom", label: "Custom" },
                 { id: "upi", label: "UPI Transfer" },
@@ -132,10 +133,10 @@ export function TradePanel({ side }: { side: Side }) {
                 <button
                   key={mode.id}
                   onClick={() => setBuyMode(mode.id as typeof buyMode)}
-                  className={`whitespace-nowrap px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                  className={`whitespace-nowrap px-4 py-2 text-xs font-semibold rounded-xl transition-all duration-300 border ${
                     buyMode === mode.id
-                      ? "bg-[color:var(--gold-soft)] text-black"
-                      : "bg-secondary text-muted-foreground"
+                      ? "bg-[color:var(--gold-soft)] text-black border-transparent shadow-md"
+                      : "bg-foreground/5 backdrop-blur-md border-foreground/10 text-muted-foreground hover:bg-foreground/10"
                   }`}
                 >
                   {mode.label}
@@ -145,17 +146,18 @@ export function TradePanel({ side }: { side: Side }) {
           )}
 
           {side === "sell" || (side === "buy" && buyMode === "custom") ? (
-            <>
-              <label className="mt-4 block">
-                <span className="text-sm font-medium">
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <label className="mt-5 block">
+                <span className="text-sm font-medium text-foreground/80 pl-1">
                   {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC - INR)"}
                 </span>
+                {/* Glassmorphism Input */}
                 <input
                   value={amount}
                   onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
                   inputMode="decimal"
                   placeholder={side === "buy" ? "Enter INR Amount" : "0.00"}
-                  className="mt-2 w-full rounded-xl bg-secondary px-4 py-3 outline-none font-mono text-lg"
+                  className="mt-2 w-full rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 px-4 py-4 outline-none font-mono text-lg text-foreground focus:border-foreground/30 focus:bg-foreground/10 transition-all shadow-inner"
                 />
               </label>
 
@@ -166,7 +168,7 @@ export function TradePanel({ side }: { side: Side }) {
                     <button
                       key={p}
                       onClick={() => setPct(p)}
-                      className="text-xs py-1.5 rounded-md bg-secondary hover:brightness-95"
+                      className="text-xs py-2 rounded-xl bg-foreground/5 backdrop-blur-md border border-foreground/10 hover:bg-foreground/10 transition-colors"
                     >
                       {p === 1 ? "MAX" : `${p * 100}%`}
                     </button>
@@ -174,7 +176,8 @@ export function TradePanel({ side }: { side: Side }) {
                 </div>
               )}
 
-              <div className="mt-4 rounded-xl bg-secondary p-3 text-sm space-y-1.5">
+              {/* Glassmorphism Summary Box */}
+              <div className="mt-5 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 p-4 text-sm space-y-2 shadow-sm">
                 {side === "buy" ? (
                   <>
                     <Row k="Price" v="1 INR = ₹1.25 LMC" />
@@ -193,36 +196,43 @@ export function TradePanel({ side }: { side: Side }) {
               <button
                 onClick={submit}
                 disabled={busy || (!price && side === "sell")}
-                className={`mt-4 w-full rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 ${
-                  side === "buy" ? "btn-gold" : "bg-[color:var(--danger)] text-white"
+                className={`mt-6 w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 shadow-lg hover:shadow-xl ${
+                  side === "buy"
+                    ? "btn-gold"
+                    : "bg-[color:var(--danger)]/90 backdrop-blur-md text-white border border-red-500/50 hover:bg-[color:var(--danger)]"
                 }`}
               >
-                {busy && <Loader2 size={16} className="animate-spin" />}
+                {busy && <Loader2 size={18} className="animate-spin" />}
                 {side === "buy" ? "Buy LMC" : "Sell LMC"}
               </button>
-            </>
+            </div>
           ) : side === "buy" && (buyMode === "upi" || buyMode === "bank") ? (
-            <div className="mt-4 space-y-3">
-              <div className="text-xs text-muted-foreground mb-2 flex items-center gap-2">
-                <Users size={14} />
+            <div className="mt-5 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="text-xs text-muted-foreground mb-3 flex items-center gap-2 pl-1">
+                <Users size={14} className="text-[color:var(--gold)]" />
                 {buyMode === "upi" ? "Sellers accepting UPI payments" : "Sellers accepting Bank Transfers"}
               </div>
               {mockSellers.map((seller) => (
-                <div key={seller.id} className="p-3 rounded-xl bg-secondary flex justify-between items-center">
+                <div
+                  key={seller.id}
+                  className="p-4 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 flex justify-between items-center hover:bg-foreground/10 transition-colors shadow-sm"
+                >
                   <div>
                     <div className="font-semibold text-sm">{seller.name}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      Available: <span className="font-mono text-foreground">{seller.qty} LMC</span>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Available: <span className="font-mono text-foreground font-medium">{seller.qty} LMC</span>
                     </div>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-[10px] text-muted-foreground/70 mt-0.5">
                       Limit: {seller.minLimit} - {seller.qty} LMC
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-mono text-sm font-bold text-[color:var(--gold)]">{formatINR(price, 2)}</div>
+                    <div className="font-mono text-sm font-bold text-[color:var(--gold)] drop-shadow-md">
+                      {formatINR(price, 2)}
+                    </div>
                     <button
                       onClick={() => handleMockBuy(seller.name)}
-                      className="mt-2 px-4 py-1.5 text-xs font-semibold rounded-lg btn-gold"
+                      className="mt-2 px-5 py-2 text-xs font-semibold rounded-xl btn-gold shadow-md hover:shadow-lg transition-all"
                     >
                       Buy
                     </button>
@@ -231,11 +241,12 @@ export function TradePanel({ side }: { side: Side }) {
               ))}
             </div>
           ) : (
-            <div className="mt-8 mb-4 text-center">
-              <div className="text-3xl mb-2">🔒</div>
+            <div className="mt-10 mb-6 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="text-4xl mb-3 drop-shadow-lg">🔒</div>
               <h3 className="font-semibold text-lg">Fixed LMC</h3>
-              <p className="text-sm text-muted-foreground mt-2 px-4">
-                കൂടുതൽ വിവരങ്ങൾ ഉടൻ വരുന്നതാണ്... (More info coming soon)
+              <p className="text-sm text-muted-foreground mt-2 px-4 leading-relaxed">
+                കൂടുതൽ വിവരങ്ങൾ ഉടൻ വരുന്നതാണ്... <br />
+                (More info coming soon)
               </p>
             </div>
           )}
@@ -247,9 +258,9 @@ export function TradePanel({ side }: { side: Side }) {
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex justify-between">
-      <span className="text-muted-foreground">{k}</span>
-      <span className="font-mono">{v}</span>
+    <div className="flex justify-between items-center">
+      <span className="text-muted-foreground/90">{k}</span>
+      <span className="font-mono font-medium">{v}</span>
     </div>
   );
 }
