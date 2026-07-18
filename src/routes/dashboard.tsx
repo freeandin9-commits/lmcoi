@@ -230,8 +230,8 @@ function Dashboard() {
 
         <div className="animate-glass-2 rounded-2xl overflow-hidden backdrop-blur-2xl bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)] transition-all duration-500">
           {[
-            { icon: User, label: "Real Name", path: "/real-name" }, // Added path here
-            { icon: CreditCard, label: "Collection" },
+            { icon: User, label: "Real Name", path: "/real-name" },
+            { icon: CreditCard, label: "Collection", path: "/collection" }, // ---- NEW PATH ADDED HERE ----
             { icon: Lock, label: "Payment Password" },
             { icon: History, label: "Transaction" },
             { icon: PlayCircle, label: "Buy Tutorial" },
@@ -243,7 +243,7 @@ function Dashboard() {
           ].map((item, idx) => (
             <button
               key={item.label}
-              onClick={() => item.path && nav({ to: item.path })} // Navigation logic added
+              onClick={() => item.path && nav({ to: item.path })}
               className={`group w-full flex items-center justify-between px-5 py-4 hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300 ease-in-out relative overflow-hidden ${
                 idx !== 0 ? "border-t border-white/10 dark:border-white/5" : ""
               }`}
