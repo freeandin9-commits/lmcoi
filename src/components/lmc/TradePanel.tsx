@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
@@ -19,11 +19,7 @@ interface RazorpayOptions {
   name: string;
   description: string;
   order_id?: string;
-  handler?: (response: {
-    razorpay_payment_id: string;
-    razorpay_order_id: string;
-    razorpay_signature: string;
-  }) => void;
+  handler?: (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => void;
   prefill?: {
     name?: string;
     email?: string;
@@ -44,10 +40,9 @@ type Side = "buy" | "sell";
 // ഓർഡർ ഐഡി ജനറേറ്റ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ (Format: BYYMMDD000000000)
 const generateBuyOrderId = () => {
   const d = new Date();
-  const yy = d.getFullYear().toString().slice(-2); // Last 2 digits of year
-  const mm = (d.getMonth() + 1).toString().padStart(2, "0"); // Month
-  const dd = d.getDate().toString().padStart(2, "0"); // Day
-  // 9 digit unique number
+  const yy = d.getFullYear().toString().slice(-2);
+  const mm = (d.getMonth() + 1).toString().padStart(2, "0");
+  const dd = d.getDate().toString().padStart(2, "0");
   const unique = Math.floor(100000000 + Math.random() * 900000000).toString();
   return `B${yy}${mm}${dd}${unique}`;
 };
@@ -55,6 +50,7 @@ const generateBuyOrderId = () => {
 export function TradePanel({ side }: { side: Side }) {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
+
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/" });
   }, [authLoading, user, nav]);
@@ -66,16 +62,18 @@ export function TradePanel({ side }: { side: Side }) {
   const [busy, setBusy] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
   const lmcPerInr = 1.25;
   const pricePerLmcInr = 1 / lmcPerInr;
 
-  const enteredAmt = parseFloat(amount) || 0;
   const parsedAmount = Number(amount.replace(/[^\d.]/g, "")) || 0;
   const minBuyAmount = 1;
   const maxBuyAmount = 5000000;
-  const canSubmit = parsedAmount >= minBuyAmount && parsedAmount <= maxBuyAmount && (side === "buy" ? true : parsedAmount <= lmc);
+
+  // Buy ചെയ്യുമ്പോൾ Wallet balance ചെക്ക് ചെയ്യില്ല, Sell ചെയ്യുമ്പോൾ മാത്രം LMC balance നോക്കും
+  const canSubmit =
+    parsedAmount > 0 &&
+    (side === "buy" ? parsedAmount >= minBuyAmount && parsedAmount <= maxBuyAmount : parsedAmount <= lmc);
 
   const openRazorpayCheckout = async () => {
     const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID as string | undefined;
@@ -134,7 +132,6 @@ export function TradePanel({ side }: { side: Side }) {
       },
       handler: async (response) => {
         try {
-          // Verify payment signature server-side before crediting the order
           const verifyRes = await fetch("/api/razorpay/verify-payment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -182,17 +179,15 @@ export function TradePanel({ side }: { side: Side }) {
   const handleInitialSubmit = async () => {
     if (side === "buy") {
       if (parsedAmount < minBuyAmount) return toast.error(`Minimum buy amount is ₹${minBuyAmount}`);
-      if (parsedAmount > maxBuyAmount) return toast.error(`Maximum buy amount is ₹${maxBuyAmount.toLocaleString("en-IN")}`);
-      if (parsedAmount > inr) {
-        toast.error("Insufficient INR");
-        return;
-      }
+      if (parsedAmount > maxBuyAmount)
+        return toast.error(`Maximum buy amount is ₹${maxBuyAmount.toLocaleString("en-IN")}`);
+      // Removed the INR insufficient check here
       setShowConfirm(true);
       return;
     }
 
     if (parsedAmount <= 0) return toast.error("Enter LMC quantity");
-    if (parsedAmount > lmc) return toast.error("Insufficient LMC");
+    if (parsedAmount > lmc) return toast.error("Insufficient LMC balance");
 
     await submit();
   };
@@ -233,9 +228,10 @@ export function TradePanel({ side }: { side: Side }) {
 
   const setPct = (p: number) => {
     if (side === "buy") {
-      const maxQty = inr;
-      setAmount((maxQty * p).toFixed(2));
+      // Wallet balance is ignored for buy, so percentage is based on max limit
+      setAmount((maxBuyAmount * p).toFixed(2));
     } else {
+      // For sell, percentage is based on actual LMC balance
       setAmount((lmc * p).toFixed(4));
     }
   };
@@ -296,119 +292,120 @@ export function TradePanel({ side }: { side: Side }) {
                   {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC - INR)"}
                 </span>
                 <div className="mt-2 flex items-center rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 px-4 py-4 shadow-inner">
-                  <span className="mr-2 text-lg font-semibold text-foreground">₹</span>
+                  {side === "buy" && <span className="mr-2 text-lg font-semibold text-foreground">₹</span>}
+
+                  {/* Completed the cutoff input field securely */}
                   <input
                     value={amount}
                     onChange={(e) => {
-                      const sanitized = e.target.value.replace(/[^ -]/g, "").replace(/^₹\s*/, "");
-                      setAmount(sanitized.replace(/[^\d.]/g, ""));
+                      const sanitized = e.target.value.replace(/[^0-9.]/g, "");
+                      setAmount(sanitized);
                     }}
-                    inputMode="decimal"
-                    placeholder={side === "buy" ? "Enter INR Amount" : "0.00"}
-                    className="w-full outline-none font-mono text-lg text-foreground bg-transparent"
+                    className="w-full bg-transparent text-xl font-bold outline-none placeholder:text-muted-foreground/50 text-foreground"
+                    placeholder="0.00"
                   />
+                  {side === "sell" && <span className="ml-2 text-lg font-semibold text-foreground">LMC</span>}
                 </div>
               </label>
 
+              {/* Show Available Balance ONLY when Selling */}
               {side === "sell" && (
-                <div className="mt-3 grid grid-cols-4 gap-2">
-                  {[0.25, 0.5, 0.75, 1].map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPct(p)}
-                      className="text-xs py-2 rounded-xl bg-foreground/5 backdrop-blur-md border border-foreground/10 hover:bg-foreground/10 transition-colors"
-                    >
-                      {p === 1 ? "MAX" : `${p * 100}%`}
-                    </button>
-                  ))}
+                <div className="mt-2 flex justify-between items-center px-1">
+                  <span className="text-xs font-medium text-muted-foreground">Available Balance:</span>
+                  <span className="text-sm font-bold text-foreground">{formatLMC(lmc, 4)} LMC</span>
                 </div>
               )}
 
-              <div className="mt-5 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 p-4 text-sm space-y-2 shadow-sm">
-                {side === "buy" ? (
-                  <>
-                    <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
-                    <Row k="You pay" v={formatINR(enteredAmt, 2)} />
-                    <Row k="You will receive" v={formatLMC(enteredAmt * lmcPerInr, 4) + " LMC"} />
-                  </>
-                ) : (
-                  <>
-                    <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
-                    <Row k="You receive" v={enteredAmt.toString()} />
-                    <Row k="Balance" v={formatLMC(lmc, 4) + " LMC"} />
-                  </>
-                )}
+              {/* Quick Percentage Selection Buttons */}
+              <div className="mt-4 flex gap-2">
+                {[0.25, 0.5, 0.75, 1].map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPct(p)}
+                    className="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-foreground/5 border border-foreground/10 text-muted-foreground hover:bg-foreground/10 transition-colors"
+                  >
+                    {p * 100}%
+                  </button>
+                ))}
               </div>
 
+              {/* Order Summary / Preview */}
+              <div className="mt-4 p-4 rounded-2xl bg-foreground/5 border border-foreground/10 flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">You will get</span>
+                <span className="text-lg font-bold text-foreground">
+                  {side === "buy"
+                    ? `${formatLMC(parsedAmount * lmcPerInr, 4)} LMC`
+                    : `₹${formatINR(parsedAmount * pricePerLmcInr, 2)}`}
+                </span>
+              </div>
+
+              {/* Submit Button */}
               <button
                 onClick={handleInitialSubmit}
                 disabled={busy || !canSubmit}
-                className={`mt-6 w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 shadow-lg hover:shadow-xl ${
-                  side === "buy"
-                    ? "btn-gold"
-                    : "bg-[color:var(--danger)]/90 backdrop-blur-md text-white border border-red-500/50 hover:bg-[color:var(--danger)]"
+                className={`mt-6 w-full py-3.5 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2 ${
+                  !canSubmit || busy
+                    ? "opacity-50 cursor-not-allowed bg-foreground/10 text-muted-foreground"
+                    : "btn-gold text-black"
                 }`}
               >
                 {busy && <Loader2 size={18} className="animate-spin" />}
-                {side === "buy" ? "Buy LMC" : "Sell LMC"}
+                {side === "buy" ? "Proceed to Buy" : "Confirm Sell"}
               </button>
             </div>
-          ) : side === "buy" && (buyMode === "upi" || buyMode === "bank") ? (
-            <div className="mt-5 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <div className="text-xs text-muted-foreground mb-3 flex items-center gap-2 pl-1">
-                <Users size={14} className="text-[color:var(--gold)]" />
-                {buyMode === "upi" ? "Sellers accepting UPI payments" : "Sellers accepting Bank Transfers"}
-              </div>
+          ) : (
+            <div className="mt-5 space-y-3 animate-in fade-in duration-500">
               {mockSellers.map((seller) => (
                 <div
                   key={seller.id}
-                  className="p-4 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 flex justify-between items-center hover:bg-foreground/10 transition-colors shadow-sm"
+                  className="p-4 rounded-2xl bg-foreground/5 border border-foreground/10 flex items-center justify-between"
                 >
                   <div>
-                    <div className="font-semibold text-sm">{seller.name}</div>
+                    <div className="font-semibold text-sm flex items-center gap-2">
+                      <Users size={14} className="text-muted-foreground" />
+                      {seller.name}
+                    </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      Available: <span className="font-mono text-foreground font-medium">{seller.qty} LMC</span>
+                      Qty: {seller.qty} LMC • Min: ₹{seller.minLimit}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <button
-                      onClick={() => handleMockBuy(seller.name)}
-                      className="mt-2 px-5 py-2 text-xs font-semibold rounded-xl btn-gold shadow-md hover:shadow-lg transition-all"
-                    >
-                      Buy
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleMockBuy(seller.name)}
+                    className="px-4 py-2 rounded-lg text-xs font-bold bg-green-500/20 text-green-500 border border-green-500/20 hover:bg-green-500/30 transition-colors"
+                  >
+                    Buy
+                  </button>
                 </div>
               ))}
-            </div>
-          ) : (
-            <div className="mt-10 mb-6 text-center animate-in fade-in zoom-in-95 duration-500">
-              <div className="text-4xl mb-3 drop-shadow-lg">🔒</div>
-              <h3 className="font-semibold text-lg">Fixed LMC</h3>
             </div>
           )}
         </div>
       </div>
 
-      {showConfirm && side === "buy" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-background/90 backdrop-blur-2xl border border-white/20 p-6 rounded-3xl shadow-2xl w-full max-w-[340px]">
-            <h3 className="text-lg font-bold mb-4 text-center">Confirm Purchase</h3>
-            <div className="space-y-4 mb-6 p-4 rounded-2xl bg-foreground/5 border border-foreground/10">
-              <p className="text-center text-xs text-muted-foreground">
-                Pay Amount:{" "}
-                <span className="text-lg font-bold text-[color:var(--gold)]">{formatINR(enteredAmt, 2)}</span>
-              </p>
-            </div>
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-secondary p-6 rounded-3xl border border-white/10 w-full max-w-sm shadow-2xl relative overflow-hidden">
+            <h3 className="text-lg font-bold mb-4">Confirm Purchase</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              You are about to buy{" "}
+              <strong className="text-foreground">{formatLMC(parsedAmount * lmcPerInr, 4)} LMC</strong> for{" "}
+              <strong className="text-foreground">₹{parsedAmount}</strong>.
+            </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 py-3 text-sm font-semibold rounded-xl border"
+                disabled={busy}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm font-semibold hover:bg-white/5 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
-              <button onClick={() => void handleConfirmPurchase()} className="flex-1 py-3 text-sm font-bold rounded-xl btn-gold">
-                Pay with Razorpay
+              <button
+                onClick={handleConfirmPurchase}
+                disabled={busy}
+                className="flex-1 py-2.5 rounded-xl btn-gold text-black text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-80"
+              >
+                {busy ? <Loader2 size={16} className="animate-spin" /> : "Pay Now"}
               </button>
             </div>
           </div>
@@ -417,15 +414,3 @@ export function TradePanel({ side }: { side: Side }) {
     </Shell>
   );
 }
-
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="flex justify-between items-center">
-      <span className="text-muted-foreground/90">{k}</span>
-      <span className="font-mono font-medium">{v}</span>
-    </div>
-  );
-}
-
-
-
