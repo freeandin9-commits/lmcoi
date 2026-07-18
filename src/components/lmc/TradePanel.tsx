@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-import { useWallet, placeOrder, formatINR, formatLMC } from "@/lib/lmc-api";
+// home.tsx-ൽ ഉള്ളതുപോലെ usePriceSeries ഇവിടെയും ഉൾപ്പെടുത്തിയിട്ടുണ്ട്
+import { useWallet, placeOrder, formatINR, formatLMC, usePriceSeries } from "@/lib/lmc-api";
 import { Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +28,8 @@ export function TradePanel({ side }: { side: Side }) {
   }, [authLoading, user, nav]);
 
   const { wallet } = useWallet();
+  // home.tsx-ൽ ഉള്ളതുപോലെ ലൈവ് പ്രൈസ് സീരീസ് എടുക്കുന്നു
+  const { price } = usePriceSeries(120);
 
   const [buyMode, setBuyMode] = useState<"custom" | "upi" | "bank" | "fixed">("custom");
   const [amount, setAmount] = useState("");
@@ -35,8 +38,13 @@ export function TradePanel({ side }: { side: Side }) {
 
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
+
+  // home.tsx-ൽ ഉള്ളതുപോലെ Hold Balance-ഉം Total Balance-ഉം കണക്കാക്കുന്നു
+  const hold = Number((wallet as { hold_balance?: number } | null)?.hold_balance ?? 0);
   const lmcPerInr = 1.25;
   const pricePerLmcInr = 1 / lmcPerInr;
+  const currentPrice = price ?? pricePerLmcInr;
+  const total = lmc * currentPrice + inr;
 
   const enteredAmt = parseFloat(amount) || 0;
   // Buy ചെയ്യുമ്പോൾ ബാലൻസ് ചെക്ക് ചെയ്യേണ്ടതില്ല, Sell ചെയ്യുമ്പോൾ LMC ബാലൻസ് ചെക്ക് ചെയ്യും
@@ -186,8 +194,10 @@ export function TradePanel({ side }: { side: Side }) {
                   <>
                     <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
                     <Row k="You receive" v={enteredAmt.toString()} />
-                    {/* Sell ചെയ്യുമ്പോൾ LMC Balance ഇവിടെ കാണിക്കും */}
-                    <Row k="Balance" v={formatLMC(lmc, 4) + " LMC"} />
+                    {/* Sell ചെയ്യുമ്പോൾ home.tsx കോഡിൽ ഉള്ളതുപോലെ വാലറ്റ് ബാലൻസുകൾ ഇവിടെ കാണിക്കുന്നു */}
+                    <Row k="LMC Balance" v={formatLMC(lmc, 4) + " LMC"} />
+                    <Row k="Hold Balance" v={formatINR(hold, 2)} />
+                    <Row k="Total Balance" v={formatINR(total, 2)} />
                   </>
                 )}
               </div>
