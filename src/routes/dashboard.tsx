@@ -233,8 +233,8 @@ function Dashboard() {
             { icon: User, label: "Real Name", path: "/real-name" },
             { icon: CreditCard, label: "Collection", path: "/collection" },
             { icon: Lock, label: "Payment Password", path: "/payment-password" },
-            { icon: History, label: "Transaction", path: "/transactions" }, // ---- PATH ADDED HERE ----
-            { icon: PlayCircle, label: "Buy Tutorial" },
+            { icon: History, label: "Transaction", path: "/transactions" },
+            { icon: PlayCircle, label: "Buy Tutorial", path: "/buy-tutorial" }, // ---- PATH ADDED HERE ----
             { icon: PlayCircle, label: "Sell Tutorial" },
             { icon: Bell, label: "User Notice" },
             { icon: Gift, label: "Rewards Card" },
