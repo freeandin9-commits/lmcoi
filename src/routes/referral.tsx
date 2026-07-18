@@ -19,7 +19,10 @@ export const Route = createFileRoute("/referral")({
 function Referral() {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  useEffect(() => { if (!authLoading && !user) nav({ to: "/" }); }, [authLoading, user, nav]);
+
+  useEffect(() => {
+    if (!authLoading && !user) nav({ to: "/" });
+  }, [authLoading, user, nav]);
 
   const { profile } = useProfile();
   const code = profile?.referral_code ?? "";
@@ -51,10 +54,8 @@ function Referral() {
     <Shell>
       <AppHeader title="Referral" />
       <div className="px-4 pt-4 space-y-4">
-        <div
-          className="rounded-2xl p-5 text-[oklch(0.2_0.02_260)]"
-          style={{ background: "linear-gradient(135deg, var(--gold) 0%, oklch(0.92 0.11 92) 100%)" }}
-        >
+        {/* Glassmorphism Code Card (Gold Tinted Glass) */}
+        <div className="rounded-2xl p-5 relative overflow-hidden bg-yellow-500/10 dark:bg-yellow-500/5 backdrop-blur-xl border border-yellow-500/20 shadow-[0_8px_32px_0_rgba(234,179,8,0.15)] text-foreground">
           <div className="text-sm opacity-80">Invite friends. Earn together.</div>
           <div className="mt-3 text-xs uppercase tracking-widest opacity-80">Your code</div>
           <div className="mt-1 flex items-center gap-2">
@@ -62,7 +63,7 @@ function Referral() {
             <button
               disabled={!code}
               onClick={() => copy(code, "code")}
-              className="ml-auto grid place-items-center h-9 w-9 rounded-full bg-background/70 disabled:opacity-40"
+              className="ml-auto grid place-items-center h-9 w-9 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm disabled:opacity-40 hover:bg-white/30 transition-all"
               aria-label="Copy code"
             >
               {copied === "code" ? <Check size={16} /> : <Copy size={16} />}
@@ -70,18 +71,19 @@ function Referral() {
           </div>
         </div>
 
-        <div className="rounded-2xl card-flat p-4">
+        {/* Glassmorphism Share Link Card */}
+        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
           <div className="text-xs uppercase tracking-widest text-muted-foreground">Share link</div>
           <div className="mt-2 flex items-center gap-2">
             <input
               readOnly
               value={link}
-              className="flex-1 rounded-lg bg-secondary px-3 py-2 text-xs font-mono truncate outline-none"
+              className="flex-1 rounded-lg bg-black/5 dark:bg-white/5 border border-white/10 backdrop-blur-sm px-3 py-2 text-xs font-mono truncate outline-none text-foreground"
             />
             <button
               disabled={!link}
               onClick={() => copy(link, "link")}
-              className="rounded-lg btn-gold px-3 py-2 text-xs font-semibold disabled:opacity-50"
+              className="rounded-lg bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm hover:bg-white/30 px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-all"
             >
               {copied === "link" ? "Copied" : "Copy"}
             </button>
@@ -89,27 +91,28 @@ function Referral() {
           <button
             onClick={share}
             disabled={!link}
-            className="mt-3 w-full rounded-xl btn-soft py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+            className="mt-4 w-full rounded-xl bg-white/10 dark:bg-white/5 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-sm py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
           >
             <Share2 size={16} /> Share
           </button>
         </div>
 
-        <div className="rounded-2xl card-flat p-4">
+        {/* Glassmorphism How it Works Card */}
+        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
           <h2 className="text-base font-bold">How it works</h2>
-          <ol className="mt-3 space-y-3 text-sm">
+          <ol className="mt-4 space-y-4 text-sm">
             {[
               ["Share", "Send your link to friends via WhatsApp, Telegram or email."],
               ["They join", "When they sign up with your code, we link their account to you."],
               ["You earn", "Earn a share of every trade fee they generate."],
             ].map(([t, d], i) => (
               <li key={t} className="flex gap-3">
-                <span className="grid place-items-center h-7 w-7 rounded-full btn-gold text-xs font-bold shrink-0">
+                <span className="grid place-items-center h-8 w-8 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 shadow-inner text-xs font-bold shrink-0">
                   {i + 1}
                 </span>
                 <div>
                   <div className="font-semibold">{t}</div>
-                  <div className="text-muted-foreground text-xs">{d}</div>
+                  <div className="text-muted-foreground text-xs mt-0.5">{d}</div>
                 </div>
               </li>
             ))}
