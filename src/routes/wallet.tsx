@@ -16,16 +16,15 @@ export const Route = createFileRoute("/wallet")({
   }),
 });
 
-type Tab = "inr" | "lmc";
-
 function WalletPage() {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [tab, setTab] = useState<Tab>("inr");
   const { wallet } = useWallet();
   const { price } = usePriceSeries(20);
 
-  useEffect(() => { if (!authLoading && !user) nav({ to: "/" }); }, [authLoading, user, nav]);
+  useEffect(() => {
+    if (!authLoading && !user) nav({ to: "/" });
+  }, [authLoading, user, nav]);
 
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
@@ -34,12 +33,13 @@ function WalletPage() {
     <Shell>
       <AppHeader title="Wallet" />
       <div className="px-4 pt-4 space-y-4">
+        {/* Changed 'Portfolio' to 'Wallet' */}
         <div
           className="rounded-2xl p-5 text-[oklch(0.2_0.02_260)]"
           style={{ background: "linear-gradient(135deg, var(--gold) 0%, oklch(0.92 0.11 92) 100%)" }}
         >
           <div className="flex items-center justify-between">
-            <div className="text-sm opacity-80">Portfolio</div>
+            <div className="text-sm opacity-80">Wallet</div>
             <LMCMark size={28} />
           </div>
           <div className="mt-2 text-3xl font-extrabold tabular-nums">{formatINR(inr + lmc * price, 2)}</div>
@@ -48,12 +48,8 @@ function WalletPage() {
           </div>
         </div>
 
-        <div className="inline-flex w-full rounded-xl bg-secondary p-1">
-          <TabBtn active={tab === "inr"} onClick={() => setTab("inr")}>INR Wallet</TabBtn>
-          <TabBtn active={tab === "lmc"} onClick={() => setTab("lmc")}>LMC Wallet</TabBtn>
-        </div>
-
-        {tab === "inr" ? <InrPanel balance={inr} /> : <LmcPanel balance={lmc} price={price} />}
+        {/* LMC & INR Wallet tabs are removed. The INR Deposit/Withdraw panel is directly displayed below */}
+        <InrPanel balance={inr} />
       </div>
     </Shell>
   );
@@ -90,8 +86,12 @@ function InrPanel({ balance }: { balance: number }) {
       <div className="mt-1 text-2xl font-extrabold">{formatINR(balance, 2)}</div>
 
       <div className="mt-4 inline-flex w-full rounded-xl bg-secondary p-1">
-        <TabBtn active={mode === "deposit"} onClick={() => setMode("deposit")}>Deposit</TabBtn>
-        <TabBtn active={mode === "withdraw"} onClick={() => setMode("withdraw")}>Withdraw</TabBtn>
+        <TabBtn active={mode === "deposit"} onClick={() => setMode("deposit")}>
+          Deposit
+        </TabBtn>
+        <TabBtn active={mode === "withdraw"} onClick={() => setMode("withdraw")}>
+          Withdraw
+        </TabBtn>
       </div>
 
       <label className="mt-4 block">
@@ -126,19 +126,6 @@ function InrPanel({ balance }: { balance: number }) {
         {mode === "deposit" ? "Deposit INR" : "Withdraw INR"}
       </button>
       <p className="mt-2 text-[11px] text-muted-foreground text-center">Instant simulated settlement.</p>
-    </div>
-  );
-}
-
-function LmcPanel({ balance, price }: { balance: number; price: number }) {
-  return (
-    <div className="rounded-2xl card-flat p-4">
-      <div className="text-xs uppercase tracking-widest text-muted-foreground">LMC Balance</div>
-      <div className="mt-1 text-2xl font-extrabold">{formatLMC(balance, 4)} LMC</div>
-      <div className="text-xs text-muted-foreground">≈ {formatINR(balance * price, 2)}</div>
-      <p className="mt-4 text-sm text-muted-foreground">
-        Buy or sell LMC on the Trade tab. Wallet transfers between users are coming soon.
-      </p>
     </div>
   );
 }
