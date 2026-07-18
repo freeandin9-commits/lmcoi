@@ -71,7 +71,7 @@ function Dashboard() {
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase.rpc("delete_user_account");
+      const { error } = await (supabase.rpc as any)("delete_user_account");
       if (error) console.error("Error deleting account backend:", error);
 
       await supabase.auth.signOut();
