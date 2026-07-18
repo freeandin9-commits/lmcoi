@@ -47,8 +47,8 @@ export function TradePanel({ side }: { side: Side }) {
   const total = lmc * currentPrice + inr;
 
   const enteredAmt = parseFloat(amount) || 0;
-  // Buy ചെയ്യുമ്പോൾ ബാലൻസ് ചെക്ക് ചെയ്യേണ്ടതില്ല, Sell ചെയ്യുമ്പോൾ LMC ബാലൻസ് ചെക്ക് ചെയ്യും
-  const canSubmit = enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= lmc);
+  // Buy ചെയ്യുമ്പോൾ ബാലൻസ് ചെക്ക് ചെയ്യേണ്ടതില്ല, Sell ചെയ്യുമ്പോൾ Balance (total) ചെക്ക് ചെയ്യും
+  const canSubmit = enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= total);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
@@ -59,7 +59,8 @@ export function TradePanel({ side }: { side: Side }) {
     }
 
     if (enteredAmt <= 0) return toast.error("Enter LMC quantity");
-    if (enteredAmt > lmc) return toast.error("Insufficient LMC");
+    // LMC ബാലൻസിന് പകരം പുതിയ Balance (total) ചെക്ക് ചെയ്യുന്നു
+    if (enteredAmt > total) return toast.error("Insufficient Balance");
 
     await submit();
   };
@@ -101,7 +102,8 @@ export function TradePanel({ side }: { side: Side }) {
       const maxQty = inr;
       setAmount((maxQty * p).toFixed(2));
     } else {
-      setAmount((lmc * p).toFixed(4));
+      // Sell ചെയ്യുമ്പോൾ LMC യ്ക്ക് പകരം Total വാല്യൂ കണക്കാക്കുന്നു
+      setAmount((total * p).toFixed(4));
     }
   };
 
