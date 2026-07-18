@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
-import { ArrowLeft, History, ArrowUpRight, ArrowDownLeft, Gift, Copy, Check, Share2 } from "lucide-react";
+import { ArrowLeft, History, ArrowUpRight, ArrowDownLeft, Gift, Copy, Check, Share2, Loader2 } from "lucide-react";
 import { useTransactions, formatINR, formatLMC } from "@/lib/lmc-api";
 import html2canvas from "html2canvas";
 
@@ -19,6 +19,8 @@ function TransactionsPage() {
 
   // State for tracking copied Order ID
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  // State for tracking which transaction is currently generating the image for sharing
+  const [sharingId, setSharingId] = useState<string | null>(null);
 
   const getTransactionIcon = (type: string) => {
     switch (type.toLowerCase()) {
@@ -59,38 +61,59 @@ function TransactionsPage() {
 
   // 2) Handle Share as Image
   const handleShare = async (id: string) => {
+    if (sharingId) return; // Prevent multiple clicks
     const element = document.getElementById(`tx-${id}`);
     if (!element) return;
+
+    setSharingId(id); // Show loading state
 
     try {
       // Create canvas from the specific transaction div
       const canvas = await html2canvas(element, {
-        backgroundColor: null, // Keep background transparent/original
+        backgroundColor: window.getComputedStyle(document.body).backgroundColor || "#000000",
         scale: 2, // Better image quality
+        useCORS: true, // Fixes potential cross-origin image issues
+        logging: false,
       });
 
-      canvas.toBlob(async (blob: Blob | null) => {
-        if (!blob) return;
-        const file = new File([blob], `transaction_${id}.png`, { type: "image/png" });
+      // Convert canvas to Blob safely
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, "image/png", 1.0);
+      });
 
-        // Check if browser supports Web Share API with files
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (!blob) throw new Error("Could not generate image blob");
+
+      const file = new File([blob], `transaction_${id}.png`, { type: "image/png" });
+
+      // Check if browser supports Web Share API with files
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
           await navigator.share({
             title: "LM Coin Transaction",
             files: [file],
           });
-        } else {
-          // Fallback for browsers that don't support file sharing (Downloads the image instead)
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `transaction_${id}.png`;
-          a.click();
-          URL.revokeObjectURL(url);
+        } catch (shareError: any) {
+          // Ignore AbortError when the user closes the share menu without sharing
+          if (shareError.name !== "AbortError") {
+            console.error("Error with native share:", shareError);
+          }
         }
-      });
+      } else {
+        // Fallback for browsers that don't support file sharing (Downloads the image instead)
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `transaction_${id}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     } catch (error) {
       console.error("Error sharing transaction:", error);
+      alert("Something went wrong while trying to share. Please try again.");
+    } finally {
+      setSharingId(null); // Remove loading state
     }
   };
 
@@ -128,7 +151,7 @@ function TransactionsPage() {
                 <div
                   key={t.id}
                   id={`tx-${t.id}`} // Added ID for html2canvas to capture this specific div
-                  className="p-4 rounded-2xl bg-secondary/40 backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex flex-col gap-3"
+                  className="p-4 rounded-2xl bg-secondary/40 backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 relative"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
@@ -136,9 +159,9 @@ function TransactionsPage() {
                         {getTransactionIcon(t.type)}
                       </div>
                       <div>
-                        {/* Type: Buy / Sell / Referral */}
+                        {/* 1. Type: Buy / Sell / Referral */}
                         <div className="font-bold text-base capitalize text-foreground">{t.type}</div>
-                        {/* Date and Time */}
+                        {/* 2. Date and Time */}
                         <div className="text-xs text-muted-foreground font-medium mt-0.5">
                           {new Date(t.created_at).toLocaleString("en-IN", {
                             day: "2-digit",
@@ -160,7 +183,7 @@ function TransactionsPage() {
                     </div>
                   </div>
 
-                  {/* Order ID & Actions (Copy / Share) */}
+                  {/* 3. Order ID & Actions (Copy / Share) */}
                   <div className="pt-2 mt-1 border-t border-border/50 flex justify-between items-center">
                     <span className="text-[11px] text-muted-foreground font-semibold">Order ID</span>
 
@@ -183,11 +206,12 @@ function TransactionsPage() {
 
                       <button
                         onClick={() => handleShare(t.id)}
-                        className="p-1.5 bg-background/50 border border-border rounded-md hover:bg-white/10 text-muted-foreground transition-all"
+                        disabled={sharingId === t.id}
+                        className="p-1.5 bg-background/50 border border-border rounded-md hover:bg-white/10 text-muted-foreground transition-all disabled:opacity-50"
                         title="Share Transaction"
                         data-html2canvas-ignore="true" // Hides share button from shared image
                       >
-                        <Share2 size={14} />
+                        {sharingId === t.id ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
                       </button>
                     </div>
                   </div>
