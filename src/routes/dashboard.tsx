@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-import { useProfile, useTransactions, formatINR, formatLMC } from "@/lib/lmc-api";
+import { useProfile } from "@/lib/lmc-api";
 import { supabase } from "@/integrations/supabase/client";
 import {
   LogOut,
@@ -23,21 +23,9 @@ import {
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
   head: () => ({
-    meta: [
-      { title: "Account · LM Coin" },
-      { name: "description", content: "Your account, KYC status and transaction history." },
-    ],
+    meta: [{ title: "Account · LM Coin" }, { name: "description", content: "Your account and KYC status." }],
   }),
 });
-
-const TYPE_LABEL: Record<string, string> = {
-  buy: "Buy LMC",
-  sell: "Sell LMC",
-  deposit: "Deposit INR",
-  withdraw: "Withdraw INR",
-  transfer: "Transfer",
-  referral: "Referral reward",
-};
 
 // Generate 20 distinct avatar URLs (using DiceBear API for beautiful avatars)
 const AVATARS = Array.from({ length: 20 }).map(
@@ -59,7 +47,6 @@ function Dashboard() {
   }, [authLoading, user, nav]);
 
   const { profile } = useProfile();
-  const { transactions } = useTransactions(30);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -125,7 +112,6 @@ function Dashboard() {
         .animate-glass-1 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.1s; }
         .animate-glass-2 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.2s; }
         .animate-glass-3 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.3s; }
-        .animate-glass-4 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.4s; }
         .animate-modal { animation: modal-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         /* Shimmer Effect for Glass Cards */
@@ -263,54 +249,10 @@ function Dashboard() {
           ))}
         </div>
 
-        {/* Transactions - Glassmorphism with Animation */}
-        <div className="animate-glass-3">
-          <div className="px-1 pb-3 text-base font-bold text-foreground/90 drop-shadow-sm flex items-center gap-2">
-            <History size={18} className="text-muted-foreground" />
-            Transactions
-          </div>
-          <div className="rounded-2xl overflow-hidden backdrop-blur-2xl bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)] transition-all duration-500">
-            {transactions.length === 0 && (
-              <div className="px-4 py-10 text-center text-sm font-medium text-muted-foreground bg-white/5">
-                No transactions yet. Deposit INR and start trading.
-              </div>
-            )}
-            {transactions.map((t, i) => {
-              const amt =
-                t.type === "buy" || t.type === "sell"
-                  ? `${t.type === "buy" ? "+" : "-"}${formatLMC(Number(t.amount_lmc), 4)} LMC`
-                  : `${t.type === "deposit" || t.type === "referral" ? "+" : "-"}${formatINR(Number(t.amount_inr), 2)}`;
-              return (
-                <div
-                  key={t.id}
-                  className={`group px-5 py-3.5 flex items-center gap-3 hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300 ${
-                    i === 0 ? "" : "border-t border-white/10 dark:border-white/5"
-                  }`}
-                >
-                  <div className="flex-1 min-w-0 transform group-hover:translate-x-2 transition-transform duration-300">
-                    <div className="text-sm font-bold text-foreground/90 group-hover:text-foreground drop-shadow-sm">
-                      {TYPE_LABEL[t.type] ?? t.type}
-                    </div>
-                    <div className="text-xs text-muted-foreground font-medium mt-0.5">
-                      {new Date(t.created_at).toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="text-right transform group-hover:-translate-x-1 transition-transform duration-300">
-                    <div className="text-sm font-mono font-bold drop-shadow-md">{amt}</div>
-                    <div className="text-[11px] text-muted-foreground capitalize font-semibold group-hover:text-foreground/80 mt-0.5">
-                      {t.status}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Sign Out Button - Glassmorphism with Animation */}
         <button
           onClick={signOut}
-          className="animate-glass-4 glass-shine w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-2xl bg-white/10 dark:bg-white/5 hover:bg-red-500/20 hover:text-red-500 dark:hover:bg-red-500/20 border border-white/30 dark:border-white/10 hover:border-red-500/50 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(0,0,0,0.1)] text-foreground hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-95 group relative z-10"
+          className="animate-glass-3 glass-shine w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-2xl bg-white/10 dark:bg-white/5 hover:bg-red-500/20 hover:text-red-500 dark:hover:bg-red-500/20 border border-white/30 dark:border-white/10 hover:border-red-500/50 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(0,0,0,0.1)] text-foreground hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-95 group relative z-10"
         >
           <LogOut size={18} className="transition-transform duration-300 group-hover:-translate-x-1" /> Sign out
         </button>
