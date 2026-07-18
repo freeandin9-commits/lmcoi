@@ -306,7 +306,7 @@ export function TradePanel({ side }: { side: Side }) {
               </div>
 
               <button
-                onClick={handleInitialSubmit}
+                onClick={() => (side === "buy" ? setShowConfirm(true) : void submit())}
                 disabled={busy || !canSubmit}
                 className={`mt-6 w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 shadow-lg hover:shadow-xl ${
                   side === "buy"
