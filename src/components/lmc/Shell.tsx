@@ -29,7 +29,8 @@ export function Shell({ children, hideTabs = false }: { children: ReactNode; hid
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <div className="min-h-screen w-full flex justify-center" style={{ background: "var(--page)" }}>
-      <div className="relative w-full max-w-[480px] min-h-screen bg-background shadow-xl border-x border-border flex flex-col">
+      {/* മെയിൻ കണ്ടെയ്നറിന് നേരിയ സുതാര്യതയും ഷാഡോയും നൽകി */}
+      <div className="relative w-full max-w-[480px] min-h-screen bg-background/80 backdrop-blur-sm shadow-2xl border-x border-white/10 flex flex-col">
         <main className={`flex-1 ${hideTabs ? "" : "pb-24"}`}>{children}</main>
         {!hideTabs && <BottomNav pathname={pathname} />}
       </div>
@@ -39,7 +40,8 @@ export function Shell({ children, hideTabs = false }: { children: ReactNode; hid
 
 function BottomNav({ pathname }: { pathname: string }) {
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-background border-t border-border z-40">
+    // Glassmorphism styling for BottomNav: സുതാര്യമായ ബാക്ക്ഗ്രൗണ്ട്, ബ്ലർ, ബോർഡർ, റൗണ്ടഡ് കോർണേഴ്സ്
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[448px] bg-white/5 backdrop-blur-lg border border-white/10 z-40 rounded-2xl shadow-xl overflow-hidden">
       <div className="grid grid-cols-5">
         {tabs.map((t) => {
           const Icon = t.icon;
@@ -48,8 +50,8 @@ function BottomNav({ pathname }: { pathname: string }) {
             <Link
               key={t.to}
               to={t.to}
-              className={`flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition ${
-                active ? "text-[color:var(--foreground)]" : "text-muted-foreground"
+              className={`flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition-all duration-300 ${
+                active ? "text-[color:var(--foreground)]" : "text-muted-foreground/80 hover:text-muted-foreground"
               }`}
             >
               <Icon size={22} strokeWidth={active ? 2.2 : 1.8} className={active ? "text-[color:var(--gold)]" : ""} />
@@ -58,18 +60,19 @@ function BottomNav({ pathname }: { pathname: string }) {
           );
         })}
       </div>
-      <div className="h-[env(safe-area-inset-bottom)]" />
+      {/* safe-area-inset ഒഴിവാക്കി, പകരം bottom-4 നൽകി ഫ്ലോട്ടിംഗ് ലുക്ക് നൽകി */}
     </nav>
   );
 }
 
 export function AppHeader({ title, left, right }: { title: string; left?: ReactNode; right?: ReactNode }) {
   return (
-    <header className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
-      <div className="h-14 px-4 flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
+    // Glassmorphism styling for AppHeader: സുതാര്യമായ ബാക്ക്ഗ്രൗണ്ട്, ബ്ലർ, ബോട്ടം ബോർഡർ
+    <header className="sticky top-0 z-30 bg-background/40 backdrop-blur-xl border-b border-white/10 shadow-sm">
+      <div className="h-16 px-4 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           {left}
-          <h1 className="truncate text-lg font-bold">{title}</h1>
+          <h1 className="truncate text-xl font-bold tracking-tight">{title}</h1>
         </div>
         {right ? <div className="shrink-0">{right}</div> : null}
       </div>
