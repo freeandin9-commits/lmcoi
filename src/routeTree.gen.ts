@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TradeRouteImport } from './routes/trade'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -25,6 +26,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransactionsRoute = TransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TradeRoute = TradeRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/trade': typeof TradeRoute
+  '/transactions': typeof TransactionsRoute
   '/wallet': typeof WalletRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/trade': typeof TradeRoute
+  '/transactions': typeof TransactionsRoute
   '/wallet': typeof WalletRoute
 }
 export interface FileRoutesById {
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/trade': typeof TradeRoute
+  '/transactions': typeof TransactionsRoute
   '/wallet': typeof WalletRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sell'
     | '/trade'
+    | '/transactions'
     | '/wallet'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sell'
     | '/trade'
+    | '/transactions'
     | '/wallet'
   id:
     | '__root__'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sell'
     | '/trade'
+    | '/transactions'
     | '/wallet'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SellRoute: typeof SellRoute
   TradeRoute: typeof TradeRoute
+  TransactionsRoute: typeof TransactionsRoute
   WalletRoute: typeof WalletRoute
 }
 
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/wallet'
       fullPath: '/wallet'
       preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transactions': {
+      id: '/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof TransactionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trade': {
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SellRoute: SellRoute,
   TradeRoute: TradeRoute,
+  TransactionsRoute: TransactionsRoute,
   WalletRoute: WalletRoute,
 }
 export const routeTree = rootRouteImport
