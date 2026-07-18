@@ -28,10 +28,12 @@ export function LMCMark({ size = 32 }: { size?: number }) {
 export function Shell({ children, hideTabs = false }: { children: ReactNode; hideTabs?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <div className="min-h-screen w-full flex justify-center" style={{ background: "var(--page)" }}>
+    // Main container set to screen height (100dvh for mobile) with overflow-hidden to stop body scroll
+    <div className="h-[100dvh] w-full flex justify-center overflow-hidden" style={{ background: "var(--page)" }}>
       {/* മെയിൻ കണ്ടെയ്നറിന് നേരിയ സുതാര്യതയും ഷാഡോയും നൽകി */}
-      <div className="relative w-full max-w-[480px] min-h-screen bg-background/80 backdrop-blur-sm shadow-2xl border-x border-white/10 flex flex-col">
-        <main className={`flex-1 ${hideTabs ? "" : "pb-24"}`}>{children}</main>
+      <div className="relative w-full max-w-[480px] h-full bg-background/80 backdrop-blur-sm shadow-2xl border-x border-white/10 flex flex-col">
+        {/* Added overflow-y-auto here so only this section scrolls */}
+        <main className={`flex-1 overflow-y-auto ${hideTabs ? "" : "pb-24"}`}>{children}</main>
         {!hideTabs && <BottomNav pathname={pathname} />}
       </div>
     </div>
@@ -41,7 +43,8 @@ export function Shell({ children, hideTabs = false }: { children: ReactNode; hid
 function BottomNav({ pathname }: { pathname: string }) {
   return (
     // Glassmorphism styling for BottomNav: സുതാര്യമായ ബാക്ക്ഗ്രൗണ്ട്, ബ്ലർ, ബോർഡർ, റൗണ്ടഡ് കോർണേഴ്സ്
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[448px] bg-white/5 backdrop-blur-lg border border-white/10 z-40 rounded-2xl shadow-xl overflow-hidden">
+    // Changed 'fixed' to 'absolute' to perfectly pin it to the bottom of the relative parent container
+    <nav className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[448px] bg-white/5 backdrop-blur-lg border border-white/10 z-40 rounded-2xl shadow-xl overflow-hidden">
       <div className="grid grid-cols-5">
         {tabs.map((t) => {
           const Icon = t.icon;
