@@ -33,7 +33,7 @@ function WalletPage() {
     <Shell>
       <AppHeader title="Wallet" />
       <div className="px-4 pt-4 space-y-4">
-        {/* Changed 'Portfolio' to 'Wallet' */}
+        {/* Wallet Overview */}
         <div
           className="rounded-2xl p-5 text-[oklch(0.2_0.02_260)]"
           style={{ background: "linear-gradient(135deg, var(--gold) 0%, oklch(0.92 0.11 92) 100%)" }}
@@ -48,14 +48,14 @@ function WalletPage() {
           </div>
         </div>
 
-        {/* LMC & INR Wallet tabs are removed. The INR Deposit/Withdraw panel is directly displayed below */}
-        <InrPanel balance={inr} />
+        {/* Action Panel (INR Deposit/Withdraw) */}
+        <InrPanel />
       </div>
     </Shell>
   );
 }
 
-function InrPanel({ balance }: { balance: number }) {
+function InrPanel() {
   const [mode, setMode] = useState<"deposit" | "withdraw">("deposit");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
@@ -82,10 +82,9 @@ function InrPanel({ balance }: { balance: number }) {
 
   return (
     <div className="rounded-2xl card-flat p-4">
-      <div className="text-xs uppercase tracking-widest text-muted-foreground">Available INR</div>
-      <div className="mt-1 text-2xl font-extrabold">{formatINR(balance, 2)}</div>
+      {/* Available INR session removed as requested */}
 
-      <div className="mt-4 inline-flex w-full rounded-xl bg-secondary p-1">
+      <div className="inline-flex w-full rounded-xl bg-secondary p-1">
         <TabBtn active={mode === "deposit"} onClick={() => setMode("deposit")}>
           Deposit
         </TabBtn>
