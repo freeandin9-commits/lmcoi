@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Home, LineChart, Wallet, Users, User } from "lucide-react";
+import { Home, Receipt, Wallet, Users, User } from "lucide-react";
 import logoAsset from "@/assets/lm-coin-logo.png.asset.json";
 
 const tabs = [
