@@ -33,12 +33,6 @@ interface RazorpayOptions {
   modal?: { ondismiss?: () => void };
 }
 
-interface RazorpayOrderPayload {
-  id: string;
-  amount: number;
-  currency: string;
-}
-
 type Side = "buy" | "sell";
 
 // ഓർഡർ ഐഡി ജനറേറ്റ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ (Format: BYYMMDD000000000)
@@ -101,25 +95,13 @@ export function TradePanel({ side }: { side: Side }) {
     }
 
     const amountMinor = Math.round(parsedAmount * 100);
-    const orderPayload = await fetch("/api/razorpay/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: amountMinor, currency: "INR", receipt: `lmc-${Date.now()}` }),
-    }).then(async (response) => {
-      if (!response.ok) {
-        const body = await response.text();
-        throw new Error(body || "Unable to create Razorpay order");
-      }
-      return response.json() as Promise<RazorpayOrderPayload>;
-    });
-
     const options: RazorpayOptions = {
       key: keyId,
-      amount: orderPayload.amount,
-      currency: orderPayload.currency,
+      amount: amountMinor,
+      currency: "INR",
       name: "LM Coin",
       description: `Buy ${formatLMC(parsedAmount * lmcPerInr, 4)} LMC`,
-      order_id: orderPayload.id,
+      order_id: `lmc-${Date.now()}`,
       prefill: {
         name: user?.email || "",
         email: user?.email || "",
@@ -132,10 +114,9 @@ export function TradePanel({ side }: { side: Side }) {
           toast.error("Payment cancelled");
         },
       },
-      handler: async (response) => {
+      handler: async () => {
         try {
           await submit();
-          toast.success(`Payment completed. Order ID: ${response.razorpay_order_id}`);
         } catch (e: unknown) {
           const message = e instanceof Error ? e.message : "Unable to place order";
           toast.error(message);
