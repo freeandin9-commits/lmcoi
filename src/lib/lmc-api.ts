@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Wallet = { user_id: string; inr_balance: number; lmc_balance: number; updated_at: string };
@@ -36,28 +36,38 @@ export function useWallet() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshWallet = useCallback(async () => {
+    const { data, error } = await supabase.from("wallets").select("*").maybeSingle();
+    if (error) throw error;
+    setWallet(data as Wallet | null);
+    return data as Wallet | null;
+  }, []);
+
   useEffect(() => {
     let mounted = true;
     async function load() {
-      const { data } = await supabase.from("wallets").select("*").maybeSingle();
-      if (!mounted) return;
-      setWallet(data as Wallet | null);
-      setLoading(false);
+      try {
+        await refreshWallet();
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
-    load();
+    void load();
 
     const channel = supabase
       .channel("wallet-self")
-      .on("postgres_changes", { event: "*", schema: "public", table: "wallets" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "wallets" }, () => {
+        void refreshWallet();
+      })
       .subscribe();
 
     return () => {
       mounted = false;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [refreshWallet]);
 
-  return { wallet, loading };
+  return { wallet, loading, refreshWallet };
 }
 
 export function useProfile() {
