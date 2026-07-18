@@ -8,6 +8,9 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/trade")({
   component: Trade,
+  validateSearch: (search: Record<string, unknown>) => ({
+    side: search.side === "sell" ? ("sell" as const) : ("buy" as const),
+  }),
   head: () => ({
     meta: [{ title: "Trade · LM Coin" }, { name: "description", content: "Buy and sell LMC at live market price." }],
   }),
@@ -15,6 +18,7 @@ export const Route = createFileRoute("/trade")({
 
 function Trade() {
   const nav = useNavigate();
+  const { side: initialSide } = Route.useSearch();
   const { user, loading: authLoading } = useAuth();
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/" });
@@ -23,7 +27,10 @@ function Trade() {
   const { wallet } = useWallet();
   const { price } = usePriceSeries(180);
 
-  const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [side, setSide] = useState<"buy" | "sell">(initialSide);
+  useEffect(() => {
+    setSide(initialSide);
+  }, [initialSide]);
   // NEW: State to manage the 4 modes in Buy session
   const [buyMode, setBuyMode] = useState<"custom" | "upi" | "bank" | "fixed">("custom");
 
