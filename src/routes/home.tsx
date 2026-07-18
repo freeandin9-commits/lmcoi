@@ -109,9 +109,9 @@ function HomeApp() {
   );
 }
 
-function QuickAction({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function QuickAction({ to, icon, label, search }: { to: string; icon: React.ReactNode; label: string; search?: Record<string, string> }) {
   return (
-    <Link to={to} className="flex flex-col items-center gap-1.5">
+    <Link to={to} search={search as never} className="flex flex-col items-center gap-1.5">
       <span className="grid place-items-center h-11 w-11 rounded-full bg-background/70 text-[oklch(0.2_0.02_260)]">
         {icon}
       </span>
