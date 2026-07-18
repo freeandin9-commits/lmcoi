@@ -63,8 +63,8 @@ function HomeApp() {
           <div className="mt-1 text-sm font-medium opacity-90">Hold Balance: {formatINR(hold, 2)}</div>
 
           <div className="mt-4 grid grid-cols-3 gap-2">
-            <QuickAction to="/wallet" icon={<ArrowDownToLine size={18} />} label="Buy" />
-            <QuickAction to="/wallet" icon={<ArrowUpFromLine size={18} />} label="Sell" />
+            <QuickAction to="/trade" search={{ side: "buy" }} icon={<ArrowDownToLine size={18} />} label="Buy" />
+            <QuickAction to="/trade" search={{ side: "sell" }} icon={<ArrowUpFromLine size={18} />} label="Sell" />
             <QuickAction to="/referral" icon={<Gift size={18} />} label="Refer" />
           </div>
         </div>
