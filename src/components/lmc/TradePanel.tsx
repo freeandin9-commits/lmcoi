@@ -165,7 +165,7 @@ export function TradePanel({ side }: { side: Side }) {
                   {side === "sell" && (
                     <span className="text-xs font-medium text-muted-foreground">
                       Balance:{" "}
-                      <span className="font-mono font-bold text-[color:var(--gold)]">{formatLMC(lmc, 4)} LMC</span>
+                      <span className="font-mono font-bold text-[color:var(--gold)]">{formatLMC(total, 4)} LMC</span>
                     </span>
                   )}
                 </div>
