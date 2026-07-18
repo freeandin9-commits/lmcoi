@@ -8,6 +8,17 @@ import { toast } from "sonner";
 
 type Side = "buy" | "sell";
 
+// ഓർഡർ ഐഡി ജനറേറ്റ് ചെയ്യാനുള്ള ഫംഗ്ഷൻ (Format: BYYMMDD000000000)
+const generateBuyOrderId = () => {
+  const d = new Date();
+  const yy = d.getFullYear().toString().slice(-2); // Last 2 digits of year
+  const mm = (d.getMonth() + 1).toString().padStart(2, "0"); // Month
+  const dd = d.getDate().toString().padStart(2, "0"); // Day
+  // 9 digit unique number
+  const unique = Math.floor(100000000 + Math.random() * 900000000).toString();
+  return `B${yy}${mm}${dd}${unique}`;
+};
+
 export function TradePanel({ side }: { side: Side }) {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -31,16 +42,36 @@ export function TradePanel({ side }: { side: Side }) {
     if (qty <= 0) return toast.error("Enter LMC quantity");
     if (side === "buy" && total > inr) return toast.error("Insufficient INR");
     if (side === "sell" && qty > lmc) return toast.error("Insufficient LMC");
+
     setBusy(true);
     try {
+      let orderId = "";
+      if (side === "buy") {
+        orderId = generateBuyOrderId();
+        console.log("Generated Buy Order ID:", orderId); // കാണാൻ വേണ്ടി കൺസോളിൽ നൽകുന്നു
+      }
+
       await placeOrder(side, qty, price);
-      toast.success(`${side === "buy" ? "Bought" : "Sold"} ${formatLMC(qty)} LMC`);
+
+      if (side === "buy") {
+        // Buy സക്സസ് ആകുമ്പോൾ ഓർഡർ ഐഡി കൂടി കാണിക്കുന്നു
+        toast.success(`Bought ${formatLMC(qty)} LMC. Order ID: ${orderId}`);
+      } else {
+        toast.success(`Sold ${formatLMC(qty)} LMC`);
+      }
+
       setAmount("");
     } catch (e: unknown) {
       toast.error((e as Error).message);
     } finally {
       setBusy(false);
     }
+  };
+
+  // Mock sellers-ൽ നിന്ന് buy ചെയ്യുമ്പോഴും ഓർഡർ ഐഡി വർക്ക് ചെയ്യാൻ
+  const handleMockBuy = (sellerName: string) => {
+    const orderId = generateBuyOrderId();
+    toast.success(`Order placed with ${sellerName}. Order ID: ${orderId}`);
   };
 
   const setPct = (p: number) => {
@@ -162,7 +193,12 @@ export function TradePanel({ side }: { side: Side }) {
                   </div>
                   <div className="text-right">
                     <div className="font-mono text-sm font-bold text-[color:var(--gold)]">{formatINR(price, 2)}</div>
-                    <button className="mt-2 px-4 py-1.5 text-xs font-semibold rounded-lg btn-gold">Buy</button>
+                    <button
+                      onClick={() => handleMockBuy(seller.name)}
+                      className="mt-2 px-4 py-1.5 text-xs font-semibold rounded-lg btn-gold"
+                    >
+                      Buy
+                    </button>
                   </div>
                 </div>
               ))}
