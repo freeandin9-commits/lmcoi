@@ -70,9 +70,10 @@ function TransactionsPage() {
     try {
       // Create canvas from the specific transaction div
       const canvas = await html2canvas(element, {
-        backgroundColor: window.getComputedStyle(document.body).backgroundColor || "#000000",
+        backgroundColor: null, // Set to null for transparent/default background
         scale: 2, // Better image quality
         useCORS: true, // Fixes potential cross-origin image issues
+        allowTaint: true, // Helps with rendering issues
         logging: false,
       });
 
@@ -85,21 +86,8 @@ function TransactionsPage() {
 
       const file = new File([blob], `transaction_${id}.png`, { type: "image/png" });
 
-      // Check if browser supports Web Share API with files
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            title: "LM Coin Transaction",
-            files: [file],
-          });
-        } catch (shareError: any) {
-          // Ignore AbortError when the user closes the share menu without sharing
-          if (shareError.name !== "AbortError") {
-            console.error("Error with native share:", shareError);
-          }
-        }
-      } else {
-        // Fallback for browsers that don't support file sharing (Downloads the image instead)
+      // Fallback function to download the image if sharing fails
+      const downloadFallback = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -108,10 +96,29 @@ function TransactionsPage() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+      };
+
+      // Check if browser supports Web Share API with files
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: "LM Coin Transaction",
+            files: [file],
+          });
+        } catch (shareError: any) {
+          // If share fails (e.g., due to async delay browser security), fallback to download
+          if (shareError.name !== "AbortError") {
+            console.warn("Native share blocked or failed, falling back to download...");
+            downloadFallback();
+          }
+        }
+      } else {
+        // Direct fallback for browsers that don't support file sharing
+        downloadFallback();
       }
     } catch (error) {
-      console.error("Error sharing transaction:", error);
-      alert("Something went wrong while trying to share. Please try again.");
+      console.error("Error generating or sharing transaction image:", error);
+      alert("Unable to generate the image. Please try again.");
     } finally {
       setSharingId(null); // Remove loading state
     }
