@@ -75,7 +75,7 @@ function Dashboard() {
       // This is a placeholder for the actual backend call (e.g., supabase.rpc('delete_user_account'))
       // After deletion on the backend, we sign the user out.
       
-      const { error } = await supabase.rpc('delete_user_account'); // Example RPC call
+      const { error } = await (supabase.rpc as any)('delete_user_account'); // Example RPC call
       if (error) console.error("Error deleting account backend:", error);
 
       await supabase.auth.signOut();
@@ -438,7 +438,7 @@ function Dashboard() {
                 value={deleteEmailInput}
                 onChange={(e) => setDeleteEmailInput(e.target.value)}
                 placeholder="Type your email"
-                {/* Fix: Explicit text colors for input and placeholder */}
+                
                 className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-red-500/30 focus:border-red-500 focus:bg-white/30 focus:shadow-[0_0_15px_rgba(239,68,68,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
               />
             </div>
