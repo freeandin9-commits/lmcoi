@@ -6,6 +6,7 @@ export type Profile = {
   id: string;
   email: string | null;
   display_name: string | null;
+  avatar_url: string | null;
   referral_code: string;
   referred_by: string | null;
   kyc_status: string;
