@@ -18,7 +18,7 @@ import {
   Users,
   Edit2,
   X,
-  Trash2, // Imported Trash2 for Delete Button
+  Trash2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -68,14 +68,10 @@ function Dashboard() {
   const handleDeleteAccount = async () => {
     const userEmail = profile?.email || user?.email;
     if (deleteEmailInput !== userEmail) return;
-    
+
     setIsDeleting(true);
     try {
-      // Note: Deleting a user securely usually requires a Supabase Edge Function or RPC.
-      // This is a placeholder for the actual backend call (e.g., supabase.rpc('delete_user_account'))
-      // After deletion on the backend, we sign the user out.
-      
-      const { error } = await (supabase.rpc as any)('delete_user_account'); // Example RPC call
+      const { error } = await supabase.rpc("delete_user_account");
       if (error) console.error("Error deleting account backend:", error);
 
       await supabase.auth.signOut();
@@ -89,15 +85,12 @@ function Dashboard() {
     }
   };
 
-  // Open Edit Modal and set current values
   const handleEditClick = () => {
     setEditName(profile?.display_name || "");
-    // If user has an avatar, use it. Otherwise, default to the first one in the list.
     setEditAvatar(profile?.avatar_url || AVATARS[0]);
     setIsEditing(true);
   };
 
-  // Save profile changes to Supabase
   const handleSaveProfile = async () => {
     if (!user) return;
     setIsSaving(true);
@@ -112,7 +105,6 @@ function Dashboard() {
 
       if (error) throw error;
 
-      // Close modal and refresh the page to fetch the updated profile
       setIsEditing(false);
       window.location.reload();
     } catch (error) {
@@ -125,7 +117,6 @@ function Dashboard() {
 
   return (
     <Shell>
-      {/* Custom Keyframe Animations for Glassmorphism */}
       <style>{`
         @keyframes glass-fade-in {
           0% { opacity: 0; transform: translateY(20px) scale(0.98); }
@@ -144,13 +135,11 @@ function Dashboard() {
           100% { transform: translateX(200%) skewX(-20deg); }
         }
         
-        /* Glass Animation Classes */
         .animate-glass-1 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.1s; }
         .animate-glass-2 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.2s; }
         .animate-glass-3 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.3s; }
         .animate-modal { animation: modal-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        /* Shimmer Effect for Glass Cards */
         .glass-shine {
           position: relative;
           overflow: hidden;
@@ -165,7 +154,6 @@ function Dashboard() {
           z-index: 10;
         }
 
-        /* Floating Background Blobs */
         .bg-blob {
           position: fixed;
           border-radius: 50%;
@@ -177,7 +165,6 @@ function Dashboard() {
         }
       `}</style>
 
-      {/* Background Floating Orbs to make Glassmorphism pop */}
       <div className="bg-blob w-64 h-64 bg-purple-500/30 top-10 left-[-10%]"></div>
       <div className="bg-blob w-72 h-72 bg-blue-500/20 bottom-20 right-[-10%]" style={{ animationDelay: "2s" }}></div>
       <div
@@ -198,9 +185,7 @@ function Dashboard() {
         }
       />
       <div className="px-4 pt-4 space-y-5 pb-8 relative z-10">
-        {/* Profile Info - Glassmorphism with Animation & Shine */}
         <div className="animate-glass-1 glass-shine rounded-2xl p-4 flex items-center gap-4 backdrop-blur-2xl bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] hover:bg-white/15 dark:hover:bg-black/40 transition-all duration-500 ease-in-out group">
-          {/* Profile Picture / Avatar */}
           {profile?.avatar_url ? (
             <img
               src={profile.avatar_url}
@@ -216,7 +201,6 @@ function Dashboard() {
             </span>
           )}
 
-          {/* Name & Email Details */}
           <div className="flex-1 min-w-0 transition-transform duration-300 group-hover:translate-x-2">
             <div className="font-bold text-lg truncate text-foreground drop-shadow-md">
               {profile?.display_name ?? "—"}
@@ -224,7 +208,6 @@ function Dashboard() {
             <div className="text-xs text-muted-foreground truncate font-medium">{profile?.email}</div>
           </div>
 
-          {/* Edit Button & KYC Wrapper aligned to right side */}
           <div className="flex flex-col items-end gap-2 relative z-20">
             <button
               onClick={handleEditClick}
@@ -245,10 +228,9 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* SETTINGS & MENU BUTTONS - Glassmorphism with Animation */}
         <div className="animate-glass-2 rounded-2xl overflow-hidden backdrop-blur-2xl bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.05)] transition-all duration-500">
           {[
-            { icon: User, label: "Real Name" },
+            { icon: User, label: "Real Name", path: "/real-name" }, // Added path here
             { icon: CreditCard, label: "Collection" },
             { icon: Lock, label: "Payment Password" },
             { icon: History, label: "Transaction" },
@@ -261,11 +243,11 @@ function Dashboard() {
           ].map((item, idx) => (
             <button
               key={item.label}
+              onClick={() => item.path && nav({ to: item.path })} // Navigation logic added
               className={`group w-full flex items-center justify-between px-5 py-4 hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300 ease-in-out relative overflow-hidden ${
                 idx !== 0 ? "border-t border-white/10 dark:border-white/5" : ""
               }`}
             >
-              {/* Subtle hover background sweep */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none"></div>
 
               <div className="flex items-center gap-3 transform group-hover:translate-x-3 transition-transform duration-300 relative z-10">
@@ -285,9 +267,7 @@ function Dashboard() {
           ))}
         </div>
 
-        {/* Action Buttons Container */}
         <div className="space-y-3">
-          {/* Sign Out Button - Glassmorphism with Animation */}
           <button
             onClick={() => setIsSignOutModalOpen(true)}
             className="animate-glass-3 glass-shine w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-2xl bg-white/10 dark:bg-white/5 hover:bg-red-500/20 hover:text-red-500 dark:hover:bg-red-500/20 border border-white/30 dark:border-white/10 hover:border-red-500/50 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(0,0,0,0.1)] text-foreground hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-95 group relative z-10"
@@ -295,7 +275,6 @@ function Dashboard() {
             <LogOut size={18} className="transition-transform duration-300 group-hover:-translate-x-1" /> Sign out
           </button>
 
-          {/* Permanent Delete Button */}
           <button
             onClick={() => setIsDeleteModalOpen(true)}
             className="animate-glass-3 glass-shine w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-2xl bg-red-500/10 dark:bg-red-500/5 hover:bg-red-600/20 text-red-500 border border-red-500/30 dark:border-red-500/20 hover:border-red-500/60 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(239,68,68,0.05)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:scale-[1.02] active:scale-95 group relative z-10"
@@ -306,10 +285,9 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* EDIT PROFILE MODAL - Glassmorphism with Pop Animation */}
+      {/* EDIT PROFILE MODAL */}
       {isEditing && (
         <div className="fixed inset-0 z-[100] bg-black/50 dark:bg-black/70 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300">
-          {/* Modal Background Glow */}
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-transparent to-blue-500/10 z-0"></div>
 
           <div className="animate-modal glass-shine relative z-10 w-full max-w-md rounded-[2rem] p-6 space-y-6 backdrop-blur-3xl bg-white/20 dark:bg-black/50 border border-white/40 dark:border-white/20 shadow-[0_8px_40px_0_rgba(31,38,135,0.3)]">
@@ -323,7 +301,6 @@ function Dashboard() {
               </button>
             </div>
 
-            {/* Name Input */}
             <div className="group">
               <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
                 Display Name
@@ -337,9 +314,10 @@ function Dashboard() {
               />
             </div>
 
-            {/* Avatar Selection Grid */}
             <div>
-              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm">Choose Avatar</label>
+              <label className="text-sm font-bold mb-2 block text-gray-800 dark:text-gray-200 drop-shadow-sm">
+                Choose Avatar
+              </label>
               <div className="grid grid-cols-5 gap-3 max-h-52 overflow-y-auto p-3 scrollbar-hide rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 shadow-inner">
                 {AVATARS.map((url, idx) => (
                   <img
@@ -357,7 +335,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Save Button */}
             <button
               onClick={handleSaveProfile}
               disabled={isSaving}
@@ -370,22 +347,18 @@ function Dashboard() {
         </div>
       )}
 
-      {/* SIGN OUT CONFIRMATION MODAL - Custom Glassmorphism Popup */}
+      {/* SIGN OUT CONFIRMATION MODAL */}
       {isSignOutModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/50 dark:bg-black/70 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300">
           <div className="absolute inset-0 bg-gradient-to-tr from-red-500/10 via-transparent to-orange-500/10 z-0"></div>
 
           <div className="animate-modal glass-shine relative z-10 w-full max-w-sm rounded-[2rem] p-6 space-y-5 backdrop-blur-3xl bg-white/20 dark:bg-black/50 border border-white/40 dark:border-white/20 shadow-[0_8px_40px_0_rgba(31,38,135,0.3)] text-center flex flex-col items-center">
-            
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-1 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
               <LogOut size={30} className="text-red-500 drop-shadow-md" />
             </div>
-            
-            {/* Confirmation Message */}
+
             <div>
-              {/* Fix: Changed text-foreground to text-black dark:text-white */}
               <h2 className="text-xl font-extrabold text-black dark:text-white drop-shadow-md mb-1">Sign Out</h2>
-              {/* Fix: Changed text-muted-foreground to text-gray-800 dark:text-gray-200 */}
               <p className="text-gray-800 dark:text-gray-200 text-sm font-medium px-2">
                 Are you sure you want to sign out of your account?
               </p>
@@ -409,25 +382,25 @@ function Dashboard() {
         </div>
       )}
 
-      {/* DELETE ACCOUNT CONFIRMATION MODAL - With Email Verification */}
+      {/* DELETE ACCOUNT CONFIRMATION MODAL */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/50 dark:bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300">
           <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 via-transparent to-red-900/10 z-0"></div>
 
           <div className="animate-modal glass-shine relative z-10 w-full max-w-sm rounded-[2rem] p-6 space-y-5 backdrop-blur-3xl bg-white/10 dark:bg-black/60 border border-red-500/40 shadow-[0_8px_40px_0_rgba(239,68,68,0.2)] text-center flex flex-col items-center">
-            
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-1 border border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
               <Trash2 size={30} className="text-red-500 drop-shadow-md" />
             </div>
-            
+
             <div>
               <h2 className="text-xl font-extrabold text-red-500 drop-shadow-md mb-2">Delete Account</h2>
-              {/* Fix: Changed text-muted-foreground and text-foreground to gray/black/white */}
               <p className="text-gray-800 dark:text-gray-200 text-sm font-medium px-1">
-                This action is <span className="font-bold text-black dark:text-white">permanent</span> and cannot be undone. All your data will be lost.
+                This action is <span className="font-bold text-black dark:text-white">permanent</span> and cannot be
+                undone. All your data will be lost.
               </p>
               <p className="text-gray-800 dark:text-gray-300 text-xs mt-3">
-                Please type your email to confirm:<br/>
+                Please type your email to confirm:
+                <br />
                 <span className="font-bold text-black dark:text-white block mt-1">{profile?.email || user?.email}</span>
               </p>
             </div>
@@ -438,7 +411,6 @@ function Dashboard() {
                 value={deleteEmailInput}
                 onChange={(e) => setDeleteEmailInput(e.target.value)}
                 placeholder="Type your email"
-                
                 className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-red-500/30 focus:border-red-500 focus:bg-white/30 focus:shadow-[0_0_15px_rgba(239,68,68,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
               />
             </div>
