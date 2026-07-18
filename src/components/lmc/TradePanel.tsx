@@ -39,12 +39,15 @@ export function TradePanel({ side }: { side: Side }) {
   const pricePerLmcInr = 1 / lmcPerInr;
 
   const enteredAmt = parseFloat(amount) || 0;
-  const canSubmit = enteredAmt > 0 && (side === "buy" ? enteredAmt <= inr : enteredAmt <= lmc);
+  const canSubmit = enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= lmc);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
       if (enteredAmt <= 0) return toast.error("Enter INR amount");
-      if (enteredAmt > inr) return toast.error("Insufficient INR");
+      if (enteredAmt > inr) {
+        toast.error("Insufficient INR");
+        return;
+      }
       setShowConfirm(true);
       return;
     }
