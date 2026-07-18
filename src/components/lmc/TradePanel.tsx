@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-import { useWallet, usePriceSeries, placeOrder, formatINR, formatLMC } from "@/lib/lmc-api";
+import { useWallet, placeOrder, formatINR, formatLMC } from "@/lib/lmc-api";
 import { Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,7 +27,6 @@ export function TradePanel({ side }: { side: Side }) {
   }, [authLoading, user, nav]);
 
   const { wallet } = useWallet();
-  const { price } = usePriceSeries(180);
 
   const [buyMode, setBuyMode] = useState<"custom" | "upi" | "bank" | "fixed">("custom");
   const [amount, setAmount] = useState("");
@@ -35,6 +34,8 @@ export function TradePanel({ side }: { side: Side }) {
 
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
+  const lmcPerInr = 1.25;
+  const pricePerLmcInr = 1 / lmcPerInr;
 
   const enteredAmt = parseFloat(amount) || 0;
 
@@ -55,17 +56,15 @@ export function TradePanel({ side }: { side: Side }) {
 
     try {
       const orderId = generateBuyOrderId();
-      const livePrice = Number(price) || 0;
       let qtyToProcess = 0;
 
       if (side === "buy") {
-        if (livePrice <= 0) throw new Error("Market price unavailable");
-        qtyToProcess = enteredAmt / livePrice;
-        await placeOrder(side, qtyToProcess, livePrice);
+        qtyToProcess = enteredAmt * lmcPerInr;
+        await placeOrder(side, qtyToProcess, pricePerLmcInr);
         toast.success(`Bought ${formatLMC(qtyToProcess, 4)} LMC. Order ID: ${orderId}`);
       } else {
         qtyToProcess = enteredAmt;
-        await placeOrder(side, qtyToProcess, livePrice || 1);
+        await placeOrder(side, qtyToProcess, pricePerLmcInr);
         toast.success(`Sold ${formatLMC(qtyToProcess, 4)} LMC`);
       }
 
@@ -173,13 +172,13 @@ export function TradePanel({ side }: { side: Side }) {
               <div className="mt-5 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 p-4 text-sm space-y-2 shadow-sm">
                 {side === "buy" ? (
                   <>
-                    <Row k="Price" v={`1 INR = ${formatLMC(Number(price) || 1, 4)} LMC`} />
+                    <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
                     <Row k="You pay" v={formatINR(enteredAmt, 2)} />
-                    <Row k="You will receive" v={formatLMC(enteredAmt / Math.max(Number(price) || 1, 1), 4) + " LMC"} />
+                    <Row k="You will receive" v={formatLMC(enteredAmt * lmcPerInr, 4) + " LMC"} />
                   </>
                 ) : (
                   <>
-                    <Row k="Price" v={`1 INR = ${formatLMC(Number(price) || 1, 4)} LMC`} />
+                    <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
                     <Row k="You receive" v={enteredAmt.toString()} />
                     <Row k="Balance" v={formatLMC(lmc, 4) + " LMC"} />
                   </>
