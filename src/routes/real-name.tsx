@@ -15,12 +15,12 @@ function RealNameKYC() {
 
   // Refs for file inputs
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const fileInputBackRef = useRef<HTMLInputElement>(null); // New ref for Back ID
+  const fileInputBackRef = useRef<HTMLInputElement>(null);
 
   const [aadhaarName, setAadhaarName] = useState("");
   const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedBackImage, setSelectedBackImage] = useState<string | null>(null); // New state for Back ID
+  const [selectedBackImage, setSelectedBackImage] = useState<string | null>(null);
 
   // Handle Front Image Upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,10 +75,10 @@ function RealNameKYC() {
 
       <AppHeader
         title="Real Name Authentication"
-        right={
+        left={
           <button
             onClick={() => nav({ to: "/dashboard" })}
-            className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110 active:scale-95"
+            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110 active:scale-95"
             aria-label="Go back"
           >
             <ArrowLeft size={24} />
@@ -131,7 +131,7 @@ function RealNameKYC() {
               )}
             </div>
 
-            {/* Photo Upload Guidelines (Demo Photos) */}
+            {/* Photo Upload Guidelines for Front (Demo Photos) */}
             <div className="mt-5">
               <h4 className="text-[11px] font-bold text-muted-foreground/80 mb-3 uppercase tracking-wider">
                 Photo Guidelines
@@ -178,7 +178,7 @@ function RealNameKYC() {
             </div>
           </div>
 
-          {/* --- NEW: Back Identity Card Upload Section --- */}
+          {/* Back Identity Card Upload Section */}
           <div className="glass-card p-5 rounded-[2rem] bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
             <h3 className="text-base font-bold text-foreground mb-4 drop-shadow-md">Back of Aadhaar ID Card</h3>
 
@@ -220,8 +220,54 @@ function RealNameKYC() {
                 </div>
               )}
             </div>
+
+            {/* --- NEW: Photo Upload Guidelines for Back (Demo Photos) --- */}
+            <div className="mt-5">
+              <h4 className="text-[11px] font-bold text-muted-foreground/80 mb-3 uppercase tracking-wider">
+                Photo Guidelines
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Correct Demo */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative w-full aspect-[1.6] rounded-xl border border-green-500/60 bg-green-500/10 dark:bg-green-500/5 overflow-hidden flex items-center justify-center">
+                    <div className="w-3/4 h-2/3 bg-foreground/20 rounded flex items-center p-2 gap-2">
+                      <div className="w-8 h-8 bg-foreground/30 rounded-full"></div>
+                      <div className="flex-1 space-y-1">
+                        <div className="h-2 w-full bg-foreground/30 rounded"></div>
+                        <div className="h-2 w-2/3 bg-foreground/30 rounded"></div>
+                      </div>
+                    </div>
+                    <div className="absolute -bottom-px -right-px bg-green-500 rounded-tl-xl p-1 text-white shadow-md">
+                      <CheckCircle size={14} strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-semibold text-green-600 dark:text-green-400 text-center leading-tight">
+                    Good: Clear & Full
+                  </span>
+                </div>
+
+                {/* Incorrect Demo */}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="relative w-full aspect-[1.6] rounded-xl border border-red-500/60 bg-red-500/10 dark:bg-red-500/5 overflow-hidden flex items-center justify-center">
+                    <div className="w-[120%] h-[120%] bg-foreground/20 rounded flex items-center p-2 gap-2 blur-[2px] translate-x-4 translate-y-4 opacity-70">
+                      <div className="w-10 h-10 bg-foreground/30 rounded-full"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 w-full bg-foreground/30 rounded"></div>
+                        <div className="h-3 w-2/3 bg-foreground/30 rounded"></div>
+                      </div>
+                    </div>
+                    <div className="absolute -bottom-px -right-px bg-red-500 rounded-tl-xl p-1 text-white shadow-md">
+                      <XCircle size={14} strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-semibold text-red-600 dark:text-red-400 text-center leading-tight">
+                    Bad: Blurry or Cut
+                  </span>
+                </div>
+              </div>
+            </div>
+            {/* --- END OF NEW ADDITION --- */}
           </div>
-          {/* --- END OF NEW ADDITION --- */}
 
           {/* Form Inputs Section */}
           <div className="glass-card p-5 rounded-[2rem] space-y-5 bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
