@@ -42,19 +42,20 @@ function Dashboard() {
   const [editAvatar, setEditAvatar] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  // State for Sign Out Confirmation Modal
+  const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/" });
   }, [authLoading, user, nav]);
 
   const { profile } = useProfile();
 
-  // Sign out with confirmation
-  const signOut = async () => {
-    const confirmed = window.confirm("Are you sure you want to sign out?");
-    if (confirmed) {
-      await supabase.auth.signOut();
-      nav({ to: "/" });
-    }
+  // Actual Sign Out execution
+  const confirmSignOut = async () => {
+    setIsSignOutModalOpen(false);
+    await supabase.auth.signOut();
+    nav({ to: "/" });
   };
 
   // Open Edit Modal and set current values
@@ -157,7 +158,7 @@ function Dashboard() {
         title="Account"
         right={
           <button
-            onClick={signOut}
+            onClick={() => setIsSignOutModalOpen(true)}
             className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110 active:scale-95 relative z-20"
             aria-label="Sign out"
           >
@@ -255,7 +256,7 @@ function Dashboard() {
 
         {/* Sign Out Button - Glassmorphism with Animation */}
         <button
-          onClick={signOut}
+          onClick={() => setIsSignOutModalOpen(true)}
           className="animate-glass-3 glass-shine w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-2xl bg-white/10 dark:bg-white/5 hover:bg-red-500/20 hover:text-red-500 dark:hover:bg-red-500/20 border border-white/30 dark:border-white/10 hover:border-red-500/50 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(0,0,0,0.1)] text-foreground hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-95 group relative z-10"
         >
           <LogOut size={18} className="transition-transform duration-300 group-hover:-translate-x-1" /> Sign out
@@ -322,6 +323,41 @@ function Dashboard() {
             >
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* SIGN OUT CONFIRMATION MODAL - Custom Glassmorphism Popup */}
+      {isSignOutModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/50 dark:bg-black/70 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300">
+          <div className="absolute inset-0 bg-gradient-to-tr from-red-500/10 via-transparent to-orange-500/10 z-0"></div>
+
+          <div className="animate-modal glass-shine relative z-10 w-full max-w-sm rounded-[2rem] p-6 space-y-5 backdrop-blur-3xl bg-white/20 dark:bg-black/50 border border-white/40 dark:border-white/20 shadow-[0_8px_40px_0_rgba(31,38,135,0.3)] text-center flex flex-col items-center">
+            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-1 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+              <LogOut size={30} className="text-red-500 drop-shadow-md" />
+            </div>
+
+            <div>
+              <h2 className="text-xl font-extrabold text-foreground drop-shadow-md mb-1">Sign Out</h2>
+              <p className="text-muted-foreground text-sm font-medium px-2">
+                Are you sure you want to sign out of your account?
+              </p>
+            </div>
+
+            <div className="flex gap-3 w-full pt-2">
+              <button
+                onClick={() => setIsSignOutModalOpen(false)}
+                className="flex-1 py-3 rounded-2xl font-bold backdrop-blur-xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 text-foreground hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmSignOut}
+                className="flex-1 py-3 rounded-2xl font-bold bg-red-500 hover:bg-red-600 text-white shadow-[0_4px_15px_rgba(239,68,68,0.3)] hover:shadow-[0_8px_25px_rgba(239,68,68,0.5)] transition-all duration-300"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
       )}
