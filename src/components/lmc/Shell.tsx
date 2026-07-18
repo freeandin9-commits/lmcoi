@@ -63,12 +63,15 @@ function BottomNav({ pathname }: { pathname: string }) {
   );
 }
 
-export function AppHeader({ title, right }: { title: string; right?: ReactNode }) {
+export function AppHeader({ title, left, right }: { title: string; left?: ReactNode; right?: ReactNode }) {
   return (
     <header className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
-      <div className="h-14 px-4 flex items-center justify-between">
-        <h1 className="text-lg font-bold">{title}</h1>
-        <div>{right}</div>
+      <div className="h-14 px-4 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {left}
+          <h1 className="truncate text-lg font-bold">{title}</h1>
+        </div>
+        {right ? <div className="shrink-0">{right}</div> : null}
       </div>
     </header>
   );
