@@ -23,6 +23,8 @@ function WalletPage() {
 
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
+  // ഭാവിയിൽ Hold Balance API-ൽ നിന്ന് ലഭ്യമാകുന്നതിനായി സെറ്റ് ചെയ്തത്
+  const holdBalance = Number((wallet as any)?.hold_balance ?? 0);
 
   return (
     <Shell>
@@ -37,10 +39,14 @@ function WalletPage() {
             <div className="text-sm opacity-80">Wallet</div>
             <LMCMark size={28} />
           </div>
-          <div className="mt-2 text-3xl font-extrabold tabular-nums">{formatINR(inr + lmc * price, 2)}</div>
-          <div className="mt-1 text-sm font-medium">
-            {formatINR(inr, 2)} INR · {formatLMC(lmc, 4)} LMC
-          </div>
+
+          {/* LMC Price Added Here */}
+          <div className="mt-2 text-sm font-medium opacity-90">1 INR = 1.25 LMC</div>
+
+          <div className="mt-1 text-3xl font-extrabold tabular-nums">{formatINR(inr + lmc * price, 2)}</div>
+
+          {/* Removed previous LMC/INR balance and Added Hold Balance */}
+          <div className="mt-1 text-sm font-medium">Hold Balance: {formatLMC(holdBalance, 4)} LMC</div>
         </div>
       </div>
     </Shell>
