@@ -32,6 +32,7 @@ export function TradePanel({ side }: { side: Side }) {
   const [buyMode, setBuyMode] = useState<"custom" | "upi" | "bank" | "fixed">("custom");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false); // New state for confirmation modal
 
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
@@ -39,16 +40,28 @@ export function TradePanel({ side }: { side: Side }) {
   // യൂസർ എന്റർ ചെയ്ത വാല്യൂ
   const enteredAmt = parseFloat(amount) || 0;
 
-  const submit = async () => {
+  // Initial Submit Handler (To show confirmation for Buy)
+  const handleInitialSubmit = () => {
     if (side === "buy") {
       if (enteredAmt <= 0) return toast.error("Enter INR amount");
       if (enteredAmt > inr) return toast.error("Insufficient INR");
+      // എല്ലാ കണ്ടീഷനും ശരിയാണെങ്കിൽ കൺഫർമേഷൻ കാണിക്കുക
+      setShowConfirm(true);
     } else {
+      // Sell ആണെങ്കിൽ നേരിട്ട് സബ്മിറ്റ് ചെയ്യാം
+      submit();
+    }
+  };
+
+  const submit = async () => {
+    if (side === "sell") {
       if (enteredAmt <= 0) return toast.error("Enter LMC quantity");
       if (enteredAmt > lmc) return toast.error("Insufficient LMC");
     }
 
+    setShowConfirm(false); // കൺഫർമേഷൻ ഹൈഡ് ചെയ്യുന്നു
     setBusy(true);
+
     try {
       let orderId = "";
       let qtyToProcess = 0;
@@ -104,7 +117,7 @@ export function TradePanel({ side }: { side: Side }) {
   return (
     <Shell>
       <AppHeader title={side === "buy" ? "Buy LMC" : "Sell LMC"} />
-      <div className="px-4 pt-4 space-y-4">
+      <div className="px-4 pt-4 space-y-4 relative">
         {/* Glassmorphism Main Card */}
         <div className="rounded-3xl bg-background/60 backdrop-blur-2xl border border-white/10 shadow-2xl p-5">
           <div className="grid grid-cols-2 gap-3 rounded-xl overflow-hidden p-1 bg-foreground/5 backdrop-blur-md border border-foreground/10">
@@ -193,8 +206,9 @@ export function TradePanel({ side }: { side: Side }) {
                 )}
               </div>
 
+              {/* സബ്മിറ്റ് ബട്ടൺ ഇപ്പോൾ കൺഫർമേഷൻ വിൻഡോ തുറക്കാനായി മാറ്റി (For Buy) */}
               <button
-                onClick={submit}
+                onClick={handleInitialSubmit}
                 disabled={busy || (!price && side === "sell")}
                 className={`mt-6 w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 shadow-lg hover:shadow-xl ${
                   side === "buy"
@@ -252,6 +266,44 @@ export function TradePanel({ side }: { side: Side }) {
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-background/90 backdrop-blur-2xl border border-white/20 p-6 rounded-3xl shadow-2xl w-full max-w-[340px] animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold mb-4 text-center">Confirm Purchase</h3>
+
+            <div className="space-y-4 mb-6 p-4 rounded-2xl bg-foreground/5 border border-foreground/10">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">Pay Amount</p>
+                <p className="text-2xl font-mono font-bold text-[color:var(--gold)]">{formatINR(enteredAmt, 2)}</p>
+              </div>
+              <div className="h-px w-full bg-foreground/10"></div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground mb-1">You will receive</p>
+                <p className="text-lg font-mono font-semibold">{formatLMC(enteredAmt * 1.25, 4)} LMC</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-3 text-sm font-semibold rounded-xl border border-foreground/20 hover:bg-foreground/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submit}
+                disabled={busy}
+                className="flex-1 py-3 text-sm font-bold rounded-xl btn-gold shadow-lg flex justify-center items-center gap-2"
+              >
+                {busy && <Loader2 size={16} className="animate-spin" />}
+                Confirm Pay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Shell>
   );
 }
