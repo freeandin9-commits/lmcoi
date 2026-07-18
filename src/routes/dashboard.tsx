@@ -4,7 +4,19 @@ import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
 import { useWallet, useProfile, useTransactions, usePriceSeries, formatINR, formatLMC } from "@/lib/lmc-api";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, User, CreditCard, Lock, History, PlayCircle, Settings, ChevronRight } from "lucide-react";
+import {
+  LogOut,
+  User,
+  CreditCard,
+  Lock,
+  History,
+  PlayCircle,
+  Settings,
+  ChevronRight,
+  Bell, // NEW ICON
+  Gift, // NEW ICON
+  Users, // NEW ICON
+} from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -109,6 +121,9 @@ function Dashboard() {
             { icon: History, label: "Transaction" },
             { icon: PlayCircle, label: "Buy Tutorial" },
             { icon: PlayCircle, label: "Sell Tutorial" },
+            { icon: Bell, label: "User Notice" }, // NEW ITEM
+            { icon: Gift, label: "Rewards Card" }, // NEW ITEM
+            { icon: Users, label: "Team Center" }, // NEW ITEM
             { icon: Settings, label: "Settings" },
           ].map((item, idx) => (
             <button
