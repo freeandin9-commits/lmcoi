@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-import { useWallet, placeOrder, formatINR, formatLMC } from "@/lib/lmc-api";
+import { useWallet, usePriceSeries, placeOrder, formatINR, formatLMC } from "@/lib/lmc-api";
 import { Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,33 +27,25 @@ export function TradePanel({ side }: { side: Side }) {
   }, [authLoading, user, nav]);
 
   const { wallet } = useWallet();
+  const { price } = usePriceSeries(180);
 
   const [buyMode, setBuyMode] = useState<"custom" | "upi" | "bank" | "fixed">("custom");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
-  const lmcPerInr = 1.25;
-  const pricePerLmcInr = 1 / lmcPerInr;
 
   const enteredAmt = parseFloat(amount) || 0;
-  const canSubmit = enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= lmc);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
       if (enteredAmt <= 0) return toast.error("Enter INR amount");
-      if (enteredAmt > inr) {
-        toast.error("Insufficient INR");
-        return;
-      }
-      setShowConfirm(true);
-      return;
+      if (enteredAmt > inr) return toast.error("Insufficient INR");
+    } else {
+      if (enteredAmt <= 0) return toast.error("Enter LMC quantity");
+      if (enteredAmt > lmc) return toast.error("Insufficient LMC");
     }
-
-    if (enteredAmt <= 0) return toast.error("Enter LMC quantity");
-    if (enteredAmt > lmc) return toast.error("Insufficient LMC");
 
     await submit();
   };
@@ -63,20 +55,21 @@ export function TradePanel({ side }: { side: Side }) {
 
     try {
       const orderId = generateBuyOrderId();
+      const livePrice = Number(price) || 0;
       let qtyToProcess = 0;
 
       if (side === "buy") {
-        qtyToProcess = enteredAmt * lmcPerInr;
-        await placeOrder(side, qtyToProcess, pricePerLmcInr);
+        if (livePrice <= 0) throw new Error("Market price unavailable");
+        qtyToProcess = enteredAmt / livePrice;
+        await placeOrder(side, qtyToProcess, livePrice);
         toast.success(`Bought ${formatLMC(qtyToProcess, 4)} LMC. Order ID: ${orderId}`);
       } else {
         qtyToProcess = enteredAmt;
-        await placeOrder(side, qtyToProcess, pricePerLmcInr);
+        await placeOrder(side, qtyToProcess, livePrice || 1);
         toast.success(`Sold ${formatLMC(qtyToProcess, 4)} LMC`);
       }
 
       setAmount("");
-      setShowConfirm(false);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unable to place order";
       toast.error(message);
@@ -180,13 +173,13 @@ export function TradePanel({ side }: { side: Side }) {
               <div className="mt-5 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 p-4 text-sm space-y-2 shadow-sm">
                 {side === "buy" ? (
                   <>
-                    <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
+                    <Row k="Price" v={`1 INR = ${formatLMC(Number(price) || 1, 4)} LMC`} />
                     <Row k="You pay" v={formatINR(enteredAmt, 2)} />
-                    <Row k="You will receive" v={formatLMC(enteredAmt * lmcPerInr, 4) + " LMC"} />
+                    <Row k="You will receive" v={formatLMC(enteredAmt / Math.max(Number(price) || 1, 1), 4) + " LMC"} />
                   </>
                 ) : (
                   <>
-                    <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
+                    <Row k="Price" v={`1 INR = ${formatLMC(Number(price) || 1, 4)} LMC`} />
                     <Row k="You receive" v={enteredAmt.toString()} />
                     <Row k="Balance" v={formatLMC(lmc, 4) + " LMC"} />
                   </>
@@ -195,7 +188,7 @@ export function TradePanel({ side }: { side: Side }) {
 
               <button
                 onClick={handleInitialSubmit}
-                disabled={busy || !canSubmit}
+                disabled={busy}
                 className={`mt-6 w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-60 transition-all duration-300 shadow-lg hover:shadow-xl ${
                   side === "buy"
                     ? "btn-gold"
@@ -242,31 +235,6 @@ export function TradePanel({ side }: { side: Side }) {
           )}
         </div>
       </div>
-
-      {showConfirm && side === "buy" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-background/90 backdrop-blur-2xl border border-white/20 p-6 rounded-3xl shadow-2xl w-full max-w-[340px]">
-            <h3 className="text-lg font-bold mb-4 text-center">Confirm Purchase</h3>
-            <div className="space-y-4 mb-6 p-4 rounded-2xl bg-foreground/5 border border-foreground/10">
-              <p className="text-center text-xs text-muted-foreground">
-                Pay Amount:{" "}
-                <span className="text-lg font-bold text-[color:var(--gold)]">{formatINR(enteredAmt, 2)}</span>
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 py-3 text-sm font-semibold rounded-xl border"
-              >
-                Cancel
-              </button>
-              <button onClick={() => void submit()} className="flex-1 py-3 text-sm font-bold rounded-xl btn-gold">
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </Shell>
   );
 }
