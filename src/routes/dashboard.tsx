@@ -18,6 +18,7 @@ import {
   Users,
   Edit2,
   X,
+  Trash2, // Imported Trash2 for Delete Button
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -45,6 +46,11 @@ function Dashboard() {
   // State for Sign Out Confirmation Modal
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
 
+  // States for Delete Account
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteEmailInput, setDeleteEmailInput] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/" });
   }, [authLoading, user, nav]);
@@ -56,6 +62,31 @@ function Dashboard() {
     setIsSignOutModalOpen(false);
     await supabase.auth.signOut();
     nav({ to: "/" });
+  };
+
+  // Actual Delete Account execution
+  const handleDeleteAccount = async () => {
+    const userEmail = profile?.email || user?.email;
+    if (deleteEmailInput !== userEmail) return;
+
+    setIsDeleting(true);
+    try {
+      // Note: Deleting a user securely usually requires a Supabase Edge Function or RPC.
+      // This is a placeholder for the actual backend call (e.g., supabase.rpc('delete_user_account'))
+      // After deletion on the backend, we sign the user out.
+
+      const { error } = await supabase.rpc("delete_user_account"); // Example RPC call
+      if (error) console.error("Error deleting account backend:", error);
+
+      await supabase.auth.signOut();
+      nav({ to: "/" });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("Failed to delete account. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
+    }
   };
 
   // Open Edit Modal and set current values
@@ -254,13 +285,25 @@ function Dashboard() {
           ))}
         </div>
 
-        {/* Sign Out Button - Glassmorphism with Animation */}
-        <button
-          onClick={() => setIsSignOutModalOpen(true)}
-          className="animate-glass-3 glass-shine w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-2xl bg-white/10 dark:bg-white/5 hover:bg-red-500/20 hover:text-red-500 dark:hover:bg-red-500/20 border border-white/30 dark:border-white/10 hover:border-red-500/50 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(0,0,0,0.1)] text-foreground hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-95 group relative z-10"
-        >
-          <LogOut size={18} className="transition-transform duration-300 group-hover:-translate-x-1" /> Sign out
-        </button>
+        {/* Action Buttons Container */}
+        <div className="space-y-3">
+          {/* Sign Out Button - Glassmorphism with Animation */}
+          <button
+            onClick={() => setIsSignOutModalOpen(true)}
+            className="animate-glass-3 glass-shine w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-2xl bg-white/10 dark:bg-white/5 hover:bg-red-500/20 hover:text-red-500 dark:hover:bg-red-500/20 border border-white/30 dark:border-white/10 hover:border-red-500/50 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(0,0,0,0.1)] text-foreground hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-95 group relative z-10"
+          >
+            <LogOut size={18} className="transition-transform duration-300 group-hover:-translate-x-1" /> Sign out
+          </button>
+
+          {/* Permanent Delete Button */}
+          <button
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="animate-glass-3 glass-shine w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-2xl bg-red-500/10 dark:bg-red-500/5 hover:bg-red-600/20 text-red-500 border border-red-500/30 dark:border-red-500/20 hover:border-red-500/60 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(239,68,68,0.05)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:scale-[1.02] active:scale-95 group relative z-10"
+            style={{ animationDelay: "0.4s" }}
+          >
+            <Trash2 size={18} className="transition-transform duration-300 group-hover:scale-110" /> Permanent Delete
+          </button>
+        </div>
       </div>
 
       {/* EDIT PROFILE MODAL - Glassmorphism with Pop Animation */}
@@ -357,6 +400,61 @@ function Dashboard() {
                 className="flex-1 py-3 rounded-2xl font-bold bg-red-500 hover:bg-red-600 text-white shadow-[0_4px_15px_rgba(239,68,68,0.3)] hover:shadow-[0_8px_25px_rgba(239,68,68,0.5)] transition-all duration-300"
               >
                 Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE ACCOUNT CONFIRMATION MODAL - With Email Verification */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/50 dark:bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 transition-opacity duration-300">
+          <div className="absolute inset-0 bg-gradient-to-tr from-red-600/10 via-transparent to-red-900/10 z-0"></div>
+
+          <div className="animate-modal glass-shine relative z-10 w-full max-w-sm rounded-[2rem] p-6 space-y-5 backdrop-blur-3xl bg-white/10 dark:bg-black/60 border border-red-500/40 shadow-[0_8px_40px_0_rgba(239,68,68,0.2)] text-center flex flex-col items-center">
+            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-1 border border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+              <Trash2 size={30} className="text-red-500 drop-shadow-md" />
+            </div>
+
+            <div>
+              <h2 className="text-xl font-extrabold text-red-500 drop-shadow-md mb-2">Delete Account</h2>
+              <p className="text-muted-foreground text-sm font-medium px-1">
+                This action is <span className="font-bold text-foreground">permanent</span> and cannot be undone. All
+                your data will be lost.
+              </p>
+              <p className="text-muted-foreground text-xs mt-3">
+                Please type your email to confirm:
+                <br />
+                <span className="font-bold text-foreground block mt-1">{profile?.email || user?.email}</span>
+              </p>
+            </div>
+
+            <div className="w-full">
+              <input
+                type="email"
+                value={deleteEmailInput}
+                onChange={(e) => setDeleteEmailInput(e.target.value)}
+                placeholder="Type your email"
+                className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/30 border border-red-500/30 focus:border-red-500 focus:bg-white/30 focus:shadow-[0_0_15px_rgba(239,68,68,0.2)] text-foreground placeholder:text-muted-foreground transition-all duration-300"
+              />
+            </div>
+
+            <div className="flex gap-3 w-full pt-1">
+              <button
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setDeleteEmailInput(""); // reset input on cancel
+                }}
+                className="flex-1 py-3 rounded-2xl font-bold backdrop-blur-xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 text-foreground hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteEmailInput !== (profile?.email || user?.email) || isDeleting}
+                className="flex-1 py-3 rounded-2xl font-bold bg-red-600 hover:bg-red-700 text-white disabled:opacity-40 disabled:hover:bg-red-600 disabled:cursor-not-allowed shadow-[0_4px_15px_rgba(239,68,68,0.3)] hover:shadow-[0_8px_25px_rgba(239,68,68,0.5)] transition-all duration-300"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
