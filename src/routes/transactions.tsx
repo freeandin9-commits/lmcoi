@@ -69,7 +69,7 @@ function TransactionsPage() {
         scale: 2, // Better image quality
       });
 
-      canvas.toBlob(async (blob) => {
+      canvas.toBlob(async (blob: Blob | null) => {
         if (!blob) return;
         const file = new File([blob], `transaction_${id}.png`, { type: "image/png" });
 
