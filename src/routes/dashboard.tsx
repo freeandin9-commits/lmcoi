@@ -48,9 +48,13 @@ function Dashboard() {
 
   const { profile } = useProfile();
 
+  // Sign out with confirmation
   const signOut = async () => {
-    await supabase.auth.signOut();
-    nav({ to: "/" });
+    const confirmed = window.confirm("Are you sure you want to sign out?");
+    if (confirmed) {
+      await supabase.auth.signOut();
+      nav({ to: "/" });
+    }
   };
 
   // Open Edit Modal and set current values
@@ -313,7 +317,7 @@ function Dashboard() {
             <button
               onClick={handleSaveProfile}
               disabled={isSaving}
-              className="glass-shine w-full py-4 rounded-2xl font-extrabold flex justify-center items-center gap-2 text-black transition-all duration-300 shadow-[0_4px_15px_0_rgba(0,0,0,0.2)] disabled:opacity-50 hover:shadow-[0_8px_25px_rgba(255,215,0,0.5)] hover:-translate-y-1 active:translate-y-0 text-base"
+              className="glass-shine w-full py-4 rounded-2xl font-extrabold flex justify-center items-center gap-2 text-black transition-all duration-300 shadow-[0_4px_15px_0_rgba(0,0,0,0.2)] disabled:opacity-50 hover:shadow-[0_8px_25px_rgba(255,255,0,0.5)] hover:-translate-y-1 active:translate-y-0 text-base"
               style={{ background: "var(--gold-soft)" }}
             >
               {isSaving ? "Saving..." : "Save Changes"}
