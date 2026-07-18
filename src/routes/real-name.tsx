@@ -75,10 +75,10 @@ function RealNameKYC() {
 
       <AppHeader
         title="Real Name Authentication"
-        left={
+        right={
           <button
             onClick={() => nav({ to: "/dashboard" })}
-            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110 active:scale-95"
+            className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110 active:scale-95"
             aria-label="Go back"
           >
             <ArrowLeft size={24} />
