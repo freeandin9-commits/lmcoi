@@ -85,6 +85,9 @@ export function TradePanel({ side }: { side: Side }) {
     await submit();
   };
 
+  const createOrderFn = useServerFn(createRazorpayOrder);
+  const verifyPaymentFn = useServerFn(verifyRazorpayPayment);
+
   const submit = async () => {
     setBusy(true);
 
@@ -93,8 +96,52 @@ export function TradePanel({ side }: { side: Side }) {
       let qtyToProcess = 0;
 
       if (side === "buy") {
+        // Razorpay checkout for buying LMC with INR
+        const ok = await loadRazorpayScript();
+        if (!ok) throw new Error("Failed to load Razorpay. Check your internet connection.");
+
+        const order = await createOrderFn({ data: { amountInr: enteredAmt } });
+
+        await new Promise<void>((resolve, reject) => {
+          const rzp = new window.Razorpay!({
+            key: order.keyId,
+            amount: order.amount,
+            currency: order.currency,
+            order_id: order.orderId,
+            name: "LM Coin",
+            description: `Buy ${formatLMC(enteredAmt * lmcPerInr, 4)} LMC`,
+            prefill: {
+              email: user?.email ?? "",
+              name: user?.user_metadata?.display_name ?? "",
+            },
+            theme: { color: "#D4AF37" },
+            handler: async (resp: {
+              razorpay_order_id: string;
+              razorpay_payment_id: string;
+              razorpay_signature: string;
+            }) => {
+              try {
+                await verifyPaymentFn({
+                  data: {
+                    razorpay_order_id: resp.razorpay_order_id,
+                    razorpay_payment_id: resp.razorpay_payment_id,
+                    razorpay_signature: resp.razorpay_signature,
+                    amountInr: enteredAmt,
+                  },
+                });
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            },
+            modal: {
+              ondismiss: () => reject(new Error("Payment cancelled")),
+            },
+          });
+          rzp.open();
+        });
+
         qtyToProcess = enteredAmt * lmcPerInr;
-        await placeOrder(side, qtyToProcess, pricePerLmcInr);
         toast.success(`Bought ${formatLMC(qtyToProcess, 4)} LMC. Order ID: ${orderId}`);
       } else {
         qtyToProcess = enteredAmt;
