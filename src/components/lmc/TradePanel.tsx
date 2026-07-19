@@ -273,10 +273,19 @@ export function TradePanel({ side }: { side: Side }) {
                   <span className="text-sm font-medium text-foreground/80">Buy LMC</span>
                   <span className="font-mono font-bold text-lg">₹5000</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-4">
                   <span className="text-xs text-muted-foreground">You will received LM Coin</span>
                   <span className="font-mono font-bold text-[color:var(--gold)]">₹6250</span>
                 </div>
+                <button
+                  onClick={() => {
+                    setAmount("5000");
+                    setShowConfirm(true);
+                  }}
+                  className="w-full py-2.5 text-sm font-bold rounded-xl btn-gold shadow-md hover:shadow-lg transition-all"
+                >
+                  Buy Now
+                </button>
               </div>
 
               <div className="p-4 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 hover:bg-foreground/10 transition-colors shadow-sm">
@@ -284,10 +293,19 @@ export function TradePanel({ side }: { side: Side }) {
                   <span className="text-sm font-medium text-foreground/80">Buy LMC</span>
                   <span className="font-mono font-bold text-lg">₹10,000</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-4">
                   <span className="text-xs text-muted-foreground">You Will Received LM Coin</span>
                   <span className="font-mono font-bold text-[color:var(--gold)]">₹13,000</span>
                 </div>
+                <button
+                  onClick={() => {
+                    setAmount("10000");
+                    setShowConfirm(true);
+                  }}
+                  className="w-full py-2.5 text-sm font-bold rounded-xl btn-gold shadow-md hover:shadow-lg transition-all"
+                >
+                  Buy Now
+                </button>
               </div>
 
               <div className="p-4 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 hover:bg-foreground/10 transition-colors shadow-sm">
@@ -295,10 +313,19 @@ export function TradePanel({ side }: { side: Side }) {
                   <span className="text-sm font-medium text-foreground/80">Buy LMC</span>
                   <span className="font-mono font-bold text-lg">₹15,000</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-4">
                   <span className="text-xs text-muted-foreground">You Will Received LM Coin</span>
                   <span className="font-mono font-bold text-[color:var(--gold)]">₹19,000</span>
                 </div>
+                <button
+                  onClick={() => {
+                    setAmount("15000");
+                    setShowConfirm(true);
+                  }}
+                  className="w-full py-2.5 text-sm font-bold rounded-xl btn-gold shadow-md hover:shadow-lg transition-all"
+                >
+                  Buy Now
+                </button>
               </div>
             </div>
           )}
@@ -308,7 +335,11 @@ export function TradePanel({ side }: { side: Side }) {
       {showConfirm && side === "buy" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-background/90 backdrop-blur-2xl border border-white/20 p-6 rounded-3xl shadow-2xl w-full max-w-[340px]">
-            <h3 className="text-lg font-bold mb-4 text-center">Confirm Purchase</h3>
+            <h3 className="text-lg font-bold mb-2 text-center">Confirm Purchase</h3>
+            {/* Added confirmation message here */}
+            <p className="text-center text-sm text-muted-foreground mb-4">
+              Are you sure you want to proceed with this purchase?
+            </p>
             <div className="space-y-4 mb-6 p-4 rounded-2xl bg-foreground/5 border border-foreground/10">
               <p className="text-center text-xs text-muted-foreground">
                 Pay Amount:{" "}
