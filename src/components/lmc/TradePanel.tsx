@@ -265,9 +265,41 @@ export function TradePanel({ side }: { side: Side }) {
               ))}
             </div>
           ) : (
-            <div className="mt-10 mb-6 text-center animate-in fade-in zoom-in-95 duration-500">
-              <div className="text-4xl mb-3 drop-shadow-lg">🔒</div>
-              <h3 className="font-semibold text-lg">Fixed LMC</h3>
+            <div className="mt-5 space-y-4 animate-in fade-in zoom-in-95 duration-500">
+              <h3 className="font-semibold text-lg text-center mb-4">Fixed LMC</h3>
+
+              <div className="p-4 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 hover:bg-foreground/10 transition-colors shadow-sm">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-foreground/80">Buy LMC</span>
+                  <span className="font-mono font-bold text-lg">₹5000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">You will received LM Coin</span>
+                  <span className="font-mono font-bold text-[color:var(--gold)]">₹6250</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 hover:bg-foreground/10 transition-colors shadow-sm">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-foreground/80">Buy LMC</span>
+                  <span className="font-mono font-bold text-lg">₹10,000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">You Will Received LM Coin</span>
+                  <span className="font-mono font-bold text-[color:var(--gold)]">₹13,000</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 hover:bg-foreground/10 transition-colors shadow-sm">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-foreground/80">Buy LMC</span>
+                  <span className="font-mono font-bold text-lg">₹15,000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">You Will Received LM Coin</span>
+                  <span className="font-mono font-bold text-[color:var(--gold)]">₹19,000</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
