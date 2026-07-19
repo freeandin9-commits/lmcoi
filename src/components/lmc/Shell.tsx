@@ -44,7 +44,7 @@ function BottomNav({ pathname }: { pathname: string }) {
   return (
     // Glassmorphism styling for BottomNav: സുതാര്യമായ ബാക്ക്ഗ്രൗണ്ട്, ബ്ലർ, ബോർഡർ, റൗണ്ടഡ് കോർണേഴ്സ്
     // Changed 'fixed' to 'absolute' to perfectly pin it to the bottom of the relative parent container
-    <nav className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[448px] bg-white/5 backdrop-blur-lg border border-white/10 z-40 rounded-2xl shadow-xl overflow-hidden">
+    <nav className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[736px] bg-white/5 backdrop-blur-lg border border-white/10 z-40 rounded-2xl shadow-xl overflow-hidden">
       <div className="grid grid-cols-5">
         {tabs.map((t) => {
           const Icon = t.icon;
