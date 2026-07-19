@@ -1,11 +1,31 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
 // home.tsx-ൽ ഉള്ളതുപോലെ usePriceSeries ഇവിടെയും ഉൾപ്പെടുത്തിയിട്ടുണ്ട്
 import { useWallet, placeOrder, formatINR, formatLMC, usePriceSeries } from "@/lib/lmc-api";
+import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.functions";
 import { Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
+
+declare global {
+  interface Window {
+    Razorpay?: new (opts: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
 
 type Side = "buy" | "sell";
 
