@@ -171,13 +171,22 @@ export function TradePanel({ side }: { side: Side }) {
                     </span>
                   )}
                 </div>
-                <input
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
-                  inputMode="decimal"
-                  placeholder={side === "buy" ? "Enter INR Amount" : "0.00"}
-                  className="mt-2 w-full rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 px-4 py-4 outline-none font-mono text-lg text-foreground focus:border-foreground/30 focus:bg-foreground/10 transition-all shadow-inner"
-                />
+
+                {/* Input field with INR Symbol for Sell */}
+                <div className="relative mt-2">
+                  {side === "sell" && (
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/50 font-mono text-lg pointer-events-none">
+                      ₹
+                    </span>
+                  )}
+                  <input
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+                    inputMode="decimal"
+                    placeholder={side === "buy" ? "Enter INR Amount" : "0.00"}
+                    className={`w-full rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 py-4 outline-none font-mono text-lg text-foreground focus:border-foreground/30 focus:bg-foreground/10 transition-all shadow-inner ${side === "sell" ? "pl-9 pr-4" : "px-4"}`}
+                  />
+                </div>
               </label>
 
               {side === "sell" && (
@@ -204,7 +213,8 @@ export function TradePanel({ side }: { side: Side }) {
                 ) : (
                   <>
                     <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
-                    <Row k="You receive" v={enteredAmt.toString()} />
+                    {/* Updated 'You receive' row with Green Color and INR symbol */}
+                    <Row k="You receive" v={`₹ ${enteredAmt.toString()}`} className="text-green-500" />
                     {/* Sell ചെയ്യുമ്പോൾ LMC Balance-ൽ Total Balance-ന്റെ വാല്യൂ തന്നെ നൽകിയിരിക്കുന്നു */}
                     <Row k="LMC Balance" v={formatLMC(total, 4) + " LMC"} />
                     <Row k="Hold Balance" v={formatINR(hold, 2)} />
@@ -291,11 +301,12 @@ export function TradePanel({ side }: { side: Side }) {
   );
 }
 
-function Row({ k, v }: { k: string; v: string }) {
+// Row component updated to accept className for custom styling
+function Row({ k, v, className }: { k: string; v: React.ReactNode; className?: string }) {
   return (
     <div className="flex justify-between items-center">
       <span className="text-muted-foreground/90">{k}</span>
-      <span className="font-mono font-medium">{v}</span>
+      <span className={`font-mono font-medium ${className || ""}`}>{v}</span>
     </div>
   );
 }
