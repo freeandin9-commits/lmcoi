@@ -41,7 +41,7 @@ function PaymentStatusPage() {
   const { status, amount, lmc, paymentId, orderId, reason } = Route.useSearch();
   const nav = useNavigate();
 
-  const config = STATUS_CONFIG[status];
+  const config = STATUS_CONFIG[status as Status];
   const Icon = config.icon;
 
   return (
