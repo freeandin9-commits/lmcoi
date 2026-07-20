@@ -19,7 +19,14 @@ import {
   Edit2,
   X,
   Trash2,
-  FileText, // <-- പുതുതായി ചേർത്തത് (For My Appeal icon)
+  FileText,
+  // --- പുതുതായി ചേർത്ത ഐക്കണുകൾ (New Features) ---
+  Wallet,
+  ShieldCheck,
+  HelpCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+  Activity,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -139,6 +146,7 @@ function Dashboard() {
         .animate-glass-1 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.1s; }
         .animate-glass-2 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.2s; }
         .animate-glass-3 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.3s; }
+        .animate-glass-4 { animation: glass-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.4s; }
         .animate-modal { animation: modal-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         .glass-shine {
@@ -229,19 +237,54 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* MENU LIST - Glassmorphism */}
-        <div className="animate-glass-2 rounded-3xl overflow-hidden backdrop-blur-2xl bg-background/40 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] transition-all duration-500">
+        {/* ---------------- NEW FEATURE: WALLET SUMMARY CARD ---------------- */}
+        <div className="animate-glass-2 rounded-3xl p-5 backdrop-blur-2xl bg-gradient-to-br from-background/60 to-black/40 border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-4 opacity-20 pointer-events-none">
+            <Wallet size={80} className="text-[color:var(--gold)]" />
+          </div>
+
+          <div className="relative z-10">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Total Balance</p>
+            <div className="flex items-baseline gap-2 mb-5">
+              <h3 className="text-3xl font-black text-foreground drop-shadow-md">0.00</h3>
+              <span className="text-sm font-bold text-[color:var(--gold)]">LMC</span>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => nav({ to: "/buy" })}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm bg-[color:var(--gold-soft)]/90 text-black shadow-[0_4px_15px_rgba(255,215,0,0.2)] hover:shadow-[0_8px_25px_rgba(255,215,0,0.4)] transition-all duration-300 hover:-translate-y-0.5"
+              >
+                <ArrowDownRight size={16} /> Deposit
+              </button>
+              <button
+                onClick={() => nav({ to: "/sell" })}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm bg-white/10 dark:bg-white/5 border border-white/20 text-foreground hover:bg-white/20 transition-all duration-300 hover:-translate-y-0.5"
+              >
+                <ArrowUpRight size={16} /> Withdraw
+              </button>
+            </div>
+          </div>
+        </div>
+        {/* ---------------- END NEW FEATURE ---------------- */}
+
+        {/* MENU LIST - Glassmorphism (Updated with New Menu Items) */}
+        <div className="animate-glass-3 rounded-3xl overflow-hidden backdrop-blur-2xl bg-background/40 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] transition-all duration-500">
           {[
             { icon: User, label: "Real Name", path: "/real-name" },
+            { icon: Wallet, label: "My Wallet", path: "/wallet" }, // <-- New
             { icon: CreditCard, label: "Collection", path: "/collection" },
             { icon: Lock, label: "Payment Password", path: "/payment-password" },
+            { icon: ShieldCheck, label: "Security Center", path: "/security" }, // <-- New
             { icon: History, label: "Transaction", path: "/transactions" },
             { icon: FileText, label: "My Appeal", path: "/my-appeal" },
             { icon: PlayCircle, label: "Buy Tutorial", path: "/buy-tutorial" },
             { icon: PlayCircle, label: "Sell Tutorial", path: "/sell-tutorial" },
+            { icon: Activity, label: "Market Activity", path: "/market" }, // <-- New
             { icon: Bell, label: "User Notice", path: "/user-notice" },
-            { icon: Gift, label: "Rewards Card", path: "/referral" }, // Linked to referral.tsx
-            { icon: Users, label: "Team Center", path: "/team" }, // Linked to new team.tsx
+            { icon: Gift, label: "Rewards Card", path: "/referral" },
+            { icon: Users, label: "Team Center", path: "/team" },
+            { icon: HelpCircle, label: "Help & Support", path: "/support" }, // <-- New
             { icon: Settings, label: "Settings", path: "/settings" },
           ].map((item, idx) => (
             <button
@@ -278,15 +321,15 @@ function Dashboard() {
         <div className="space-y-3">
           <button
             onClick={() => setIsSignOutModalOpen(true)}
-            className="animate-glass-3 glass-shine w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-xl bg-background/40 hover:bg-red-500/10 border border-white/20 hover:border-red-500/40 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(0,0,0,0.05)] text-foreground hover:text-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] hover:scale-[1.02] active:scale-95 group relative z-10"
+            className="animate-glass-4 glass-shine w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-xl bg-background/40 hover:bg-red-500/10 border border-white/20 hover:border-red-500/40 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(0,0,0,0.05)] text-foreground hover:text-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)] hover:scale-[1.02] active:scale-95 group relative z-10"
           >
             <LogOut size={18} className="transition-transform duration-300 group-hover:-translate-x-1" /> Sign out
           </button>
 
           <button
             onClick={() => setIsDeleteModalOpen(true)}
-            className="animate-glass-3 glass-shine w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 hover:border-red-500/50 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(239,68,68,0.05)] hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-95 group relative z-10"
-            style={{ animationDelay: "0.4s" }}
+            className="animate-glass-4 glass-shine w-full rounded-2xl py-4 text-sm font-bold flex items-center justify-center gap-2 backdrop-blur-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 hover:border-red-500/50 transition-all duration-400 ease-out shadow-[0_4px_15px_rgba(239,68,68,0.05)] hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] hover:scale-[1.02] active:scale-95 group relative z-10"
+            style={{ animationDelay: "0.5s" }}
           >
             <Trash2 size={18} className="transition-transform duration-300 group-hover:scale-110" /> Permanent Delete
           </button>
