@@ -27,12 +27,29 @@ export const Route = createFileRoute("/settings")({
 function SettingsPage() {
   const nav = useNavigate();
 
-  // Payment Sounds states (Pending, Cancelled, Success)
-  const [soundPending, setSoundPending] = useState(true);
-  const [soundCancelled, setSoundCancelled] = useState(true);
-  const [soundSuccess, setSoundSuccess] = useState(true);
+  // Payment Sounds states (Connected with localStorage)
+  const [soundPending, setSoundPending] = useState(() =>
+    JSON.parse(localStorage.getItem("lmc_soundPending") ?? "true"),
+  );
+  const [soundCancelled, setSoundCancelled] = useState(() =>
+    JSON.parse(localStorage.getItem("lmc_soundCancelled") ?? "true"),
+  );
+  const [soundSuccess, setSoundSuccess] = useState(() =>
+    JSON.parse(localStorage.getItem("lmc_soundSuccess") ?? "true"),
+  );
 
-  // States for other toggle switches (ഇവ പിന്നീട് നിങ്ങളുടെ ബാക്കെൻഡുമായോ ലോക്കൽ സ്റ്റോറേജുമായോ ബന്ധിപ്പിക്കാം)
+  // Update localStorage when toggled
+  useEffect(() => {
+    localStorage.setItem("lmc_soundPending", JSON.stringify(soundPending));
+  }, [soundPending]);
+  useEffect(() => {
+    localStorage.setItem("lmc_soundCancelled", JSON.stringify(soundCancelled));
+  }, [soundCancelled]);
+  useEffect(() => {
+    localStorage.setItem("lmc_soundSuccess", JSON.stringify(soundSuccess));
+  }, [soundSuccess]);
+
+  // States for other toggle switches
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
