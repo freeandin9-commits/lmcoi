@@ -13,10 +13,14 @@ import {
   MessageCircle,
   Send,
   Twitter,
-  // --- പുതുതായി ചേർത്ത ഐക്കണുകൾ ---
   Mail,
   Trophy,
   Info,
+  // --- പുതുതായി ചേർത്ത ഐക്കണുകൾ ---
+  Calculator,
+  HelpCircle,
+  ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,6 +46,10 @@ function Referral() {
   const code = profile?.referral_code ?? "";
   const link = typeof window !== "undefined" && code ? `${window.location.origin}/register?ref=${code}` : "";
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
+
+  // --- പുതുതായി ചേർത്ത സ്റ്റേറ്റുകൾ (Calculator & FAQ) ---
+  const [friendCount, setFriendCount] = useState<number>(5);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const copy = async (v: string, k: "code" | "link") => {
     try {
@@ -78,7 +86,7 @@ function Referral() {
     window.open(shareUrl, "_blank");
   };
 
-  // NEW FEATURE: Email Sharing Logic
+  // Email Sharing Logic
   const shareEmail = () => {
     if (!link) return;
     const subject = encodeURIComponent("You're invited to join LM Coin!");
@@ -110,7 +118,7 @@ function Referral() {
           </div>
         </div>
 
-        {/* NEW FEATURE: Referral Tier / Gamification Progress Bar */}
+        {/* Referral Tier / Gamification Progress Bar */}
         <div className="rounded-2xl p-5 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 dark:from-yellow-500/5 dark:to-orange-500/5 backdrop-blur-xl border border-yellow-500/20 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none transform translate-x-2 -translate-y-2">
             <Trophy size={80} />
@@ -209,7 +217,6 @@ function Referral() {
               >
                 <Twitter size={18} />
               </button>
-              {/* NEW FEATURE: Email Share Button */}
               <button
                 onClick={shareEmail}
                 disabled={!link}
@@ -218,6 +225,36 @@ function Referral() {
                 <Mail size={18} />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* --- NEW FEATURE: Earnings Estimator / Calculator Card --- */}
+        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+          <div className="flex items-center gap-2 mb-3">
+            <Calculator size={16} className="text-yellow-500" />
+            <h2 className="text-sm font-bold">Earnings Estimator</h2>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            Estimate how much LMC you can earn based on your invites:
+          </p>
+          <div className="flex items-center justify-between bg-black/10 dark:bg-white/5 p-3 rounded-xl border border-white/10 mb-3">
+            <span className="text-xs font-medium">
+              Invited Friends: <strong className="text-foreground">{friendCount}</strong>
+            </span>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={friendCount}
+              onChange={(e) => setFriendCount(Number(e.target.value))}
+              className="w-32 accent-yellow-500 cursor-pointer"
+            />
+          </div>
+          <div className="flex items-center justify-between text-xs bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-xl">
+            <span className="font-semibold text-yellow-600 dark:text-yellow-400 flex items-center gap-1">
+              <Sparkles size={14} /> Estimated Monthly Reward:
+            </span>
+            <strong className="text-sm font-mono text-foreground">{(friendCount * 12.5).toFixed(2)} LMC</strong>
           </div>
         </div>
 
@@ -253,7 +290,43 @@ function Referral() {
           </div>
         </div>
 
-        {/* NEW FEATURE: Terms & Conditions Link */}
+        {/* --- NEW FEATURE: Frequently Asked Questions (FAQ) --- */}
+        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+          <div className="flex items-center gap-2 mb-3">
+            <HelpCircle size={16} className="text-blue-500" />
+            <h2 className="text-sm font-bold">FAQ</h2>
+          </div>
+          <div className="space-y-2">
+            {[
+              [
+                "When do I get my rewards?",
+                "Rewards are credited to your balance instantly whenever your referred friend completes a qualifying trade fee.",
+              ],
+              [
+                "Is there a limit on how many friends I can invite?",
+                "No limit at all! You can invite as many friends as you want and keep earning.",
+              ],
+            ].map(([q, a], idx) => (
+              <div key={idx} className="border border-white/10 rounded-xl overflow-hidden bg-white/5 dark:bg-black/10">
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full p-3 text-left text-xs font-semibold flex items-center justify-between hover:bg-white/5 transition-colors"
+                >
+                  <span>{q}</span>
+                  <ChevronDown
+                    size={14}
+                    className={`transform transition-transform ${openFaq === idx ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {openFaq === idx && (
+                  <div className="px-3 pb-3 text-xs text-muted-foreground border-t border-white/5 pt-2">{a}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Terms & Conditions Link */}
         <div className="flex items-center justify-center gap-1.5 mt-6 pb-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
           <Info size={14} className="text-muted-foreground" />
           <span
