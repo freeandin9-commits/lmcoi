@@ -23,10 +23,13 @@ import {
   Edit3,
   Award,
   Medal,
-  // --- പുതിയതായി ചേർത്ത ഐക്കണുകൾ ---
   Gift,
   Bell,
   BellOff,
+  // --- പുതിയതായി ചേർത്ത ഐക്കണുകൾ ---
+  Target,
+  Clock,
+  BellRing,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -58,9 +61,12 @@ function Referral() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [customMessage, setCustomMessage] = useState<string>("Join LM Coin and earn rewards! Sign up with my code:");
 
-  // --- പുതിയ സ്റ്റേറ്റുകൾ (Claim Rewards & Notifications) ---
+  // നേരത്തെയുള്ള പുതിയ സ്റ്റേറ്റുകൾ
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
+
+  // --- പുതിയതായി ചേർത്ത സ്റ്റേറ്റ് (Reminder ഫീച്ചറിന് വേണ്ടി) ---
+  const [remindingId, setRemindingId] = useState<number | null>(null);
 
   const copy = async (v: string, k: "code" | "link") => {
     try {
@@ -129,7 +135,7 @@ function Referral() {
           </div>
         </div>
 
-        {/* --- NEW FEATURE: Claim Rewards Banner --- */}
+        {/* Claim Rewards Banner */}
         <div className="rounded-2xl p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30 flex items-center justify-between shadow-sm backdrop-blur-xl">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.3)]">
@@ -173,6 +179,36 @@ function Referral() {
           </div>
           <div className="w-full bg-black/10 dark:bg-white/10 rounded-full h-2.5 mt-3 relative z-10 overflow-hidden shadow-inner">
             <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full w-[5%] transition-all duration-1000"></div>
+          </div>
+        </div>
+
+        {/* --- NEW FEATURE 1: Milestone Bonuses --- */}
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Target size={16} className="text-purple-500" />
+            <h2 className="text-sm font-bold">Milestone Bonuses</h2>
+          </div>
+          <div className="space-y-3">
+            {[
+              { target: 10, reward: "50 LMC", progress: 0 },
+              { target: 50, reward: "300 LMC", progress: 0 },
+              { target: 100, reward: "1000 LMC", progress: 0 },
+            ].map((milestone, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5"
+              >
+                <div>
+                  <div className="text-xs font-bold text-foreground">Invite {milestone.target} Friends</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                    <Sparkles size={10} className="text-yellow-500" /> Reward: {milestone.reward}
+                  </div>
+                </div>
+                <div className="text-xs font-bold text-yellow-600 dark:text-yellow-400">
+                  {milestone.progress} / {milestone.target}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -378,7 +414,46 @@ function Referral() {
           </div>
         </div>
 
-        {/* --- NEW FEATURE: Notification Toggle Settings --- */}
+        {/* --- NEW FEATURE 2: Pending Actions / Reminders --- */}
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock size={16} className="text-orange-500" />
+            <h2 className="text-sm font-bold">Pending Actions</h2>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">Friends who joined but haven't traded yet.</p>
+          <div className="space-y-2">
+            {[
+              { id: 1, name: "Rahul T.", status: "KYC Pending" },
+              { id: 2, name: "Sneha M.", status: "No Trades Yet" },
+            ].map((friend) => (
+              <div
+                key={friend.id}
+                className="flex items-center justify-between bg-black/5 dark:bg-white/5 p-2.5 rounded-lg border border-white/5"
+              >
+                <div>
+                  <div className="text-xs font-medium">{friend.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{friend.status}</div>
+                </div>
+                <button
+                  onClick={() => {
+                    setRemindingId(friend.id);
+                    setTimeout(() => {
+                      setRemindingId(null);
+                      toast.success(`Reminder sent to ${friend.name}!`);
+                    }, 1000);
+                  }}
+                  disabled={remindingId === friend.id}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 text-[10px] font-bold rounded-lg transition-all disabled:opacity-50"
+                >
+                  <BellRing size={12} />
+                  {remindingId === friend.id ? "Sending..." : "Remind"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Notification Toggle Settings */}
         <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
