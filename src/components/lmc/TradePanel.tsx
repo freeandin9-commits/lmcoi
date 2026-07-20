@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Shell, AppHeader } from "@/components/lmc/Shell";
+import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
 import { useWallet, placeOrder, formatINR, formatLMC, LMC_PER_INR, FIXED_PRICE_PER_LMC } from "@/lib/lmc-api";
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.functions";
@@ -56,11 +56,9 @@ export function TradePanel({ side }: { side: Side }) {
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
 
-  const hold = Number((wallet as { hold_balance?: number } | null)?.hold_balance ?? 0);
   const lmcPerInr = LMC_PER_INR;
   const pricePerLmcInr = FIXED_PRICE_PER_LMC;
-  const total = lmc * pricePerLmcInr + inr;
-  const totalBalance = Math.round(total * 100) / 100;
+  const sellableInr = Math.round(lmc * pricePerLmcInr * 100) / 100;
 
   const enteredAmt = parseFloat(amount) || 0;
   /** Buy: You will receive this many LMC after payment success */
@@ -69,7 +67,7 @@ export function TradePanel({ side }: { side: Side }) {
   const sellLmcQty = Math.round(enteredAmt * lmcPerInr * 10000) / 10000;
 
   const canSubmit =
-    enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= totalBalance + 0.0001);
+    enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= sellableInr + 0.0001);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
@@ -79,7 +77,7 @@ export function TradePanel({ side }: { side: Side }) {
     }
 
     if (enteredAmt <= 0) return toast.error("Enter amount to sell");
-    if (enteredAmt > totalBalance) return toast.error("Insufficient Balance");
+    if (enteredAmt > sellableInr) return toast.error("Insufficient Balance");
 
     await submit();
   };
@@ -210,7 +208,7 @@ export function TradePanel({ side }: { side: Side }) {
     if (side === "buy") {
       setAmount((inr * p).toFixed(2));
     } else {
-      setAmount((totalBalance * p).toFixed(2));
+      setAmount((sellableInr * p).toFixed(2));
     }
   };
 
@@ -272,11 +270,9 @@ export function TradePanel({ side }: { side: Side }) {
                     {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC - INR)"}
                   </span>
                   {side === "sell" && (
-                    <span className="text-xs font-medium text-muted-foreground">
-                      Available:{" "}
-                      <span className="font-mono font-bold text-[color:var(--gold)]">
-                        {formatINR(totalBalance, 2)}
-                      </span>
+                    <span className="text-xs font-medium text-muted-foreground inline-flex items-center gap-1">
+                      Available:
+                      <LmcAmount value={lmc} />
                     </span>
                   )}
                 </div>
@@ -322,11 +318,8 @@ export function TradePanel({ side }: { side: Side }) {
                 ) : (
                   <>
                     <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
-                    <Row k="LMC deducted" v={formatLMC(sellLmcQty, 4) + " LMC"} />
                     <Row k="You receive" v={formatINR(enteredAmt, 2)} className="text-green-500" />
-                    <Row k="LMC Balance" v={formatLMC(lmc, 4) + " LMC"} />
-                    <Row k="Hold Balance" v={formatINR(hold, 2)} />
-                    <Row k="Total Balance" v={formatINR(total, 2)} />
+                    <Row k="LMC Balance" v={<LmcAmount value={lmc} />} />
                   </>
                 )}
               </div>
@@ -473,6 +466,15 @@ export function TradePanel({ side }: { side: Side }) {
 }
 
 // Row component updated to accept className for custom styling
+function LmcAmount({ value }: { value: number }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 font-mono font-bold text-[color:var(--gold)]">
+      <LMCMark size={16} />
+      {formatLMC(value, 4)}
+    </span>
+  );
+}
+
 function Row({ k, v, className }: { k: string; v: React.ReactNode; className?: string }) {
   return (
     <div className="flex justify-between items-center">
