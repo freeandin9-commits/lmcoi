@@ -63,7 +63,7 @@ export function TradePanel({ side }: { side: Side }) {
   const hold = Number((wallet as { hold_balance?: number } | null)?.hold_balance ?? 0);
   const lmcPerInr = 1.25;
   const pricePerLmcInr = 1 / lmcPerInr;
-  const currentPrice = price ?? pricePerLmcInr;
+  const currentPrice = pricePerLmcInr;
   const total = lmc * currentPrice + inr;
 
   const enteredAmt = parseFloat(amount) || 0;
