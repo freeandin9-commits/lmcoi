@@ -27,12 +27,42 @@ export const Route = createFileRoute("/settings")({
 function SettingsPage() {
   const nav = useNavigate();
 
-  // Payment Sounds states (Pending, Cancelled, Success)
-  const [soundPending, setSoundPending] = useState(true);
-  const [soundCancelled, setSoundCancelled] = useState(true);
-  const [soundSuccess, setSoundSuccess] = useState(true);
+  // Payment Sounds states with LocalStorage persistence
+  const [soundPending, setSoundPending] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return JSON.parse(localStorage.getItem("soundPending") ?? "true");
+    }
+    return true;
+  });
 
-  // States for other toggle switches (ഇവ പിന്നീട് നിങ്ങളുടെ ബാക്കെൻഡുമായോ ലോക്കൽ സ്റ്റോറേജുമായോ ബന്ധിപ്പിക്കാം)
+  const [soundCancelled, setSoundCancelled] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return JSON.parse(localStorage.getItem("soundCancelled") ?? "true");
+    }
+    return true;
+  });
+
+  const [soundSuccess, setSoundSuccess] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return JSON.parse(localStorage.getItem("soundSuccess") ?? "true");
+    }
+    return true;
+  });
+
+  // Update LocalStorage whenever states change
+  useEffect(() => {
+    localStorage.setItem("soundPending", JSON.stringify(soundPending));
+  }, [soundPending]);
+
+  useEffect(() => {
+    localStorage.setItem("soundCancelled", JSON.stringify(soundCancelled));
+  }, [soundCancelled]);
+
+  useEffect(() => {
+    localStorage.setItem("soundSuccess", JSON.stringify(soundSuccess));
+  }, [soundSuccess]);
+
+  // States for other toggle switches
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);

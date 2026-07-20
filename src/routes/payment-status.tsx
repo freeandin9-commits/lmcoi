@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { CheckCircle2, XCircle, Clock, Loader2, ArrowRight, Home } from "lucide-react";
 import { formatINR, formatLMC } from "@/lib/lmc-api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Added "cancelled" to strictly match the requirement
 type Status = "success" | "failed" | "pending" | "processing" | "cancelled";
@@ -59,6 +59,43 @@ function PaymentStatusPage() {
 
   const config = STATUS_CONFIG[status as Status];
   const Icon = config.icon;
+
+  // Sound Play Logic based on LocalStorage settings
+  useEffect(() => {
+    const playSound = (soundType: "success" | "cancelled" | "pending") => {
+      try {
+        let soundUrl = "";
+        let isEnabled = false;
+
+        // Check localStorage for user settings (Defaults to true)
+        if (soundType === "success") {
+          isEnabled = JSON.parse(localStorage.getItem("soundSuccess") ?? "true");
+          soundUrl = "/sounds/success.mp3"; // നിങ്ങളുടെ സക്‌സസ്സ് ഓഡിയോ പാത്ത് നൽകുക
+        } else if (soundType === "cancelled") {
+          isEnabled = JSON.parse(localStorage.getItem("soundCancelled") ?? "true");
+          soundUrl = "/sounds/cancelled.mp3"; // നിങ്ങളുടെ കാൻസൽഡ് ഓഡിയോ പാത്ത് നൽകുക
+        } else if (soundType === "pending") {
+          isEnabled = JSON.parse(localStorage.getItem("soundPending") ?? "true");
+          soundUrl = "/sounds/pending.mp3"; // നിങ്ങളുടെ പെൻഡിങ് ഓഡിയോ പാത്ത് നൽകുക
+        }
+
+        if (isEnabled && soundUrl) {
+          const audio = new Audio(soundUrl);
+          audio.play().catch((err) => console.log("Audio playback failed:", err));
+        }
+      } catch (error) {
+        console.error("Error checking sound settings:", error);
+      }
+    };
+
+    if (status === "success") {
+      playSound("success");
+    } else if (status === "cancelled") {
+      playSound("cancelled");
+    } else if (status === "pending") {
+      playSound("pending");
+    }
+  }, [status]);
 
   // Generate Current Date & Time (hh:mm:ss) dynamically if not provided in URL
   const [displayDate] = useState(() => {
