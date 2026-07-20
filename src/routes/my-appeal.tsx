@@ -40,7 +40,7 @@ function MyAppeal() {
 
       // 3. Auto-fill UTR Number
       // (Assuming your database returns utr_number or utr. Added fallback "N/A" if empty)
-      setUtrNumber(selectedTx.utr_number || selectedTx.utr || "N/A");
+      setUtrNumber((selectedTx as any).utr_number || (selectedTx as any).utr || "N/A");
 
       // 4. Auto-fill Date and Time
       if (selectedTx.created_at) {
