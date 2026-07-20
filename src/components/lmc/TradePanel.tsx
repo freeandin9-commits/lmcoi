@@ -60,8 +60,7 @@ export function TradePanel({ side }: { side: Side }) {
   const lmcPerInr = LMC_PER_INR;
   const pricePerLmcInr = FIXED_PRICE_PER_LMC;
   const total = lmc * pricePerLmcInr + inr;
-  /** Sellable LMC value in INR (only LMC can be sold) */
-  const sellableInr = Math.round(lmc * pricePerLmcInr * 100) / 100;
+  const totalBalance = Math.round(total * 100) / 100;
 
   const enteredAmt = parseFloat(amount) || 0;
   /** Buy: You will receive this many LMC after payment success */
@@ -70,7 +69,7 @@ export function TradePanel({ side }: { side: Side }) {
   const sellLmcQty = Math.round(enteredAmt * lmcPerInr * 10000) / 10000;
 
   const canSubmit =
-    enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= sellableInr + 0.0001);
+    enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= totalBalance + 0.0001);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
@@ -80,7 +79,7 @@ export function TradePanel({ side }: { side: Side }) {
     }
 
     if (enteredAmt <= 0) return toast.error("Enter amount to sell");
-    if (enteredAmt > sellableInr) return toast.error("Insufficient LMC balance");
+    if (enteredAmt > totalBalance) return toast.error("Insufficient Balance");
 
     await submit();
   };
@@ -211,7 +210,7 @@ export function TradePanel({ side }: { side: Side }) {
     if (side === "buy") {
       setAmount((inr * p).toFixed(2));
     } else {
-      setAmount((sellableInr * p).toFixed(2));
+      setAmount((totalBalance * p).toFixed(2));
     }
   };
 
@@ -276,7 +275,7 @@ export function TradePanel({ side }: { side: Side }) {
                     <span className="text-xs font-medium text-muted-foreground">
                       Available:{" "}
                       <span className="font-mono font-bold text-[color:var(--gold)]">
-                        {formatLMC(lmc, 4)} LMC ({formatINR(sellableInr, 2)})
+                        {formatINR(totalBalance, 2)}
                       </span>
                     </span>
                   )}
