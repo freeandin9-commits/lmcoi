@@ -3,7 +3,21 @@ import { useEffect, useState } from "react";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/lib/lmc-api";
-import { Copy, Check, Share2, Users, Coins, QrCode, MessageCircle, Send, Twitter } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Share2,
+  Users,
+  Coins,
+  QrCode,
+  MessageCircle,
+  Send,
+  Twitter,
+  // --- പുതുതായി ചേർത്ത ഐക്കണുകൾ ---
+  Mail,
+  Trophy,
+  Info,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/referral")({
@@ -50,7 +64,7 @@ function Referral() {
     }
   };
 
-  // New Feature: Direct Social Media Sharing Logic
+  // Direct Social Media Sharing Logic
   const shareSocial = (platform: "wa" | "tg" | "tw") => {
     if (!link) return;
     const text = encodeURIComponent(`Join LM Coin and earn rewards! Sign up with my code: ${code}`);
@@ -64,21 +78,31 @@ function Referral() {
     window.open(shareUrl, "_blank");
   };
 
+  // NEW FEATURE: Email Sharing Logic
+  const shareEmail = () => {
+    if (!link) return;
+    const subject = encodeURIComponent("You're invited to join LM Coin!");
+    const body = encodeURIComponent(
+      `Hi there,\n\nI want to invite you to join LM Coin. You can earn exclusive rewards by signing up using my referral code: ${code}\n\nJoin here: ${link}\n\nBest,\nLM Coin User`,
+    );
+    window.open(`mailto:?subject=${subject}&body=${body}`);
+  };
+
   return (
     <Shell>
       <AppHeader title="Referral" />
       <div className="px-4 pt-4 pb-8 space-y-4">
-        {/* NEW FEATURE: Rewards & Stats Card */}
+        {/* Rewards & Stats Card */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm flex flex-col items-center justify-center text-center">
-            <div className="h-10 w-10 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center mb-2">
+          <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors">
+            <div className="h-10 w-10 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
               <Users size={20} />
             </div>
             <div className="text-2xl font-bold">0</div>
             <div className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Total Invites</div>
           </div>
-          <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm flex flex-col items-center justify-center text-center">
-            <div className="h-10 w-10 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center mb-2">
+          <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors">
+            <div className="h-10 w-10 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
               <Coins size={20} />
             </div>
             <div className="text-2xl font-bold">0.00</div>
@@ -86,17 +110,38 @@ function Referral() {
           </div>
         </div>
 
+        {/* NEW FEATURE: Referral Tier / Gamification Progress Bar */}
+        <div className="rounded-2xl p-5 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 dark:from-yellow-500/5 dark:to-orange-500/5 backdrop-blur-xl border border-yellow-500/20 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none transform translate-x-2 -translate-y-2">
+            <Trophy size={80} />
+          </div>
+          <div className="flex justify-between items-end mb-2 relative z-10">
+            <div>
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                Bronze Tier <Trophy size={14} className="text-yellow-600 dark:text-yellow-500" />
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5 font-medium">Invite 5 more friends to reach Silver</p>
+            </div>
+            <span className="text-xs font-bold text-yellow-700 dark:text-yellow-400 bg-yellow-500/20 px-2.5 py-1 rounded-md">
+              0 / 5
+            </span>
+          </div>
+          <div className="w-full bg-black/10 dark:bg-white/10 rounded-full h-2.5 mt-3 relative z-10 overflow-hidden shadow-inner">
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full w-[5%] transition-all duration-1000"></div>
+          </div>
+        </div>
+
         {/* Glassmorphism Code Card (Gold Tinted Glass) */}
         <div className="rounded-2xl p-5 relative overflow-hidden bg-yellow-500/10 dark:bg-yellow-500/5 backdrop-blur-xl border border-yellow-500/20 shadow-[0_8px_32px_0_rgba(234,179,8,0.15)] text-foreground">
-          <div className="text-sm opacity-80">Invite friends. Earn together.</div>
+          <div className="text-sm opacity-80 font-medium">Invite friends. Earn together.</div>
           <div className="mt-3 text-xs uppercase tracking-widest opacity-80">Your code</div>
           <div className="mt-1 flex items-center gap-2">
-            <span className="font-mono text-3xl font-extrabold tracking-tight">{code || "—"}</span>
+            <span className="font-mono text-3xl font-extrabold tracking-tight drop-shadow-sm">{code || "—"}</span>
             <div className="ml-auto flex gap-2">
               <button
                 disabled={!code}
                 onClick={() => toast.info("QR Code feature coming soon!")}
-                className="grid place-items-center h-9 w-9 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm disabled:opacity-40 hover:bg-white/30 transition-all"
+                className="grid place-items-center h-9 w-9 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm disabled:opacity-40 hover:bg-white/30 hover:scale-110 active:scale-95 transition-all"
                 aria-label="Show QR"
               >
                 <QrCode size={16} />
@@ -104,10 +149,10 @@ function Referral() {
               <button
                 disabled={!code}
                 onClick={() => copy(code, "code")}
-                className="grid place-items-center h-9 w-9 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm disabled:opacity-40 hover:bg-white/30 transition-all"
+                className="grid place-items-center h-9 w-9 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm disabled:opacity-40 hover:bg-white/30 hover:scale-110 active:scale-95 transition-all"
                 aria-label="Copy code"
               >
-                {copied === "code" ? <Check size={16} /> : <Copy size={16} />}
+                {copied === "code" ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
               </button>
             </div>
           </div>
@@ -120,12 +165,12 @@ function Referral() {
             <input
               readOnly
               value={link}
-              className="flex-1 rounded-lg bg-black/5 dark:bg-white/5 border border-white/10 backdrop-blur-sm px-3 py-2 text-xs font-mono truncate outline-none text-foreground"
+              className="flex-1 rounded-lg bg-black/5 dark:bg-white/5 border border-white/10 backdrop-blur-sm px-3 py-2 text-xs font-mono truncate outline-none text-foreground shadow-inner"
             />
             <button
               disabled={!link}
               onClick={() => copy(link, "link")}
-              className="rounded-lg bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm hover:bg-white/30 px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-all"
+              className="rounded-lg bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/20 shadow-sm hover:bg-white/30 px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-all hover:scale-105 active:scale-95"
             >
               {copied === "link" ? "Copied" : "Copy"}
             </button>
@@ -134,35 +179,43 @@ function Referral() {
           <button
             onClick={share}
             disabled={!link}
-            className="mt-4 w-full rounded-xl bg-white/10 dark:bg-white/5 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-sm py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
+            className="mt-4 w-full rounded-xl bg-white/10 dark:bg-white/5 hover:bg-white/20 border border-white/20 backdrop-blur-md shadow-sm py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-all hover:-translate-y-0.5"
           >
             <Share2 size={16} /> Share
           </button>
 
-          {/* NEW FEATURE: Direct Social Share Buttons */}
+          {/* Direct Social Share Buttons */}
           <div className="mt-4 pt-4 border-t border-white/10 dark:border-white/5 flex items-center justify-between">
             <span className="text-xs text-muted-foreground font-medium">Quick share:</span>
             <div className="flex gap-2">
               <button
                 onClick={() => shareSocial("wa")}
                 disabled={!link}
-                className="h-10 w-10 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 border border-green-500/20 flex items-center justify-center transition-all disabled:opacity-50"
+                className="h-10 w-10 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:scale-110 active:scale-95 border border-green-500/20 flex items-center justify-center transition-all disabled:opacity-50 shadow-sm"
               >
                 <MessageCircle size={18} />
               </button>
               <button
                 onClick={() => shareSocial("tg")}
                 disabled={!link}
-                className="h-10 w-10 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border border-blue-500/20 flex items-center justify-center transition-all disabled:opacity-50"
+                className="h-10 w-10 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 hover:scale-110 active:scale-95 border border-blue-500/20 flex items-center justify-center transition-all disabled:opacity-50 shadow-sm"
               >
                 <Send size={18} />
               </button>
               <button
                 onClick={() => shareSocial("tw")}
                 disabled={!link}
-                className="h-10 w-10 rounded-full bg-neutral-500/10 text-foreground hover:bg-neutral-500/20 border border-neutral-500/20 flex items-center justify-center transition-all disabled:opacity-50"
+                className="h-10 w-10 rounded-full bg-neutral-500/10 text-foreground hover:bg-neutral-500/20 hover:scale-110 active:scale-95 border border-neutral-500/20 flex items-center justify-center transition-all disabled:opacity-50 shadow-sm"
               >
                 <Twitter size={18} />
+              </button>
+              {/* NEW FEATURE: Email Share Button */}
+              <button
+                onClick={shareEmail}
+                disabled={!link}
+                className="h-10 w-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:scale-110 active:scale-95 border border-red-500/20 flex items-center justify-center transition-all disabled:opacity-50 shadow-sm"
+              >
+                <Mail size={18} />
               </button>
             </div>
           </div>
@@ -177,20 +230,20 @@ function Referral() {
               ["They join", "When they sign up with your code, we link their account to you."],
               ["You earn", "Earn a share of every trade fee they generate."],
             ].map(([t, d], i) => (
-              <li key={t} className="flex gap-3">
-                <span className="grid place-items-center h-8 w-8 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 shadow-inner text-xs font-bold shrink-0">
+              <li key={t} className="flex gap-3 group">
+                <span className="grid place-items-center h-8 w-8 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 shadow-inner text-xs font-bold shrink-0 group-hover:scale-110 transition-transform">
                   {i + 1}
                 </span>
                 <div>
-                  <div className="font-semibold">{t}</div>
-                  <div className="text-muted-foreground text-xs mt-0.5">{d}</div>
+                  <div className="font-semibold text-foreground/90">{t}</div>
+                  <div className="text-muted-foreground text-xs mt-0.5 leading-relaxed">{d}</div>
                 </div>
               </li>
             ))}
           </ol>
         </div>
 
-        {/* NEW FEATURE: Recent Referrals List */}
+        {/* Recent Referrals List */}
         <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
           <h2 className="text-sm font-bold mb-4">Recent Referrals</h2>
           <div className="flex flex-col items-center justify-center py-6 text-center opacity-60">
@@ -198,6 +251,17 @@ function Referral() {
             <p className="text-sm font-medium">No friends joined yet</p>
             <p className="text-xs text-muted-foreground mt-1">Share your code to get started!</p>
           </div>
+        </div>
+
+        {/* NEW FEATURE: Terms & Conditions Link */}
+        <div className="flex items-center justify-center gap-1.5 mt-6 pb-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
+          <Info size={14} className="text-muted-foreground" />
+          <span
+            onClick={() => toast.info("Terms and Conditions modal opening soon!")}
+            className="text-xs font-medium text-muted-foreground underline decoration-muted-foreground/30 underline-offset-4 hover:text-foreground"
+          >
+            Read Referral Terms & Conditions
+          </span>
         </div>
       </div>
     </Shell>
