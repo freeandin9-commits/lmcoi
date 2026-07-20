@@ -37,13 +37,15 @@ function TransactionsPage() {
     }
   };
 
-  const getStatusStyle = (status: string) => {
+  // Strictly matched with payment-status.tsx logic & colors
+  const getStatusData = (status: string) => {
     const s = status?.toLowerCase();
-    if (s === "success") return "text-green-500";
-    if (s === "failed" || s === "failure" || s === "cancelled") return "text-[color:var(--danger)]";
-    if (s === "pending") return "text-yellow-500";
-    if (s === "processing") return "text-[color:var(--gold)]";
-    return "text-muted-foreground";
+    if (s === "success") return { text: "Success", color: "text-green-500" };
+    if (s === "cancelled") return { text: "Cancelled", color: "text-[color:var(--danger)]" };
+    if (s === "failed" || s === "failure") return { text: "Failure", color: "text-[color:var(--danger)]" };
+    if (s === "processing") return { text: "Processing", color: "text-[color:var(--gold)]" };
+    // Default to pending
+    return { text: "Pending", color: "text-yellow-500" };
   };
 
   // 1) Handle Copy Order ID
@@ -152,8 +154,8 @@ function TransactionsPage() {
                 hour12: true,
               });
 
-              // 2. Strict Status Text (Success / Pending / Cancelled / Failure)
-              const statusText = t.status?.toLowerCase() === "failed" ? "Failure" : t.status;
+              // 2. Strict Status Data (Text & Color) from payment-status logic
+              const statusData = getStatusData(t.status);
 
               // 3. Calculate Pay & Receive Amounts mirroring payment-status logic
               let payAmount = "N/A";
@@ -227,8 +229,8 @@ function TransactionsPage() {
                     <Row
                       label="Status"
                       value={
-                        <span className={`uppercase font-bold tracking-wider ${getStatusStyle(t.status)}`}>
-                          {statusText}
+                        <span className={`uppercase font-bold tracking-wider ${statusData.color}`}>
+                          {statusData.text}
                         </span>
                       }
                     />
