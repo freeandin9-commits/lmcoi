@@ -37,19 +37,13 @@ function TransactionsPage() {
     }
   };
 
-  const getTransactionColor = (type: string) => {
-    switch (type.toLowerCase()) {
-      case "buy":
-      case "deposit":
-        return "text-[color:var(--success)]";
-      case "sell":
-      case "withdraw":
-        return "text-red-500";
-      case "referral":
-        return "text-purple-500";
-      default:
-        return "text-foreground";
-    }
+  const getStatusStyle = (status: string) => {
+    const s = status?.toLowerCase();
+    if (s === "success") return "text-green-500";
+    if (s === "failed" || s === "failure" || s === "cancelled") return "text-[color:var(--danger)]";
+    if (s === "pending") return "text-yellow-500";
+    if (s === "processing") return "text-[color:var(--gold)]";
+    return "text-muted-foreground";
   };
 
   // 1) Handle Copy Order ID
@@ -145,81 +139,99 @@ function TransactionsPage() {
             <p>No transactions found.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {transactions.map((t) => {
-              // Format amount based on type
-              const isLmc = t.type === "buy" || t.type === "sell";
-              const amountDisplay = isLmc
-                ? `${t.type === "buy" ? "+" : "-"}${formatLMC(Number(t.amount_lmc), 4)} LMC`
-                : `${t.type === "deposit" || t.type === "referral" ? "+" : "-"}${formatINR(Number(t.amount_inr), 2)}`;
+              // 1. Format Date & Time with seconds (hh:mm:ss)
+              const displayDate = new Date(t.created_at).toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              });
+
+              // 2. Strict Status Text (Success / Pending / Cancelled / Failure)
+              const statusText = t.status?.toLowerCase() === "failed" ? "Failure" : t.status;
+
+              // 3. Calculate Pay & Receive Amounts mirroring payment-status logic
+              let payAmount = "N/A";
+              let receiveAmount = "N/A";
+              const amtInr = Number(t.amount_inr || 0);
+              const amtLmc = Number(t.amount_lmc || 0);
+
+              if (t.type?.toLowerCase() === "buy") {
+                payAmount = formatINR(amtInr, 2);
+                if (amtInr === 5000) receiveAmount = "₹6250";
+                else if (amtInr === 10000) receiveAmount = "₹13,000";
+                else if (amtInr === 15000) receiveAmount = "₹19,000";
+                else receiveAmount = `${formatLMC(amtLmc, 4)} LMC`;
+              } else if (t.type?.toLowerCase() === "sell") {
+                payAmount = `${formatLMC(amtLmc, 4)} LMC`;
+                receiveAmount = formatINR(amtInr, 2);
+              } else {
+                payAmount = "N/A";
+                receiveAmount = formatINR(amtInr, 2); // default for deposits/referrals
+              }
 
               return (
                 <div
                   key={t.id}
-                  id={`tx-${t.id}`} // Added ID for html2canvas to capture this specific div
-                  className="p-4 rounded-2xl bg-secondary/40 backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 relative"
+                  id={`tx-${t.id}`} // ID for html2canvas to capture this specific div
+                  className="p-4 rounded-3xl bg-secondary/40 backdrop-blur-md border border-white/10 shadow-sm relative flex flex-col gap-3"
                 >
-                  <div className="flex justify-between items-start">
+                  {/* Card Header (Icon, Title, Action Buttons) */}
+                  <div className="flex justify-between items-center mb-1">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center shadow-sm border border-border">
                         {getTransactionIcon(t.type)}
                       </div>
-                      <div>
-                        {/* 1. Type: Buy / Sell / Referral */}
-                        <div className="font-bold text-base capitalize text-foreground">{t.type}</div>
-                        {/* 2. Date and Time */}
-                        <div className="text-xs text-muted-foreground font-medium mt-0.5">
-                          {new Date(t.created_at).toLocaleString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
-                        </div>
-                      </div>
+                      <div className="font-bold text-base capitalize text-foreground">{t.type}</div>
                     </div>
 
-                    <div className="text-right">
-                      <div className={`font-extrabold text-sm font-mono ${getTransactionColor(t.type)}`}>
-                        {amountDisplay}
-                      </div>
-                      <div className="text-[10px] uppercase font-bold tracking-wider mt-1 opacity-70">{t.status}</div>
-                    </div>
-                  </div>
-
-                  {/* 3. Order ID & Actions (Copy / Share) */}
-                  <div className="pt-2 mt-1 border-t border-border/50 flex justify-between items-center">
-                    <span className="text-[11px] text-muted-foreground font-semibold">Order ID</span>
-
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1.5 bg-background/50 pl-2 pr-1 py-0.5 rounded-md border border-border">
-                        <span className="text-[11px] font-mono text-muted-foreground/80">{t.id}</span>
-                        <button
-                          onClick={() => handleCopy(t.id)}
-                          className="p-1 hover:bg-white/10 rounded transition-colors"
-                          title="Copy Order ID"
-                          data-html2canvas-ignore="true" // Hides copy button from shared image
-                        >
-                          {copiedId === t.id ? (
-                            <Check size={12} className="text-[color:var(--success)]" />
-                          ) : (
-                            <Copy size={12} className="text-muted-foreground" />
-                          )}
-                        </button>
-                      </div>
+                    <div className="flex items-center gap-2" data-html2canvas-ignore="true">
+                      <button
+                        onClick={() => handleCopy(t.id)}
+                        className="p-2 bg-background/50 border border-border rounded-xl hover:bg-white/10 text-muted-foreground transition-all"
+                        title="Copy Order ID"
+                      >
+                        {copiedId === t.id ? (
+                          <Check size={16} className="text-[color:var(--success)]" />
+                        ) : (
+                          <Copy size={16} />
+                        )}
+                      </button>
 
                       <button
                         onClick={() => handleShare(t.id)}
                         disabled={sharingId === t.id}
-                        className="p-1.5 bg-background/50 border border-border rounded-md hover:bg-white/10 text-muted-foreground transition-all disabled:opacity-50"
+                        className="p-2 bg-background/50 border border-border rounded-xl hover:bg-white/10 text-muted-foreground transition-all disabled:opacity-50"
                         title="Share Transaction"
-                        data-html2canvas-ignore="true" // Hides share button from shared image
                       >
-                        {sharingId === t.id ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
+                        {sharingId === t.id ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
                       </button>
                     </div>
+                  </div>
+
+                  {/* Transaction Details Box */}
+                  <div className="rounded-2xl bg-foreground/5 border border-foreground/10 p-4 text-sm space-y-3 text-left">
+                    <Row label="Order ID" value={<span className="text-xs">{t.id}</span>} />
+
+                    <Row label="Type" value={<span className="font-bold capitalize">{t.type}</span>} />
+                    <Row label="Pay Amount" value={payAmount} />
+                    <Row label="Receive Amount" value={receiveAmount} valueClass="text-[color:var(--gold)]" />
+
+                    <Row label="Date & Time" value={<span className="text-xs">{displayDate}</span>} />
+
+                    <Row
+                      label="Status"
+                      value={
+                        <span className={`uppercase font-bold tracking-wider ${getStatusStyle(t.status)}`}>
+                          {statusText}
+                        </span>
+                      }
+                    />
                   </div>
                 </div>
               );
@@ -228,5 +240,15 @@ function TransactionsPage() {
         )}
       </div>
     </Shell>
+  );
+}
+
+// Row component for rendering transaction details uniformly
+function Row({ label, value, valueClass }: { label: string; value: React.ReactNode; valueClass?: string }) {
+  return (
+    <div className="flex justify-between items-center gap-3">
+      <span className="text-muted-foreground/90">{label}</span>
+      <span className={`font-mono font-medium text-right break-all ${valueClass ?? ""}`}>{value}</span>
+    </div>
   );
 }
