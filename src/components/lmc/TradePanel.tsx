@@ -53,8 +53,8 @@ export function TradePanel({ side }: { side: Side }) {
   const [busy, setBusy] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Payment cancel അനിമേഷനും വോയ്‌സിനും വേണ്ടിയുള്ള പുതിയ സ്റ്റേറ്റ്
-  const [cancelAnimState, setCancelAnimState] = useState<"none" | "processing" | "cancelled">("none");
+  // Payment Cancel ആകുമ്പോഴും Success ആകുമ്പോഴും അനിമേഷൻ കാണിക്കാനുള്ള സ്റ്റേറ്റ്
+  const [paymentAnimState, setPaymentAnimState] = useState<"none" | "processing" | "cancelled" | "success">("none");
 
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
@@ -121,17 +121,12 @@ export function TradePanel({ side }: { side: Side }) {
               razorpay_signature: string;
             }) => {
               try {
-                nav({
-                  to: "/payment-status",
-                  search: {
-                    status: "processing",
-                    amount: enteredAmt,
-                    orderId: resp.razorpay_order_id,
-                    paymentId: resp.razorpay_payment_id,
-                  },
-                });
-                // Wallet credit happens only here — after Razorpay success + server verify
-                const verified = await verifyPaymentFn({
+                // Payment Success ആകുമ്പോൾ Processing Animation കാണിക്കുന്നു
+                setShowConfirm(false);
+                setPaymentAnimState("processing");
+
+                // Payment verify ചെയ്യാനുള്ള സർവർ ഫംഗ്ഷൻ വിളിക്കുന്നു
+                const verifyPromise = verifyPaymentFn({
                   data: {
                     razorpay_order_id: resp.razorpay_order_id,
                     razorpay_payment_id: resp.razorpay_payment_id,
@@ -139,18 +134,51 @@ export function TradePanel({ side }: { side: Side }) {
                     amountInr: enteredAmt,
                   },
                 });
-                nav({
-                  to: "/payment-status",
-                  search: {
-                    status: "success",
-                    amount: enteredAmt,
-                    lmc: Number(verified?.lmc ?? lmcExpected),
-                    orderId: resp.razorpay_order_id,
-                    paymentId: resp.razorpay_payment_id,
-                  },
-                });
-                resolve();
+
+                // ചുരുങ്ങിയത് 2 സെക്കൻഡ് അനിമേഷൻ കാണിക്കാൻ ഒരു delay നൽകുന്നു
+                const delayPromise = new Promise((res) => setTimeout(res, 2000));
+
+                // സർവർ വേരിഫിക്കേഷനും 2 സെക്കൻഡ് ഡിലേയും പൂർത്തിയാകുമ്പോൾ
+                const [verified] = await Promise.all([verifyPromise, delayPromise]);
+
+                // 3-ാമത്തെ സെക്കൻഡിൽ Success Animation ലേക്ക് മാറ്റുന്നു
+                setPaymentAnimState("success");
+
+                // Natural voice ഉപയോഗിച്ച് Success മെസ്സേജ് വായിക്കുന്നു
+                if ("speechSynthesis" in window) {
+                  const msg = new SpeechSynthesisUtterance(
+                    "Hello, Your payment was successful. The amount will be reflected shortly. Thank you for your patience.",
+                  );
+                  const voices = window.speechSynthesis.getVoices();
+                  const voice =
+                    voices.find(
+                      (v) =>
+                        v.name.includes("Natural") ||
+                        v.name.includes("Google UK English Female") ||
+                        v.name.includes("Google US English"),
+                    ) || voices[0];
+                  if (voice) msg.voice = voice;
+                  msg.rate = 0.95;
+                  window.speechSynthesis.speak(msg);
+                }
+
+                // 6 സെക്കൻഡിനു ശേഷം Payment Status പേജിലേക്ക് നാവിഗേറ്റ് ചെയ്യുന്നു (വോയിസ് പൂർണ്ണമായി കേൾക്കാൻ സമയം നൽകുന്നു)
+                setTimeout(() => {
+                  setPaymentAnimState("none");
+                  nav({
+                    to: "/payment-status",
+                    search: {
+                      status: "success",
+                      amount: enteredAmt,
+                      lmc: Number(verified?.lmc ?? lmcExpected),
+                      orderId: resp.razorpay_order_id,
+                      paymentId: resp.razorpay_payment_id,
+                    },
+                  });
+                  resolve();
+                }, 6000);
               } catch (err) {
+                setPaymentAnimState("none");
                 const msg = err instanceof Error ? err.message : "Verification failed";
                 nav({
                   to: "/payment-status",
@@ -169,12 +197,12 @@ export function TradePanel({ side }: { side: Side }) {
               ondismiss: () => {
                 // Payment Modal cancel ചെയ്യുമ്പോൾ നടക്കുന്ന അനിമേഷനും വോയ്‌സും
                 setShowConfirm(false);
-                setCancelAnimState("processing");
+                setPaymentAnimState("processing");
 
                 setTimeout(() => {
-                  setCancelAnimState("cancelled");
+                  setPaymentAnimState("cancelled");
 
-                  // Natural voice ഉപയോഗിച്ച് അലർട്ട് വായിക്കുന്നു
+                  // Natural voice ഉപയോഗിച്ച് Cancelled അലർട്ട് വായിക്കുന്നു
                   if ("speechSynthesis" in window) {
                     const msg = new SpeechSynthesisUtterance(
                       "Payment Cancelled. No Amount was deducted. If money was debited, it will be refunded to your source within 5 to 7 working days.",
@@ -195,7 +223,7 @@ export function TradePanel({ side }: { side: Side }) {
 
                   // 6 സെക്കൻഡിനു ശേഷം Failed പേജിലേക്ക് പോകുന്നു (വോയിസ് പൂർണ്ണമായി കേൾക്കാൻ സമയം നൽകുന്നു)
                   setTimeout(() => {
-                    setCancelAnimState("none");
+                    setPaymentAnimState("none");
                     nav({
                       to: "/payment-status",
                       search: {
@@ -496,17 +524,17 @@ export function TradePanel({ side }: { side: Side }) {
         </div>
       )}
 
-      {/* Payment Cancel ആകുമ്പോഴുള്ള Animation Overlay */}
-      {cancelAnimState !== "none" && (
+      {/* Payment Status Animation Overlay */}
+      {paymentAnimState !== "none" && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all duration-300">
           <div className="bg-background/90 backdrop-blur-2xl border border-white/20 p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center max-w-[340px] w-full text-center">
-            {cancelAnimState === "processing" ? (
+            {paymentAnimState === "processing" ? (
               <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center">
                 <Loader2 size={48} className="animate-spin text-[color:var(--gold)] mb-4" />
                 <h3 className="text-xl font-bold mb-2">Processing...</h3>
                 <p className="text-sm text-muted-foreground">Please wait while we verify payment status.</p>
               </div>
-            ) : (
+            ) : paymentAnimState === "cancelled" ? (
               <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center">
                 <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-4 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]">
                   <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -517,6 +545,18 @@ export function TradePanel({ side }: { side: Side }) {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   No Amount was deducted. If money was debited, it will be refunded to your source within 5-7 working
                   days.
+                </p>
+              </div>
+            ) : (
+              <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center">
+                <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-4 text-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-green-500">Payment Successful</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  The amount will be reflected shortly. Thank you for your patience.
                 </p>
               </div>
             )}
