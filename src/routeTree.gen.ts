@@ -19,6 +19,7 @@ import { Route as SellRouteImport } from './routes/sell'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as RealNameRouteImport } from './routes/real-name'
+import { Route as PaymentStatusRouteImport } from './routes/payment-status'
 import { Route as PaymentPasswordRouteImport } from './routes/payment-password'
 import { Route as MyAppealRouteImport } from './routes/my-appeal'
 import { Route as HomeRouteImport } from './routes/home'
@@ -78,6 +79,11 @@ const RealNameRoute = RealNameRouteImport.update({
   path: '/real-name',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaymentStatusRoute = PaymentStatusRouteImport.update({
+  id: '/payment-status',
+  path: '/payment-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PaymentPasswordRoute = PaymentPasswordRouteImport.update({
   id: '/payment-password',
   path: '/payment-password',
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/my-appeal': typeof MyAppealRoute
   '/payment-password': typeof PaymentPasswordRoute
+  '/payment-status': typeof PaymentStatusRoute
   '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/my-appeal': typeof MyAppealRoute
   '/payment-password': typeof PaymentPasswordRoute
+  '/payment-status': typeof PaymentStatusRoute
   '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/my-appeal': typeof MyAppealRoute
   '/payment-password': typeof PaymentPasswordRoute
+  '/payment-status': typeof PaymentStatusRoute
   '/real-name': typeof RealNameRoute
   '/referral': typeof ReferralRoute
   '/register': typeof RegisterRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/my-appeal'
     | '/payment-password'
+    | '/payment-status'
     | '/real-name'
     | '/referral'
     | '/register'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/my-appeal'
     | '/payment-password'
+    | '/payment-status'
     | '/real-name'
     | '/referral'
     | '/register'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/my-appeal'
     | '/payment-password'
+    | '/payment-status'
     | '/real-name'
     | '/referral'
     | '/register'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   MyAppealRoute: typeof MyAppealRoute
   PaymentPasswordRoute: typeof PaymentPasswordRoute
+  PaymentStatusRoute: typeof PaymentStatusRoute
   RealNameRoute: typeof RealNameRoute
   ReferralRoute: typeof ReferralRoute
   RegisterRoute: typeof RegisterRoute
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RealNameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payment-status': {
+      id: '/payment-status'
+      path: '/payment-status'
+      fullPath: '/payment-status'
+      preLoaderRoute: typeof PaymentStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/payment-password': {
       id: '/payment-password'
       path: '/payment-password'
@@ -404,6 +424,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   MyAppealRoute: MyAppealRoute,
   PaymentPasswordRoute: PaymentPasswordRoute,
+  PaymentStatusRoute: PaymentStatusRoute,
   RealNameRoute: RealNameRoute,
   ReferralRoute: ReferralRoute,
   RegisterRoute: RegisterRoute,
