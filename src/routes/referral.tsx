@@ -20,10 +20,13 @@ import {
   HelpCircle,
   ChevronDown,
   Sparkles,
-  // --- പുതിയതായി ചേർത്ത ഐക്കണുകൾ ---
   Edit3,
   Award,
   Medal,
+  // --- പുതിയതായി ചേർത്ത ഐക്കണുകൾ ---
+  Gift,
+  Bell,
+  BellOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -53,9 +56,11 @@ function Referral() {
   // പഴയ സ്റ്റേറ്റുകൾ
   const [friendCount, setFriendCount] = useState<number>(5);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  // --- പുതിയ സ്റ്റേറ്റ്: Custom Share Message ---
   const [customMessage, setCustomMessage] = useState<string>("Join LM Coin and earn rewards! Sign up with my code:");
+
+  // --- പുതിയ സ്റ്റേറ്റുകൾ (Claim Rewards & Notifications) ---
+  const [isClaiming, setIsClaiming] = useState<boolean>(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
 
   const copy = async (v: string, k: "code" | "link") => {
     try {
@@ -78,7 +83,7 @@ function Referral() {
     }
   };
 
-  // Direct Social Media Sharing Logic (Updated with Custom Message)
+  // Direct Social Media Sharing Logic
   const shareSocial = (platform: "wa" | "tg" | "tw") => {
     if (!link) return;
     const text = encodeURIComponent(`${customMessage} ${code}`);
@@ -92,7 +97,7 @@ function Referral() {
     window.open(shareUrl, "_blank");
   };
 
-  // Email Sharing Logic (Updated with Custom Message)
+  // Email Sharing Logic
   const shareEmail = () => {
     if (!link) return;
     const subject = encodeURIComponent("You're invited to join LM Coin!");
@@ -122,6 +127,32 @@ function Referral() {
             <div className="text-2xl font-bold">0.00</div>
             <div className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Earned (LMC)</div>
           </div>
+        </div>
+
+        {/* --- NEW FEATURE: Claim Rewards Banner --- */}
+        <div className="rounded-2xl p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30 flex items-center justify-between shadow-sm backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+              <Gift size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Claim Rewards</h3>
+              <p className="text-xs text-muted-foreground">0.00 LMC available</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setIsClaiming(true);
+              setTimeout(() => {
+                setIsClaiming(false);
+                toast.success("Rewards claimed successfully!");
+              }, 1500);
+            }}
+            disabled={isClaiming}
+            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+          >
+            {isClaiming ? "Claiming..." : "Claim"}
+          </button>
         </div>
 
         {/* Referral Tier / Gamification Progress Bar */}
@@ -172,7 +203,7 @@ function Referral() {
           </div>
         </div>
 
-        {/* --- NEW FEATURE: Custom Share Message --- */}
+        {/* Custom Share Message */}
         <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
@@ -302,7 +333,7 @@ function Referral() {
           </ol>
         </div>
 
-        {/* --- NEW FEATURE: Top Referrers Leaderboard --- */}
+        {/* Top Referrers Leaderboard */}
         <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold flex items-center gap-2">
@@ -347,8 +378,34 @@ function Referral() {
           </div>
         </div>
 
+        {/* --- NEW FEATURE: Notification Toggle Settings --- */}
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className={`h-8 w-8 rounded-full flex items-center justify-center transition-colors ${notificationsEnabled ? "bg-blue-500/20 text-blue-500" : "bg-gray-500/20 text-gray-500"}`}
+            >
+              {notificationsEnabled ? <Bell size={16} /> : <BellOff size={16} />}
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Referral Alerts</h3>
+              <p className="text-xs text-muted-foreground">Get notified when a friend joins</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setNotificationsEnabled(!notificationsEnabled);
+              toast.success(!notificationsEnabled ? "Notifications enabled" : "Notifications disabled");
+            }}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${notificationsEnabled ? "bg-blue-500" : "bg-gray-600"}`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${notificationsEnabled ? "translate-x-6" : "translate-x-1"}`}
+            />
+          </button>
+        </div>
+
         {/* Frequently Asked Questions (FAQ) */}
-        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] mt-4">
           <div className="flex items-center gap-2 mb-3">
             <HelpCircle size={16} className="text-blue-500" />
             <h2 className="text-sm font-bold">FAQ</h2>
