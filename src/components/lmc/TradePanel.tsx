@@ -53,6 +53,9 @@ export function TradePanel({ side }: { side: Side }) {
   const [busy, setBusy] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  // Payment cancel അനിമേഷനും വോയ്‌സിനും വേണ്ടിയുള്ള പുതിയ സ്റ്റേറ്റ്
+  const [cancelAnimState, setCancelAnimState] = useState<"none" | "processing" | "cancelled">("none");
+
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
 
@@ -164,15 +167,47 @@ export function TradePanel({ side }: { side: Side }) {
             },
             modal: {
               ondismiss: () => {
-                nav({
-                  to: "/payment-status",
-                  search: {
-                    status: "failed",
-                    amount: enteredAmt,
-                    orderId: order.orderId,
-                    reason: "Payment cancelled",
-                  },
-                });
+                // Payment Modal cancel ചെയ്യുമ്പോൾ നടക്കുന്ന അനിമേഷനും വോയ്‌സും
+                setShowConfirm(false);
+                setCancelAnimState("processing");
+
+                setTimeout(() => {
+                  setCancelAnimState("cancelled");
+
+                  // Natural voice ഉപയോഗിച്ച് അലർട്ട് വായിക്കുന്നു
+                  if ("speechSynthesis" in window) {
+                    const msg = new SpeechSynthesisUtterance(
+                      "Payment Cancelled. No Amount was deducted. If money was debited, it will be refunded to your source within 5 to 7 working days.",
+                    );
+                    const voices = window.speechSynthesis.getVoices();
+                    // നാച്ചുറൽ ആയ വോയിസ് കണ്ടെത്താൻ ശ്രമിക്കുന്നു
+                    const voice =
+                      voices.find(
+                        (v) =>
+                          v.name.includes("Natural") ||
+                          v.name.includes("Google UK English Female") ||
+                          v.name.includes("Google US English"),
+                      ) || voices[0];
+                    if (voice) msg.voice = voice;
+                    msg.rate = 0.95;
+                    window.speechSynthesis.speak(msg);
+                  }
+
+                  // 6 സെക്കൻഡിനു ശേഷം Failed പേജിലേക്ക് പോകുന്നു (വോയിസ് പൂർണ്ണമായി കേൾക്കാൻ സമയം നൽകുന്നു)
+                  setTimeout(() => {
+                    setCancelAnimState("none");
+                    nav({
+                      to: "/payment-status",
+                      search: {
+                        status: "failed",
+                        amount: enteredAmt,
+                        orderId: order.orderId,
+                        reason: "Payment cancelled",
+                      },
+                    });
+                  }, 6000);
+                }, 2000); // 2 സെക്കൻഡ് പ്രോസസ്സിംഗ് കാണിക്കുന്നു
+
                 reject(new Error("Payment cancelled"));
               },
             },
@@ -457,6 +492,34 @@ export function TradePanel({ side }: { side: Side }) {
                 Confirm
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Cancel ആകുമ്പോഴുള്ള Animation Overlay */}
+      {cancelAnimState !== "none" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all duration-300">
+          <div className="bg-background/90 backdrop-blur-2xl border border-white/20 p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center max-w-[340px] w-full text-center">
+            {cancelAnimState === "processing" ? (
+              <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center">
+                <Loader2 size={48} className="animate-spin text-[color:var(--gold)] mb-4" />
+                <h3 className="text-xl font-bold mb-2">Processing...</h3>
+                <p className="text-sm text-muted-foreground">Please wait while we verify payment status.</p>
+              </div>
+            ) : (
+              <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center">
+                <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-4 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-red-500">Payment Cancelled</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  No Amount was deducted. If money was debited, it will be refunded to your source within 5-7 working
+                  days.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
