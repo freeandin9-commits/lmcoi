@@ -56,27 +56,31 @@ export function TradePanel({ side }: { side: Side }) {
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
 
-  // home.tsx-ൽ ഉള്ളതുപോലെ Hold Balance-ഉം Total Balance-ഉം കണക്കാക്കുന്നു
   const hold = Number((wallet as { hold_balance?: number } | null)?.hold_balance ?? 0);
   const lmcPerInr = LMC_PER_INR;
   const pricePerLmcInr = FIXED_PRICE_PER_LMC;
   const total = lmc * pricePerLmcInr + inr;
+  /** Sellable LMC value in INR (only LMC can be sold) */
+  const sellableInr = Math.round(lmc * pricePerLmcInr * 100) / 100;
 
   const enteredAmt = parseFloat(amount) || 0;
-  // Buy ചെയ്യുമ്പോൾ ബാലൻസ് ചെക്ക് ചെയ്യേണ്ടതില്ല, Sell ചെയ്യുമ്പോൾ Balance (total) ചെക്ക് ചെയ്യും
-  const canSubmit = enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= total);
+  /** Buy: You will receive this many LMC after payment success */
+  const buyReceiveLmc = Math.round(enteredAmt * lmcPerInr * 10000) / 10000;
+  /** Sell: INR entered → LMC to deduct from wallet */
+  const sellLmcQty = Math.round(enteredAmt * lmcPerInr * 10000) / 10000;
+
+  const canSubmit =
+    enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= sellableInr + 0.0001);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
       if (enteredAmt <= 0) return toast.error("Enter INR amount");
-      // Buy ചെയ്യുമ്പോൾ Wallet Amount ചെക്ക് ചെയ്യുന്നത് ഒഴിവാക്കി
       setShowConfirm(true);
       return;
     }
 
-    if (enteredAmt <= 0) return toast.error("Enter LMC quantity");
-    // LMC ബാലൻസിന് പകരം പുതിയ Balance (total) ചെക്ക് ചെയ്യുന്നു
-    if (enteredAmt > total) return toast.error("Insufficient Balance");
+    if (enteredAmt <= 0) return toast.error("Enter amount to sell");
+    if (enteredAmt > sellableInr) return toast.error("Insufficient LMC balance");
 
     await submit();
   };
@@ -97,7 +101,7 @@ export function TradePanel({ side }: { side: Side }) {
         if (!ok) throw new Error("Failed to load Razorpay. Check your internet connection.");
 
         const order = await createOrderFn({ data: { amountInr: enteredAmt } });
-        const lmcExpected = enteredAmt * lmcPerInr;
+        const lmcExpected = buyReceiveLmc;
 
         await new Promise<void>((resolve, reject) => {
           const rzp = new window.Razorpay!({
@@ -127,7 +131,8 @@ export function TradePanel({ side }: { side: Side }) {
                     paymentId: resp.razorpay_payment_id,
                   },
                 });
-                await verifyPaymentFn({
+                // Wallet credit happens only here — after Razorpay success + server verify
+                const verified = await verifyPaymentFn({
                   data: {
                     razorpay_order_id: resp.razorpay_order_id,
                     razorpay_payment_id: resp.razorpay_payment_id,
@@ -140,7 +145,7 @@ export function TradePanel({ side }: { side: Side }) {
                   search: {
                     status: "success",
                     amount: enteredAmt,
-                    lmc: lmcExpected,
+                    lmc: Number(verified?.lmc ?? lmcExpected),
                     orderId: resp.razorpay_order_id,
                     paymentId: resp.razorpay_payment_id,
                   },
@@ -181,9 +186,10 @@ export function TradePanel({ side }: { side: Side }) {
 
         qtyToProcess = lmcExpected;
       } else {
-        qtyToProcess = enteredAmt;
-        await placeOrder(side, qtyToProcess, pricePerLmcInr);
-        toast.success(`Sold ${formatLMC(qtyToProcess, 4)} LMC`);
+        // Sell: deduct LMC equal to entered INR × 1.25; credit INR to wallet
+        qtyToProcess = sellLmcQty;
+        await placeOrder("sell", qtyToProcess, pricePerLmcInr);
+        toast.success(`Sold ${formatLMC(qtyToProcess, 4)} LMC · ${formatINR(enteredAmt, 2)} credited`);
       }
 
       setAmount("");
@@ -203,11 +209,9 @@ export function TradePanel({ side }: { side: Side }) {
 
   const setPct = (p: number) => {
     if (side === "buy") {
-      const maxQty = inr;
-      setAmount((maxQty * p).toFixed(2));
+      setAmount((inr * p).toFixed(2));
     } else {
-      // Sell ചെയ്യുമ്പോൾ LMC യ്ക്ക് പകരം Total വാല്യൂ കണക്കാക്കുന്നു
-      setAmount((total * p).toFixed(4));
+      setAmount((sellableInr * p).toFixed(2));
     }
   };
 
@@ -270,8 +274,10 @@ export function TradePanel({ side }: { side: Side }) {
                   </span>
                   {side === "sell" && (
                     <span className="text-xs font-medium text-muted-foreground">
-                      Balance:{" "}
-                      <span className="font-mono font-bold text-[color:var(--gold)]">{formatLMC(total, 4)} LMC</span>
+                      Available:{" "}
+                      <span className="font-mono font-bold text-[color:var(--gold)]">
+                        {formatLMC(lmc, 4)} LMC ({formatINR(sellableInr, 2)})
+                      </span>
                     </span>
                   )}
                 </div>
@@ -312,15 +318,14 @@ export function TradePanel({ side }: { side: Side }) {
                   <>
                     <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
                     <Row k="You pay" v={formatINR(enteredAmt, 2)} />
-                    <Row k="You will receive" v={formatLMC(enteredAmt * lmcPerInr, 4) + " LMC"} />
+                    <Row k="You will receive" v={formatLMC(buyReceiveLmc, 4) + " LMC"} />
                   </>
                 ) : (
                   <>
                     <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
-                    {/* Updated 'You receive' row with Green Color and INR symbol */}
-                    <Row k="You receive" v={`₹ ${enteredAmt.toString()}`} className="text-green-500" />
-                    {/* Sell ചെയ്യുമ്പോൾ LMC Balance-ൽ Total Balance-ന്റെ വാല്യൂ തന്നെ നൽകിയിരിക്കുന്നു */}
-                    <Row k="LMC Balance" v={formatLMC(total, 4) + " LMC"} />
+                    <Row k="LMC deducted" v={formatLMC(sellLmcQty, 4) + " LMC"} />
+                    <Row k="You receive" v={formatINR(enteredAmt, 2)} className="text-green-500" />
+                    <Row k="LMC Balance" v={formatLMC(lmc, 4) + " LMC"} />
                     <Row k="Hold Balance" v={formatINR(hold, 2)} />
                     <Row k="Total Balance" v={formatINR(total, 2)} />
                   </>

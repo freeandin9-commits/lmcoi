@@ -2,6 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createHmac } from "crypto";
 
+/** Fixed rate: 1 INR = 1.25 LMC */
+const LMC_PER_INR = 1.25;
+const PRICE_PER_LMC = 1 / LMC_PER_INR;
+
 type CreateOrderInput = { amountInr: number };
 type VerifyInput = {
   razorpay_order_id: string;
@@ -9,6 +13,10 @@ type VerifyInput = {
   razorpay_signature: string;
   amountInr: number;
 };
+
+function razorpayAuthHeader(keyId: string, keySecret: string) {
+  return `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`;
+}
 
 export const createRazorpayOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -35,7 +43,7 @@ export const createRazorpayOrder = createServerFn({ method: "POST" })
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`,
+        Authorization: razorpayAuthHeader(keyId, keySecret),
       },
       body: JSON.stringify(body),
     });
@@ -68,8 +76,9 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
     };
   })
   .handler(async ({ data, context }) => {
+    const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
-    if (!keySecret) throw new Error("Razorpay not configured");
+    if (!keyId || !keySecret) throw new Error("Razorpay not configured");
 
     const expected = createHmac("sha256", keySecret)
       .update(`${data.razorpay_order_id}|${data.razorpay_payment_id}`)
@@ -78,21 +87,49 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
       throw new Error("Invalid payment signature");
     }
 
+    // Confirm payment is captured/authorized on Razorpay before any wallet credit
+    const payRes = await fetch(`https://api.razorpay.com/v1/payments/${data.razorpay_payment_id}`, {
+      headers: { Authorization: razorpayAuthHeader(keyId, keySecret) },
+    });
+    if (!payRes.ok) {
+      throw new Error("Unable to verify payment with Razorpay");
+    }
+    const payment = (await payRes.json()) as {
+      id: string;
+      status: string;
+      order_id: string;
+      amount: number;
+      currency: string;
+    };
+
+    if (payment.order_id !== data.razorpay_order_id) {
+      throw new Error("Payment order mismatch");
+    }
+    if (payment.currency !== "INR") {
+      throw new Error("Unsupported currency");
+    }
+    if (payment.status !== "captured" && payment.status !== "authorized") {
+      throw new Error(`Payment not successful (${payment.status})`);
+    }
+
+    // Use Razorpay paid amount (paise → INR), not a client-only figure
+    const paidInr = Math.round(payment.amount) / 100;
+    if (Math.abs(paidInr - data.amountInr) > 0.01) {
+      throw new Error("Payment amount mismatch");
+    }
+
+    // Exact "You will receive" value: INR × 1.25 LMC
+    const lmcQty = Math.round(paidInr * LMC_PER_INR * 10000) / 10000;
+
     const { supabase } = context;
-
-    // Convert INR to LMC at fixed 1 INR = 1.25 LMC (price 0.8)
-    const lmcPerInr = 1.25;
-    const price = 1 / lmcPerInr;
-    const lmcQty = Math.round(data.amountInr * lmcPerInr * 10000) / 10000;
-
-    // Credit only the LMC to wallet (not the INR); log a single buy transaction
-    const { error: creditErr } = await (supabase as any).rpc("razorpay_credit_lmc", {
-      p_amount_inr: data.amountInr,
+    const { data: tx, error: creditErr } = await (supabase as any).rpc("razorpay_credit_lmc", {
+      p_amount_inr: paidInr,
       p_amount_lmc: lmcQty,
-      p_price: price,
+      p_price: PRICE_PER_LMC,
       p_payment_id: data.razorpay_payment_id,
     });
     if (creditErr) throw new Error(creditErr.message);
 
-    return { ok: true, lmc: lmcQty, paymentId: data.razorpay_payment_id };
+    const credited = Number(tx?.amount_lmc ?? lmcQty);
+    return { ok: true, lmc: credited, paymentId: data.razorpay_payment_id };
   });
