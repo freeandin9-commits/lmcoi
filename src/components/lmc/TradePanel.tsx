@@ -59,9 +59,15 @@ export function TradePanel({ side }: { side: Side }) {
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
 
+  // Wallet പേജിലെ അതേ ലോജിക്: Hold Balance ലഭ്യമാക്കുകയും അത് മൊത്തം LMC യിൽ നിന്ന് കുറയ്ക്കുകയും ചെയ്യുന്നു
+  const holdBalance = Number((wallet as any)?.hold_balance ?? 0);
+  const availableLmc = Math.max(0, lmc - holdBalance);
+
   const lmcPerInr = LMC_PER_INR;
   const pricePerLmcInr = FIXED_PRICE_PER_LMC;
-  const sellableInr = Math.round(lmc * pricePerLmcInr * 100) / 100;
+
+  // വിൽക്കാൻ സാധിക്കുന്ന പരമാവധി INR (Available LMC അടിസ്ഥാനമാക്കി)
+  const sellableInr = Math.round(availableLmc * pricePerLmcInr * 100) / 100;
 
   const enteredAmt = parseFloat(amount) || 0;
   /** Buy: You will receive this many LMC after payment success */
@@ -334,7 +340,7 @@ export function TradePanel({ side }: { side: Side }) {
                   {side === "sell" && (
                     <span className="text-xs font-medium text-muted-foreground inline-flex items-center gap-1">
                       Available:
-                      <LmcAmount value={lmc} />
+                      <LmcAmount value={availableLmc} />
                     </span>
                   )}
                 </div>
