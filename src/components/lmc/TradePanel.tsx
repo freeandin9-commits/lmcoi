@@ -101,6 +101,7 @@ export function TradePanel({ side }: { side: Side }) {
         if (!ok) throw new Error("Failed to load Razorpay. Check your internet connection.");
 
         const order = await createOrderFn({ data: { amountInr: enteredAmt } });
+        const lmcExpected = enteredAmt * lmcPerInr;
 
         await new Promise<void>((resolve, reject) => {
           const rzp = new window.Razorpay!({
@@ -109,7 +110,7 @@ export function TradePanel({ side }: { side: Side }) {
             currency: order.currency,
             order_id: order.orderId,
             name: "LM Coin",
-            description: `Buy ${formatLMC(enteredAmt * lmcPerInr, 4)} LMC`,
+            description: `Buy ${formatLMC(lmcExpected, 4)} LMC`,
             prefill: {
               email: user?.email ?? "",
               name: user?.user_metadata?.display_name ?? "",
@@ -121,6 +122,15 @@ export function TradePanel({ side }: { side: Side }) {
               razorpay_signature: string;
             }) => {
               try {
+                nav({
+                  to: "/payment-status",
+                  search: {
+                    status: "processing",
+                    amount: enteredAmt,
+                    orderId: resp.razorpay_order_id,
+                    paymentId: resp.razorpay_payment_id,
+                  },
+                });
                 await verifyPaymentFn({
                   data: {
                     razorpay_order_id: resp.razorpay_order_id,
@@ -129,20 +139,51 @@ export function TradePanel({ side }: { side: Side }) {
                     amountInr: enteredAmt,
                   },
                 });
+                nav({
+                  to: "/payment-status",
+                  search: {
+                    status: "success",
+                    amount: enteredAmt,
+                    lmc: lmcExpected,
+                    orderId: resp.razorpay_order_id,
+                    paymentId: resp.razorpay_payment_id,
+                  },
+                });
                 resolve();
               } catch (err) {
+                const msg = err instanceof Error ? err.message : "Verification failed";
+                nav({
+                  to: "/payment-status",
+                  search: {
+                    status: "pending",
+                    amount: enteredAmt,
+                    orderId: resp.razorpay_order_id,
+                    paymentId: resp.razorpay_payment_id,
+                    reason: msg,
+                  },
+                });
                 reject(err);
               }
             },
             modal: {
-              ondismiss: () => reject(new Error("Payment cancelled")),
+              ondismiss: () => {
+                nav({
+                  to: "/payment-status",
+                  search: {
+                    status: "failed",
+                    amount: enteredAmt,
+                    orderId: order.orderId,
+                    reason: "Payment cancelled",
+                  },
+                });
+                reject(new Error("Payment cancelled"));
+              },
             },
           });
           rzp.open();
         });
 
-        qtyToProcess = enteredAmt * lmcPerInr;
-        toast.success(`Bought ${formatLMC(qtyToProcess, 4)} LMC. Order ID: ${orderId}`);
+        qtyToProcess = lmcExpected;
       } else {
         qtyToProcess = enteredAmt;
         await placeOrder(side, qtyToProcess, pricePerLmcInr);
@@ -153,7 +194,7 @@ export function TradePanel({ side }: { side: Side }) {
       setShowConfirm(false);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unable to place order";
-      toast.error(message);
+      if (side !== "buy") toast.error(message);
     } finally {
       setBusy(false);
     }
