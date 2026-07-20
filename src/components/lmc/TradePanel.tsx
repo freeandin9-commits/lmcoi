@@ -66,8 +66,7 @@ export function TradePanel({ side }: { side: Side }) {
   /** Sell: INR entered → LMC to deduct from wallet */
   const sellLmcQty = Math.round(enteredAmt * lmcPerInr * 10000) / 10000;
 
-  const canSubmit =
-    enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= sellableInr + 0.0001);
+  const canSubmit = enteredAmt > 0 && (side === "buy" ? true : enteredAmt <= sellableInr + 0.0001);
 
   const handleInitialSubmit = async () => {
     if (side === "buy") {
@@ -267,7 +266,7 @@ export function TradePanel({ side }: { side: Side }) {
                 {/* Amount എന്റർ ചെയ്യുന്ന ഇൻപുട്ടിന് മുകളിലായി LMC Balance കാണിക്കുന്ന ഭാഗം */}
                 <div className="flex justify-between items-center pl-1">
                   <span className="text-sm font-medium text-foreground/80">
-                    {side === "buy" ? "Quantity (INR - LMC)" : "Quantity (LMC - INR)"}
+                    {side === "buy" ? "Quantity (INR ---> LMC Deposit)" : "Quantity (LMC ---> INR Withdrawal)"}
                   </span>
                   {side === "sell" && (
                     <span className="text-xs font-medium text-muted-foreground inline-flex items-center gap-1">
