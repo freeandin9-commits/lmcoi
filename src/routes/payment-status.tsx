@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { CheckCircle2, XCircle, Clock, Loader2, ArrowRight, Home } from "lucide-react";
 import { formatINR, formatLMC } from "@/lib/lmc-api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Added "cancelled" to strictly match the requirement
 type Status = "success" | "failed" | "pending" | "processing" | "cancelled";
@@ -59,6 +59,28 @@ function PaymentStatusPage() {
 
   const config = STATUS_CONFIG[status as Status];
   const Icon = config.icon;
+
+  // Sound Play Logic connected to localStorage
+  useEffect(() => {
+    let shouldPlay = true;
+    let soundFile = "";
+
+    if (status === "success") {
+      shouldPlay = JSON.parse(localStorage.getItem("lmc_soundSuccess") ?? "true");
+      soundFile = "/sounds/success.mp3"; // Replace with your actual success audio path
+    } else if (status === "failed" || status === "cancelled") {
+      shouldPlay = JSON.parse(localStorage.getItem("lmc_soundCancelled") ?? "true");
+      soundFile = "/sounds/cancelled.mp3"; // Replace with your actual cancelled/failed audio path
+    } else if (status === "pending" || status === "processing") {
+      shouldPlay = JSON.parse(localStorage.getItem("lmc_soundPending") ?? "true");
+      soundFile = "/sounds/pending.mp3"; // Replace with your actual pending audio path
+    }
+
+    if (shouldPlay && soundFile) {
+      const audio = new Audio(soundFile);
+      audio.play().catch((err) => console.log("Audio play prevented by browser:", err));
+    }
+  }, [status]);
 
   // Generate Current Date & Time (hh:mm:ss) dynamically if not provided in URL
   const [displayDate] = useState(() => {
