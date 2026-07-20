@@ -2,29 +2,45 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { CheckCircle2, XCircle, Clock, Loader2, ArrowRight, Home } from "lucide-react";
 import { formatINR, formatLMC } from "@/lib/lmc-api";
+import { useState } from "react";
 
-type Status = "success" | "failed" | "pending" | "processing";
+// Added "cancelled" to strictly match the requirement
+type Status = "success" | "failed" | "pending" | "processing" | "cancelled";
 
 type Search = {
   status?: Status;
+  type?: "Buy" | "Sell";
   amount?: number;
   lmc?: number;
   paymentId?: string;
   orderId?: string;
   reason?: string;
+  date?: string;
 };
 
 export const Route = createFileRoute("/payment-status")({
   validateSearch: (search: Record<string, unknown>): Search => {
-    const s = String(search.status ?? "pending") as Status;
-    const status: Status = ["success", "failed", "pending", "processing"].includes(s) ? s : "pending";
+    const s = String(search.status ?? "pending");
+    let status: Status = ["success", "failed", "pending", "processing", "cancelled"].includes(s)
+      ? (s as Status)
+      : "pending";
+
+    const reason = search.reason ? String(search.reason) : undefined;
+
+    // Auto-detect 'cancelled' status if Razorpay modal was closed
+    if (status === "failed" && reason?.toLowerCase().includes("cancel")) {
+      status = "cancelled";
+    }
+
     return {
       status,
+      type: search.type === "Sell" ? "Sell" : "Buy",
       amount: search.amount != null ? Number(search.amount) : undefined,
       lmc: search.lmc != null ? Number(search.lmc) : undefined,
       paymentId: search.paymentId ? String(search.paymentId) : undefined,
       orderId: search.orderId ? String(search.orderId) : undefined,
-      reason: search.reason ? String(search.reason) : undefined,
+      reason,
+      date: search.date ? String(search.date) : undefined,
     };
   },
   head: () => ({
@@ -38,11 +54,44 @@ export const Route = createFileRoute("/payment-status")({
 });
 
 function PaymentStatusPage() {
-  const { status, amount, lmc, paymentId, orderId, reason } = Route.useSearch();
+  const { status = "pending", amount, lmc, paymentId, orderId, reason, type = "Buy", date } = Route.useSearch();
   const nav = useNavigate();
 
   const config = STATUS_CONFIG[status as Status];
   const Icon = config.icon;
+
+  // Generate Current Date & Time (hh:mm:ss) dynamically if not provided in URL
+  const [displayDate] = useState(() => {
+    if (date)
+      return new Date(date).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    const timeStr = now.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+    return `${dateStr}, ${timeStr}`;
+  });
+
+  // Calculate Pay Amount and Receive Amount based on Type (Buy / Sell)
+  const payAmount =
+    type === "Buy" && amount != null ? formatINR(amount, 2) : lmc != null ? `${formatLMC(lmc, 4)} LMC` : "N/A";
+  const receiveAmount =
+    type === "Buy" && lmc != null ? `${formatLMC(lmc, 4)} LMC` : amount != null ? formatINR(amount, 2) : "N/A";
+
+  // Strict Status Text display (Success / Pending / Cancelled / Failure)
+  const statusText = status === "failed" ? "Failure" : status;
 
   return (
     <Shell>
@@ -61,15 +110,20 @@ function PaymentStatusPage() {
           <p className="text-sm text-muted-foreground mb-6">{reason ?? config.subtitle}</p>
 
           <div className="rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 p-4 text-sm space-y-3 text-left">
-            {amount != null && <Row label="Amount Paid" value={formatINR(amount, 2)} />}
-            {lmc != null && (
-              <Row label="LMC Credited" value={`${formatLMC(lmc, 4)} LMC`} valueClass="text-[color:var(--gold)]" />
-            )}
-            {paymentId && <Row label="Payment ID" value={<span className="text-xs">{paymentId}</span>} />}
+            {/* New Display Fields based on requirements */}
             {orderId && <Row label="Order ID" value={<span className="text-xs">{orderId}</span>} />}
+
+            <Row label="Type" value={<span className="font-bold">{type}</span>} />
+            <Row label="Pay Amount" value={payAmount} />
+            <Row label="Receive Amount" value={receiveAmount} valueClass="text-[color:var(--gold)]" />
+
+            <Row label="Date & Time" value={<span className="text-xs">{displayDate}</span>} />
+
+            {paymentId && <Row label="Payment ID" value={<span className="text-xs">{paymentId}</span>} />}
+
             <Row
               label="Status"
-              value={<span className={`uppercase font-semibold ${config.titleColor}`}>{status}</span>}
+              value={<span className={`uppercase font-bold tracking-wider ${config.titleColor}`}>{statusText}</span>}
             />
           </div>
 
@@ -89,7 +143,7 @@ function PaymentStatusPage() {
                   <Home size={16} /> Back to Home
                 </Link>
               </>
-            ) : status === "failed" ? (
+            ) : status === "failed" || status === "cancelled" ? (
               <>
                 <button
                   onClick={() => nav({ to: "/buy" })}
@@ -125,7 +179,7 @@ function PaymentStatusPage() {
               credited automatically within a few minutes.
             </p>
           )}
-          {status === "failed" && (
+          {(status === "failed" || status === "cancelled") && (
             <p className="mt-4 text-xs text-muted-foreground">
               No amount was deducted. If money was debited, it will be refunded to your source within 5–7 working days.
             </p>
@@ -176,6 +230,14 @@ const STATUS_CONFIG: Record<
     titleColor: "text-[color:var(--danger)]",
     title: "Payment Failed",
     subtitle: "We couldn't complete your payment.",
+  },
+  cancelled: {
+    icon: XCircle,
+    iconBg: "bg-red-500/15 border border-red-500/30",
+    iconColor: "text-[color:var(--danger)]",
+    titleColor: "text-[color:var(--danger)]",
+    title: "Payment Cancelled",
+    subtitle: "You have cancelled the payment.",
   },
   pending: {
     icon: Clock,
