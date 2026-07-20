@@ -180,6 +180,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      razorpay_credit_lmc: {
+        Args: {
+          p_amount_inr: number
+          p_amount_lmc: number
+          p_payment_id: string
+          p_price: number
+        }
+        Returns: {
+          amount_inr: number
+          amount_lmc: number
+          created_at: string
+          id: string
+          note: string | null
+          price: number | null
+          status: string
+          type: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       wallet_deposit_inr: {
         Args: { p_amount: number }
         Returns: {

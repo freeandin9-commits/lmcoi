@@ -80,23 +80,19 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
 
     const { supabase } = context;
 
-    // Credit INR to wallet
-    const { error: depErr } = await supabase.rpc("wallet_deposit_inr", {
-      p_amount: data.amountInr,
-    });
-    if (depErr) throw new Error(depErr.message);
-
-    // Convert to LMC at fixed 1 INR = 1.25 LMC (price 0.8)
+    // Convert INR to LMC at fixed 1 INR = 1.25 LMC (price 0.8)
     const lmcPerInr = 1.25;
     const price = 1 / lmcPerInr;
     const lmcQty = Math.round(data.amountInr * lmcPerInr * 10000) / 10000;
 
-    const { error: buyErr } = await supabase.rpc("place_order", {
-      p_side: "buy",
+    // Credit only the LMC to wallet (not the INR); log a single buy transaction
+    const { error: creditErr } = await (supabase as any).rpc("razorpay_credit_lmc", {
+      p_amount_inr: data.amountInr,
       p_amount_lmc: lmcQty,
       p_price: price,
+      p_payment_id: data.razorpay_payment_id,
     });
-    if (buyErr) throw new Error(buyErr.message);
+    if (creditErr) throw new Error(creditErr.message);
 
     return { ok: true, lmc: lmcQty, paymentId: data.razorpay_payment_id };
   });
