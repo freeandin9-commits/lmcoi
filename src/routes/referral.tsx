@@ -26,10 +26,15 @@ import {
   Gift,
   Bell,
   BellOff,
-  // --- പുതിയതായി ചേർത്ത ഐക്കണുകൾ ---
   Target,
   Clock,
   BellRing,
+  // --- പുതിയതായി ചേർത്ത ഐക്കണുകൾ ---
+  Percent,
+  CalendarCheck,
+  UserPlus,
+  TrendingUp,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -60,13 +65,14 @@ function Referral() {
   const [friendCount, setFriendCount] = useState<number>(5);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [customMessage, setCustomMessage] = useState<string>("Join LM Coin and earn rewards! Sign up with my code:");
-
-  // നേരത്തെയുള്ള പുതിയ സ്റ്റേറ്റുകൾ
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
-
-  // --- പുതിയതായി ചേർത്ത സ്റ്റേറ്റ് (Reminder ഫീച്ചറിന് വേണ്ടി) ---
   const [remindingId, setRemindingId] = useState<number | null>(null);
+
+  // --- പുതിയതായി ചേർത്ത സ്റ്റേറ്റുകൾ ---
+  const [inviteEmail, setInviteEmail] = useState<string>("");
+  const [isInviting, setIsInviting] = useState<boolean>(false);
+  const [questCompleted, setQuestCompleted] = useState<boolean>(false);
 
   const copy = async (v: string, k: "code" | "link") => {
     try {
@@ -113,6 +119,21 @@ function Referral() {
     window.open(`mailto:?subject=${subject}&body=${body}`);
   };
 
+  // --- പുതിയതായി ചേർത്ത ഫംഗ്ഷൻ (Direct Invite) ---
+  const handleDirectInvite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail) {
+      toast.error("Please enter an email address");
+      return;
+    }
+    setIsInviting(true);
+    setTimeout(() => {
+      setIsInviting(false);
+      setInviteEmail("");
+      toast.success(`Invitation sent to ${inviteEmail}!`);
+    }, 1500);
+  };
+
   return (
     <Shell>
       <AppHeader title="Referral" />
@@ -133,6 +154,17 @@ function Referral() {
             <div className="text-2xl font-bold">0.00</div>
             <div className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Earned (LMC)</div>
           </div>
+        </div>
+
+        {/* --- NEW FEATURE 1: Commission Rate Banner --- */}
+        <div className="rounded-xl p-3 bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between shadow-sm backdrop-blur-sm">
+          <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+            <Percent size={18} />
+            <span className="text-xs font-semibold">Current Commission Rate</span>
+          </div>
+          <span className="text-sm font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded">
+            20%
+          </span>
         </div>
 
         {/* Claim Rewards Banner */}
@@ -182,7 +214,7 @@ function Referral() {
           </div>
         </div>
 
-        {/* --- NEW FEATURE 1: Milestone Bonuses --- */}
+        {/* Milestone Bonuses */}
         <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
           <div className="flex items-center gap-2 mb-4">
             <Target size={16} className="text-purple-500" />
@@ -212,8 +244,39 @@ function Referral() {
           </div>
         </div>
 
+        {/* --- NEW FEATURE 2: Daily Quests --- */}
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <CalendarCheck size={16} className="text-teal-500" />
+            <h2 className="text-sm font-bold">Daily Quest</h2>
+          </div>
+          <div className="flex items-center justify-between bg-teal-500/10 p-3 rounded-xl border border-teal-500/20">
+            <div>
+              <div className="text-xs font-bold text-foreground">Share on WhatsApp today</div>
+              <div className="text-[10px] text-teal-600 dark:text-teal-400 mt-0.5">Reward: 5 LMC (Pending)</div>
+            </div>
+            <button
+              onClick={() => {
+                shareSocial("wa");
+                setTimeout(() => {
+                  setQuestCompleted(true);
+                  toast.success("Daily Quest Completed! 5 LMC Added.");
+                }, 2000);
+              }}
+              disabled={questCompleted}
+              className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all ${
+                questCompleted
+                  ? "bg-teal-500/50 text-white cursor-not-allowed"
+                  : "bg-teal-500 hover:bg-teal-600 text-white active:scale-95"
+              }`}
+            >
+              {questCompleted ? "Completed" : "Share Now"}
+            </button>
+          </div>
+        </div>
+
         {/* Glassmorphism Code Card (Gold Tinted Glass) */}
-        <div className="rounded-2xl p-5 relative overflow-hidden bg-yellow-500/10 dark:bg-yellow-500/5 backdrop-blur-xl border border-yellow-500/20 shadow-[0_8px_32px_0_rgba(234,179,8,0.15)] text-foreground">
+        <div className="rounded-2xl p-5 relative overflow-hidden bg-yellow-500/10 dark:bg-yellow-500/5 backdrop-blur-xl border border-yellow-500/20 shadow-[0_8px_32px_0_rgba(234,179,8,0.15)] text-foreground mt-4">
           <div className="text-sm opacity-80 font-medium">Invite friends. Earn together.</div>
           <div className="mt-3 text-xs uppercase tracking-widest opacity-80">Your code</div>
           <div className="mt-1 flex items-center gap-2">
@@ -240,7 +303,7 @@ function Referral() {
         </div>
 
         {/* Custom Share Message */}
-        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm">
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
               <Edit3 size={14} /> Customize Message
@@ -256,7 +319,7 @@ function Referral() {
         </div>
 
         {/* Glassmorphism Share Link Card */}
-        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] mt-4">
           <div className="text-xs uppercase tracking-widest text-muted-foreground">Share link</div>
           <div className="mt-2 flex items-center gap-2">
             <input
@@ -317,8 +380,33 @@ function Referral() {
           </div>
         </div>
 
+        {/* --- NEW FEATURE 3: Direct Invite Form --- */}
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <UserPlus size={16} className="text-pink-500" />
+            <h2 className="text-sm font-bold">Direct Invite</h2>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">Send a direct invitation email to your friends.</p>
+          <form onSubmit={handleDirectInvite} className="flex gap-2">
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="Enter friend's email..."
+              className="flex-1 rounded-xl bg-black/5 dark:bg-white/5 border border-white/10 px-3 py-2 text-xs outline-none focus:border-pink-500/50 transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={isInviting || !inviteEmail}
+              className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 active:scale-95"
+            >
+              {isInviting ? "Sending..." : "Send"}
+            </button>
+          </form>
+        </div>
+
         {/* Earnings Estimator / Calculator Card */}
-        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] mt-4">
           <div className="flex items-center gap-2 mb-3">
             <Calculator size={16} className="text-yellow-500" />
             <h2 className="text-sm font-bold">Earnings Estimator</h2>
@@ -348,7 +436,7 @@ function Referral() {
         </div>
 
         {/* Glassmorphism How it Works Card */}
-        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+        <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] mt-4">
           <h2 className="text-base font-bold">How it works</h2>
           <ol className="mt-4 space-y-4 text-sm">
             {[
@@ -367,6 +455,36 @@ function Referral() {
               </li>
             ))}
           </ol>
+        </div>
+
+        {/* --- NEW FEATURE 4: Analytics Overview Placeholder --- */}
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold flex items-center gap-2">
+              <BarChart3 size={16} className="text-indigo-500" /> Referral Analytics
+            </h2>
+            <span className="text-[10px] bg-indigo-500/10 text-indigo-500 px-2 py-0.5 rounded-full">This Month</span>
+          </div>
+          <div className="flex items-end gap-2 h-20 pt-4 pb-2 border-b border-white/10">
+            {/* Fake Chart Bars */}
+            {[20, 40, 30, 70, 50, 90, 60].map((height, i) => (
+              <div
+                key={i}
+                className="flex-1 bg-indigo-500/20 hover:bg-indigo-500/40 rounded-t-sm transition-colors relative group"
+                style={{ height: `${height}%` }}
+              >
+                <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] hidden group-hover:block bg-black text-white px-1.5 py-0.5 rounded">
+                  {height / 10}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between items-center mt-2 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <TrendingUp size={12} className="text-green-500" /> +12% vs last month
+            </span>
+            <span>Total Clicks: 0</span>
+          </div>
         </div>
 
         {/* Top Referrers Leaderboard */}
@@ -414,7 +532,7 @@ function Referral() {
           </div>
         </div>
 
-        {/* --- NEW FEATURE 2: Pending Actions / Reminders --- */}
+        {/* Pending Actions / Reminders */}
         <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
           <div className="flex items-center gap-2 mb-4">
             <Clock size={16} className="text-orange-500" />
