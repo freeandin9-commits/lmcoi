@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
 import { useWallet, useAnnouncements, formatINR, FIXED_PRICE_PER_LMC } from "@/lib/lmc-api";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowDownToLine, ArrowUpFromLine, Gift, Bell, Megaphone } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Gift, Bell, Megaphone, Headset } from "lucide-react";
 
 export const Route = createFileRoute("/home")({
   component: HomeApp,
@@ -119,10 +119,11 @@ function HomeApp() {
             Hold Balance: {formatINR(hold, 2)}
           </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-3 relative z-10">
+          <div className="mt-6 grid grid-cols-4 gap-3 relative z-10">
             <QuickAction to="/buy" icon={<ArrowDownToLine size={18} />} label="Buy" />
             <QuickAction to="/sell" icon={<ArrowUpFromLine size={18} />} label="Sell" />
             <QuickAction to="/referral" icon={<Gift size={18} />} label="Refer" />
+            <QuickAction to="/chat" icon={<Headset size={18} />} label="Support" />
           </div>
         </div>
 
