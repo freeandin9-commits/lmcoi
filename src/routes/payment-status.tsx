@@ -70,13 +70,13 @@ function PaymentStatusPage() {
         // Check localStorage for user settings (Defaults to true)
         if (soundType === "success") {
           isEnabled = JSON.parse(localStorage.getItem("soundSuccess") ?? "true");
-          soundUrl = "/sounds/success.mp3"; // നിങ്ങളുടെ സക്‌സസ്സ് ഓഡിയോ പാത്ത് നൽകുക
+          soundUrl = "/sounds/success.wav";
         } else if (soundType === "cancelled") {
           isEnabled = JSON.parse(localStorage.getItem("soundCancelled") ?? "true");
-          soundUrl = "/sounds/cancelled.mp3"; // നിങ്ങളുടെ കാൻസൽഡ് ഓഡിയോ പാത്ത് നൽകുക
+          soundUrl = "/sounds/cancelled.wav";
         } else if (soundType === "pending") {
           isEnabled = JSON.parse(localStorage.getItem("soundPending") ?? "true");
-          soundUrl = "/sounds/pending.mp3"; // നിങ്ങളുടെ പെൻഡിങ് ഓഡിയോ പാത്ത് നൽകുക
+          soundUrl = "/sounds/pending.wav";
         }
 
         if (isEnabled && soundUrl) {
