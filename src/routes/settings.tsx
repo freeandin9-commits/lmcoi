@@ -27,8 +27,12 @@ export const Route = createFileRoute("/settings")({
 function SettingsPage() {
   const nav = useNavigate();
 
-  // States for toggle switches (ഇവ പിന്നീട് നിങ്ങളുടെ ബാക്കെൻഡുമായോ ലോക്കൽ സ്റ്റോറേജുമായോ ബന്ധിപ്പിക്കാം)
-  const [paymentSound, setPaymentSound] = useState(true);
+  // Payment Sounds states (Pending, Cancelled, Success)
+  const [soundPending, setSoundPending] = useState(true);
+  const [soundCancelled, setSoundCancelled] = useState(true);
+  const [soundSuccess, setSoundSuccess] = useState(true);
+
+  // States for other toggle switches (ഇവ പിന്നീട് നിങ്ങളുടെ ബാക്കെൻഡുമായോ ലോക്കൽ സ്റ്റോറേജുമായോ ബന്ധിപ്പിക്കാം)
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
@@ -104,21 +108,58 @@ function SettingsPage() {
         <div className="animate-item-1">
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 pl-2">Audio & Sound</h3>
           <div className="rounded-3xl overflow-hidden backdrop-blur-2xl bg-background/40 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.1)]">
+            {/* Pending Sound */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 dark:border-white/5">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-                  {paymentSound ? (
-                    <Volume2 size={18} className="text-[color:var(--gold)]" />
+                  {soundPending ? (
+                    <Volume2 size={18} className="text-yellow-400" />
                   ) : (
                     <VolumeX size={18} className="text-muted-foreground" />
                   )}
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-foreground">Payment Sounds</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">Pending, Cancelled & Success voices</div>
+                  <div className="text-sm font-semibold text-foreground">Pending Voice</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">Voice alert for pending payments</div>
                 </div>
               </div>
-              <ToggleSwitch enabled={paymentSound} onChange={setPaymentSound} />
+              <ToggleSwitch enabled={soundPending} onChange={setSoundPending} />
+            </div>
+
+            {/* Cancelled Sound */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 dark:border-white/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white/5 border border-white/5">
+                  {soundCancelled ? (
+                    <Volume2 size={18} className="text-red-400" />
+                  ) : (
+                    <VolumeX size={18} className="text-muted-foreground" />
+                  )}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-foreground">Cancelled Voice</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">Voice alert for cancelled payments</div>
+                </div>
+              </div>
+              <ToggleSwitch enabled={soundCancelled} onChange={setSoundCancelled} />
+            </div>
+
+            {/* Success Sound */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 dark:border-white/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white/5 border border-white/5">
+                  {soundSuccess ? (
+                    <Volume2 size={18} className="text-green-400" />
+                  ) : (
+                    <VolumeX size={18} className="text-muted-foreground" />
+                  )}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-foreground">Success Voice</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">Voice alert for successful payments</div>
+                </div>
+              </div>
+              <ToggleSwitch enabled={soundSuccess} onChange={setSoundSuccess} />
             </div>
           </div>
         </div>
