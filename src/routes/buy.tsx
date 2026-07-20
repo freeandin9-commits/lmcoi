@@ -6,7 +6,7 @@ export const Route = createFileRoute("/buy")({
   head: () => ({
     meta: [
       { title: "Buy LMC · LM Coin" },
-      { name: "description", content: "Buy LMC at live market price." },
+      { name: "description", content: "Buy LMC at fixed rate (1 INR = 1.25 LMC)." },
     ],
   }),
 });

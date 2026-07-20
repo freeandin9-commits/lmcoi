@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-import { useWallet, usePriceSeries, formatINR, formatLMC } from "@/lib/lmc-api";
+import { useWallet, formatINR, formatLMC, FIXED_PRICE_PER_LMC } from "@/lib/lmc-api";
 
 export const Route = createFileRoute("/wallet")({
   component: WalletPage,
@@ -15,7 +15,6 @@ function WalletPage() {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { wallet } = useWallet();
-  const { price } = usePriceSeries(20);
 
   useEffect(() => {
     if (!authLoading && !user) nav({ to: "/" });
@@ -25,6 +24,7 @@ function WalletPage() {
   const lmc = Number(wallet?.lmc_balance ?? 0);
   // ഭാവിയിൽ Hold Balance API-ൽ നിന്ന് ലഭ്യമാകുന്നതിനായി സെറ്റ് ചെയ്തത്
   const holdBalance = Number((wallet as any)?.hold_balance ?? 0);
+  const total = inr + lmc * FIXED_PRICE_PER_LMC;
 
   return (
     <Shell>
@@ -65,7 +65,7 @@ function WalletPage() {
 
           {/* Total Balance */}
           <div className="mt-1 text-4xl font-extrabold tabular-nums text-foreground drop-shadow-sm">
-            {formatINR(inr + lmc * price, 2)}
+            {formatINR(total, 2)}
           </div>
 
           {/* Hold Balance */}

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
-import { useWallet, usePriceSeries, useAnnouncements, formatINR, formatLMC } from "@/lib/lmc-api";
+import { useWallet, useAnnouncements, formatINR, FIXED_PRICE_PER_LMC } from "@/lib/lmc-api";
 import { useAuth } from "@/hooks/use-auth";
 import { ArrowDownToLine, ArrowUpFromLine, Gift, Bell, Megaphone } from "lucide-react";
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
       { title: "LM Coin — Home" },
-      { name: "description", content: "Your LM Coin dashboard: balance, live price, quick actions and market." },
+      { name: "description", content: "Your LM Coin dashboard: balance, quick actions and announcements." },
     ],
   }),
 });
@@ -19,7 +19,6 @@ function HomeApp() {
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { wallet } = useWallet();
-  const { price } = usePriceSeries(120);
   const announcements = useAnnouncements();
 
   useEffect(() => {
@@ -29,7 +28,7 @@ function HomeApp() {
   const lmc = Number(wallet?.lmc_balance ?? 0);
   const inr = Number(wallet?.inr_balance ?? 0);
   const hold = Number((wallet as { hold_balance?: number } | null)?.hold_balance ?? 0);
-  const total = lmc * price + inr;
+  const total = lmc * FIXED_PRICE_PER_LMC + inr;
 
   return (
     <Shell>

@@ -3,8 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-// Live price സീരീസ് (usePriceSeries) പൂർണ്ണമായും ഒഴിവാക്കി
-import { useWallet, placeOrder, formatINR, formatLMC } from "@/lib/lmc-api";
+import { useWallet, placeOrder, formatINR, formatLMC, LMC_PER_INR, FIXED_PRICE_PER_LMC } from "@/lib/lmc-api";
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.functions";
 import { Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -59,12 +58,9 @@ export function TradePanel({ side }: { side: Side }) {
 
   // home.tsx-ൽ ഉള്ളതുപോലെ Hold Balance-ഉം Total Balance-ഉം കണക്കാക്കുന്നു
   const hold = Number((wallet as { hold_balance?: number } | null)?.hold_balance ?? 0);
-  const lmcPerInr = 1.25;
-  const pricePerLmcInr = 1 / lmcPerInr;
-
-  // ലൈവ് പ്രൈസ് ഒഴിവാക്കി ഫിക്സഡ് പ്രൈസ് നൽകുന്നു
-  const currentPrice = pricePerLmcInr;
-  const total = lmc * currentPrice + inr;
+  const lmcPerInr = LMC_PER_INR;
+  const pricePerLmcInr = FIXED_PRICE_PER_LMC;
+  const total = lmc * pricePerLmcInr + inr;
 
   const enteredAmt = parseFloat(amount) || 0;
   // Buy ചെയ്യുമ്പോൾ ബാലൻസ് ചെക്ക് ചെയ്യേണ്ടതില്ല, Sell ചെയ്യുമ്പോൾ Balance (total) ചെക്ക് ചെയ്യും
