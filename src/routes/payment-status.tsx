@@ -49,9 +49,7 @@ function PaymentStatusPage() {
       <AppHeader title="Payment Status" />
       <div className="px-4 pt-4 pb-8">
         <div className="rounded-3xl bg-background/60 backdrop-blur-2xl border border-white/10 shadow-2xl p-6 text-center">
-          <div
-            className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 ${config.iconBg}`}
-          >
+          <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 ${config.iconBg}`}>
             <Icon
               size={44}
               className={`${config.iconColor} ${status === "processing" ? "animate-spin" : ""}`}
@@ -63,23 +61,15 @@ function PaymentStatusPage() {
           <p className="text-sm text-muted-foreground mb-6">{reason ?? config.subtitle}</p>
 
           <div className="rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 p-4 text-sm space-y-3 text-left">
-            {amount != null && (
-              <Row label="Amount Paid" value={formatINR(amount, 2)} />
-            )}
+            {amount != null && <Row label="Amount Paid" value={formatINR(amount, 2)} />}
             {lmc != null && (
-              <Row
-                label="LMC Credited"
-                value={`${formatLMC(lmc, 4)} LMC`}
-                valueClass="text-[color:var(--gold)]"
-              />
+              <Row label="LMC Credited" value={`${formatLMC(lmc, 4)} LMC`} valueClass="text-[color:var(--gold)]" />
             )}
             {paymentId && <Row label="Payment ID" value={<span className="text-xs">{paymentId}</span>} />}
             {orderId && <Row label="Order ID" value={<span className="text-xs">{orderId}</span>} />}
             <Row
               label="Status"
-              value={
-                <span className={`uppercase font-semibold ${config.titleColor}`}>{status}</span>
-              }
+              value={<span className={`uppercase font-semibold ${config.titleColor}`}>{status}</span>}
             />
           </div>
 
@@ -116,10 +106,7 @@ function PaymentStatusPage() {
               </>
             ) : (
               <>
-                <Link
-                  to="/transactions"
-                  className="w-full rounded-2xl py-3.5 text-sm font-bold btn-gold shadow-lg"
-                >
+                <Link to="/transactions" className="w-full rounded-2xl py-3.5 text-sm font-bold btn-gold shadow-lg">
                   Check Transactions
                 </Link>
                 <Link
@@ -134,14 +121,18 @@ function PaymentStatusPage() {
 
           {status === "pending" && (
             <p className="mt-4 text-xs text-muted-foreground">
-              Your bank has taken longer than usual to confirm this payment. If the amount was debited, it will
-              be credited automatically within a few minutes.
+              Your bank has taken longer than usual to confirm this payment. If the amount was debited, it will be
+              credited automatically within a few minutes.
             </p>
           )}
           {status === "failed" && (
             <p className="mt-4 text-xs text-muted-foreground">
-              No amount was deducted. If money was debited, it will be refunded to your source within 5–7
-              working days.
+              No amount was deducted. If money was debited, it will be refunded to your source within 5–7 working days.
+            </p>
+          )}
+          {status === "success" && (
+            <p className="mt-4 text-xs text-muted-foreground">
+              Your payment was successful. The amount will be reflected shortly. Thank you for your patience.
             </p>
           )}
         </div>
@@ -150,15 +141,7 @@ function PaymentStatusPage() {
   );
 }
 
-function Row({
-  label,
-  value,
-  valueClass,
-}: {
-  label: string;
-  value: React.ReactNode;
-  valueClass?: string;
-}) {
+function Row({ label, value, valueClass }: { label: string; value: React.ReactNode; valueClass?: string }) {
   return (
     <div className="flex justify-between items-center gap-3">
       <span className="text-muted-foreground/90">{label}</span>
