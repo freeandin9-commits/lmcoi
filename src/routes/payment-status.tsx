@@ -84,11 +84,26 @@ function PaymentStatusPage() {
     return `${dateStr}, ${timeStr}`;
   });
 
-  // Calculate Pay Amount and Receive Amount based on Type (Buy / Sell)
+  // Calculate Pay Amount
   const payAmount =
     type === "Buy" && amount != null ? formatINR(amount, 2) : lmc != null ? `${formatLMC(lmc, 4)} LMC` : "N/A";
-  const receiveAmount =
-    type === "Buy" && lmc != null ? `${formatLMC(lmc, 4)} LMC` : amount != null ? formatINR(amount, 2) : "N/A";
+
+  // Calculate Receive Amount specifically mirroring TradePanel.tsx logic
+  let receiveAmount = "N/A";
+  if (type === "Buy") {
+    if (amount === 5000) {
+      receiveAmount = "₹6250";
+    } else if (amount === 10000) {
+      receiveAmount = "₹13,000";
+    } else if (amount === 15000) {
+      receiveAmount = "₹19,000";
+    } else if (lmc != null) {
+      receiveAmount = `${formatLMC(lmc, 4)} LMC`;
+    }
+  } else {
+    // For Sell
+    if (amount != null) receiveAmount = formatINR(amount, 2);
+  }
 
   // Strict Status Text display (Success / Pending / Cancelled / Failure)
   const statusText = status === "failed" ? "Failure" : status;
