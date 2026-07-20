@@ -16,11 +16,14 @@ import {
   Mail,
   Trophy,
   Info,
-  // --- പുതുതായി ചേർത്ത ഐക്കണുകൾ ---
   Calculator,
   HelpCircle,
   ChevronDown,
   Sparkles,
+  // --- പുതിയതായി ചേർത്ത ഐക്കണുകൾ ---
+  Edit3,
+  Award,
+  Medal,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,9 +50,12 @@ function Referral() {
   const link = typeof window !== "undefined" && code ? `${window.location.origin}/register?ref=${code}` : "";
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
 
-  // --- പുതുതായി ചേർത്ത സ്റ്റേറ്റുകൾ (Calculator & FAQ) ---
+  // പഴയ സ്റ്റേറ്റുകൾ
   const [friendCount, setFriendCount] = useState<number>(5);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // --- പുതിയ സ്റ്റേറ്റ്: Custom Share Message ---
+  const [customMessage, setCustomMessage] = useState<string>("Join LM Coin and earn rewards! Sign up with my code:");
 
   const copy = async (v: string, k: "code" | "link") => {
     try {
@@ -65,17 +71,17 @@ function Referral() {
   const share = async () => {
     if (typeof navigator !== "undefined" && "share" in navigator) {
       try {
-        await navigator.share({ title: "Join LM Coin", text: `Sign up with my code ${code}`, url: link });
+        await navigator.share({ title: "Join LM Coin", text: `${customMessage} ${code}`, url: link });
       } catch {}
     } else {
       copy(link, "link");
     }
   };
 
-  // Direct Social Media Sharing Logic
+  // Direct Social Media Sharing Logic (Updated with Custom Message)
   const shareSocial = (platform: "wa" | "tg" | "tw") => {
     if (!link) return;
-    const text = encodeURIComponent(`Join LM Coin and earn rewards! Sign up with my code: ${code}`);
+    const text = encodeURIComponent(`${customMessage} ${code}`);
     const url = encodeURIComponent(link);
     let shareUrl = "";
 
@@ -86,12 +92,12 @@ function Referral() {
     window.open(shareUrl, "_blank");
   };
 
-  // Email Sharing Logic
+  // Email Sharing Logic (Updated with Custom Message)
   const shareEmail = () => {
     if (!link) return;
     const subject = encodeURIComponent("You're invited to join LM Coin!");
     const body = encodeURIComponent(
-      `Hi there,\n\nI want to invite you to join LM Coin. You can earn exclusive rewards by signing up using my referral code: ${code}\n\nJoin here: ${link}\n\nBest,\nLM Coin User`,
+      `Hi there,\n\n${customMessage} ${code}\n\nJoin here: ${link}\n\nBest,\nLM Coin User`,
     );
     window.open(`mailto:?subject=${subject}&body=${body}`);
   };
@@ -166,6 +172,22 @@ function Referral() {
           </div>
         </div>
 
+        {/* --- NEW FEATURE: Custom Share Message --- */}
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+              <Edit3 size={14} /> Customize Message
+            </label>
+          </div>
+          <textarea
+            value={customMessage}
+            onChange={(e) => setCustomMessage(e.target.value)}
+            rows={2}
+            className="w-full rounded-xl bg-black/5 dark:bg-white/5 border border-white/10 p-3 text-xs text-foreground outline-none resize-none focus:border-yellow-500/50 transition-colors"
+            placeholder="Write a custom message for your friends..."
+          />
+        </div>
+
         {/* Glassmorphism Share Link Card */}
         <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
           <div className="text-xs uppercase tracking-widest text-muted-foreground">Share link</div>
@@ -228,7 +250,7 @@ function Referral() {
           </div>
         </div>
 
-        {/* --- NEW FEATURE: Earnings Estimator / Calculator Card --- */}
+        {/* Earnings Estimator / Calculator Card */}
         <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
           <div className="flex items-center gap-2 mb-3">
             <Calculator size={16} className="text-yellow-500" />
@@ -280,6 +302,41 @@ function Referral() {
           </ol>
         </div>
 
+        {/* --- NEW FEATURE: Top Referrers Leaderboard --- */}
+        <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/20 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold flex items-center gap-2">
+              <Award size={16} className="text-orange-500" /> Top Referrers
+            </h2>
+            <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-muted-foreground">This Week</span>
+          </div>
+          <div className="space-y-3">
+            {[
+              { name: "Alex M.", invites: 142, iconColor: "text-yellow-400" },
+              { name: "Sarah K.", invites: 98, iconColor: "text-gray-300" },
+              { name: "John D.", invites: 76, iconColor: "text-amber-600" },
+            ].map((user, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between bg-black/5 dark:bg-white/5 p-2.5 rounded-lg border border-white/5"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-xs w-4 text-muted-foreground">{idx + 1}</span>
+                  <div
+                    className={`h-7 w-7 rounded-full bg-white/10 flex items-center justify-center ${user.iconColor}`}
+                  >
+                    <Medal size={14} />
+                  </div>
+                  <span className="text-xs font-medium">{user.name}</span>
+                </div>
+                <div className="text-xs font-semibold flex items-center gap-1.5">
+                  <Users size={12} className="text-muted-foreground" /> {user.invites}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Recent Referrals List */}
         <div className="rounded-2xl p-4 bg-white/5 dark:bg-black/10 backdrop-blur-xl border border-white/10 shadow-sm mt-4">
           <h2 className="text-sm font-bold mb-4">Recent Referrals</h2>
@@ -290,7 +347,7 @@ function Referral() {
           </div>
         </div>
 
-        {/* --- NEW FEATURE: Frequently Asked Questions (FAQ) --- */}
+        {/* Frequently Asked Questions (FAQ) */}
         <div className="rounded-2xl p-4 bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
           <div className="flex items-center gap-2 mb-3">
             <HelpCircle size={16} className="text-blue-500" />
