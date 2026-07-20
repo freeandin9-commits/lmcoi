@@ -3,8 +3,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-// home.tsx-ൽ ഉള്ളതുപോലെ usePriceSeries ഇവിടെയും ഉൾപ്പെടുത്തിയിട്ടുണ്ട്
-import { useWallet, placeOrder, formatINR, formatLMC, usePriceSeries } from "@/lib/lmc-api";
+// Live price സീരീസ് (usePriceSeries) പൂർണ്ണമായും ഒഴിവാക്കി
+import { useWallet, placeOrder, formatINR, formatLMC } from "@/lib/lmc-api";
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.functions";
 import { Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -48,8 +48,6 @@ export function TradePanel({ side }: { side: Side }) {
   }, [authLoading, user, nav]);
 
   const { wallet } = useWallet();
-  // home.tsx-ൽ ഉള്ളതുപോലെ ലൈവ് പ്രൈസ് സീരീസ് എടുക്കുന്നു
-  const { price } = usePriceSeries(120);
 
   const [buyMode, setBuyMode] = useState<"custom" | "upi" | "bank" | "fixed">("custom");
   const [amount, setAmount] = useState("");
@@ -63,6 +61,8 @@ export function TradePanel({ side }: { side: Side }) {
   const hold = Number((wallet as { hold_balance?: number } | null)?.hold_balance ?? 0);
   const lmcPerInr = 1.25;
   const pricePerLmcInr = 1 / lmcPerInr;
+
+  // ലൈവ് പ്രൈസ് ഒഴിവാക്കി ഫിക്സഡ് പ്രൈസ് നൽകുന്നു
   const currentPrice = pricePerLmcInr;
   const total = lmc * currentPrice + inr;
 
