@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { ArrowLeft, Send } from "lucide-react";
+import { useTransactions } from "@/lib/lmc-api"; // Added import
 
 export const Route = createFileRoute("/my-appeal")({
   component: MyAppeal,
@@ -9,11 +10,53 @@ export const Route = createFileRoute("/my-appeal")({
 
 function MyAppeal() {
   const nav = useNavigate();
+  // Fetch transactions to populate the dropdown
+  const { transactions } = useTransactions(50);
+
   const [type, setType] = useState<"Sell" | "Buy">("Buy");
   const [amount, setAmount] = useState("");
   const [utrNumber, setUtrNumber] = useState("");
   const [dateTime, setDateTime] = useState("");
   const [orderId, setOrderId] = useState("");
+
+  const handleOrderSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    setOrderId(selectedId);
+
+    // Find the selected transaction from the fetched data
+    const selectedTx = transactions.find((t: any) => t.id === selectedId);
+
+    if (selectedTx) {
+      // 1. Auto-fill Type
+      if (selectedTx.type.toLowerCase() === "buy") setType("Buy");
+      else if (selectedTx.type.toLowerCase() === "sell") setType("Sell");
+
+      // 2. Auto-fill Amount (checking if lmc or inr exists)
+      const txAmount =
+        selectedTx.type.toLowerCase() === "buy" || selectedTx.type.toLowerCase() === "sell"
+          ? selectedTx.amount_lmc
+          : selectedTx.amount_inr;
+      setAmount(txAmount?.toString() || "");
+
+      // 3. Auto-fill UTR Number
+      // (Assuming your database returns utr_number or utr. Added fallback "N/A" if empty)
+      setUtrNumber(selectedTx.utr_number || selectedTx.utr || "N/A");
+
+      // 4. Auto-fill Date and Time
+      if (selectedTx.created_at) {
+        const date = new Date(selectedTx.created_at);
+        const offset = date.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+        setDateTime(localISOTime);
+      }
+    } else {
+      // Reset if nothing is selected
+      setType("Buy");
+      setAmount("");
+      setUtrNumber("");
+      setDateTime("");
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,43 +111,50 @@ function MyAppeal() {
           onSubmit={handleSubmit}
           className="rounded-[2rem] p-6 space-y-5 backdrop-blur-2xl bg-white/10 dark:bg-black/30 border border-white/30 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]"
         >
-          {/* Order ID */}
+          {/* Order ID Selection */}
           <div className="space-y-2 group">
             <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
-              Order ID
+              Select Order ID
             </label>
-            <input
-              type="text"
+            <select
               required
               value={orderId}
-              onChange={(e) => setOrderId(e.target.value)}
-              placeholder="Enter Order ID"
-              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:shadow-[0_0_15px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
-            />
+              onChange={handleOrderSelect}
+              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:shadow-[0_0_15px_rgba(255,215,0,0.2)] text-black dark:text-white transition-all duration-300 appearance-none cursor-pointer"
+            >
+              <option value="" disabled className="text-black">
+                -- Choose an Order ID --
+              </option>
+              {transactions?.map((t: any) => (
+                <option key={t.id} value={t.id} className="text-black">
+                  {t.id} ({t.type.toUpperCase()})
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Type: Buy or Sell */}
+          {/* Type: Buy or Sell (Read Only / Disabled) */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm">Type</label>
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => setType("Buy")}
-                className={`flex-1 py-3 rounded-2xl font-bold transition-all duration-300 border ${
+                disabled
+                className={`flex-1 py-3 rounded-2xl font-bold transition-all duration-300 border cursor-not-allowed ${
                   type === "Buy"
                     ? "bg-[color:var(--success)] text-white border-transparent shadow-[0_4px_15px_rgba(var(--success),0.4)]"
-                    : "bg-white/10 dark:bg-white/5 border-white/20 text-foreground hover:bg-white/20"
+                    : "bg-white/10 dark:bg-white/5 border-white/20 text-foreground opacity-40"
                 }`}
               >
                 Buy
               </button>
               <button
                 type="button"
-                onClick={() => setType("Sell")}
-                className={`flex-1 py-3 rounded-2xl font-bold transition-all duration-300 border ${
+                disabled
+                className={`flex-1 py-3 rounded-2xl font-bold transition-all duration-300 border cursor-not-allowed ${
                   type === "Sell"
                     ? "bg-red-500 text-white border-transparent shadow-[0_4px_15px_rgba(239,68,68,0.4)]"
-                    : "bg-white/10 dark:bg-white/5 border-white/20 text-foreground hover:bg-white/20"
+                    : "bg-white/10 dark:bg-white/5 border-white/20 text-foreground opacity-40"
                 }`}
               >
                 Sell
@@ -112,22 +162,22 @@ function MyAppeal() {
             </div>
           </div>
 
-          {/* Amount */}
+          {/* Amount (Read Only) */}
           <div className="space-y-2 group">
             <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
               Amount
             </label>
             <input
-              type="number"
+              type="text"
               required
+              readOnly
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:shadow-[0_0_15px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+              placeholder="Auto-filled"
+              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/10 text-black dark:text-white/70 placeholder:text-gray-500 transition-all duration-300 cursor-not-allowed opacity-80"
             />
           </div>
 
-          {/* UTR Number */}
+          {/* UTR Number (Read Only) */}
           <div className="space-y-2 group">
             <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
               UTR Number
@@ -135,14 +185,14 @@ function MyAppeal() {
             <input
               type="text"
               required
+              readOnly
               value={utrNumber}
-              onChange={(e) => setUtrNumber(e.target.value)}
-              placeholder="Enter UTR transaction number"
-              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:shadow-[0_0_15px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+              placeholder="Auto-filled"
+              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/10 text-black dark:text-white/70 placeholder:text-gray-500 transition-all duration-300 cursor-not-allowed opacity-80"
             />
           </div>
 
-          {/* Date and Time */}
+          {/* Date and Time (Read Only) */}
           <div className="space-y-2 group">
             <label className="text-sm font-bold text-gray-800 dark:text-gray-200 drop-shadow-sm group-focus-within:text-[color:var(--gold-soft)] transition-colors">
               Date and Time
@@ -150,9 +200,9 @@ function MyAppeal() {
             <input
               type="datetime-local"
               required
+              readOnly
               value={dateTime}
-              onChange={(e) => setDateTime(e.target.value)}
-              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/10 focus:border-[color:var(--gold-soft)] focus:shadow-[0_0_15px_rgba(255,215,0,0.2)] text-black dark:text-white placeholder:text-gray-500 transition-all duration-300"
+              className="w-full rounded-2xl px-4 py-3.5 text-sm font-medium outline-none backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/10 text-black dark:text-white/70 placeholder:text-gray-500 transition-all duration-300 cursor-not-allowed opacity-80"
             />
           </div>
 
