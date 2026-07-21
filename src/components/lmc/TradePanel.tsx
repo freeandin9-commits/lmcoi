@@ -64,7 +64,10 @@ export function TradePanel({ side }: { side: Side }) {
 
   const lmcPerInr = LMC_PER_INR;
   const pricePerLmcInr = FIXED_PRICE_PER_LMC;
-  const sellableInr = Math.round(lmc * pricePerLmcInr * 100) / 100;
+
+  // UI-ൽ Available ആയി കാണിക്കുന്നത് Total Balance ആയതുകൊണ്ട്, Sell ചെയ്യാനുള്ള ലിമിറ്റും Total ആയി സെറ്റ് ചെയ്യുന്നു.
+  // (ഇതിലൂടെ Percentage ബട്ടണുകൾ കൃത്യമായി പ്രവർത്തിക്കും)
+  const sellableInr = total;
 
   const enteredAmt = parseFloat(amount) || 0;
   /** Buy: You will receive this many LMC after payment success */
@@ -273,6 +276,7 @@ export function TradePanel({ side }: { side: Side }) {
     if (side === "buy") {
       setAmount((inr * p).toFixed(2));
     } else {
+      // ഇപ്പോൾ sellableInr എന്നത് Total Balance ആണ്. അതിനാൽ Percentage കൃത്യമായി പ്രവർത്തിക്കും.
       setAmount((sellableInr * p).toFixed(2));
     }
   };
@@ -351,7 +355,13 @@ export function TradePanel({ side }: { side: Side }) {
                   )}
                   <input
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+                    onChange={(e) => {
+                      // നമ്പറുകളും ഒരു ഡെസിമൽ പോയിന്റും മാത്രം അനുവദിക്കാൻ regex അപ്ഡേറ്റ് ചെയ്തു
+                      const val = e.target.value;
+                      if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                        setAmount(val);
+                      }
+                    }}
                     inputMode="decimal"
                     placeholder={side === "buy" ? "Enter INR Amount" : "0.00"}
                     className={`w-full rounded-2xl bg-foreground/5 backdrop-blur-xl border border-foreground/10 py-4 outline-none font-mono text-lg text-foreground focus:border-foreground/30 focus:bg-foreground/10 transition-all shadow-inner ${side === "sell" ? "pl-9 pr-4" : "px-4"}`}
