@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Shell, AppHeader } from "@/components/lmc/Shell";
 import { ArrowLeft, Wallet, Landmark, Save, Plus, Trash2 } from "lucide-react";
 
@@ -21,6 +21,21 @@ function CollectionDetails() {
 
   // Bank Account Details State (Array to hold up to 5 Bank Accounts)
   const [bankList, setBankList] = useState([{ accountName: "", bankName: "", accountNumber: "", ifsc: "" }]);
+
+  // --- Load Saved Data on Component Mount ---
+  useEffect(() => {
+    const savedUpi = localStorage.getItem("lmc_upiDetails");
+    if (savedUpi) {
+      const parsedUpi = JSON.parse(savedUpi);
+      if (parsedUpi.length > 0) setUpiList(parsedUpi);
+    }
+
+    const savedBank = localStorage.getItem("lmc_bankDetails");
+    if (savedBank) {
+      const parsedBank = JSON.parse(savedBank);
+      if (parsedBank.length > 0) setBankList(parsedBank);
+    }
+  }, []);
 
   // --- UPI Handlers ---
   const handleAddUpi = () => {
@@ -59,9 +74,29 @@ function CollectionDetails() {
   // --- Submit Handler ---
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // ഒഴിഞ്ഞ ഫീൽഡുകൾ ഒഴിവാക്കുന്നു
+    const validUpiList = upiList.filter((upi) => upi.trim() !== "");
+    const validBankList = bankList.filter((bank) => bank.accountNumber.trim() !== "");
+
+    // Local Storage-ലേക്ക് സേവ് ചെയ്യുന്നു
+    localStorage.setItem("lmc_upiDetails", JSON.stringify(validUpiList.length > 0 ? validUpiList : [""]));
+    localStorage.setItem(
+      "lmc_bankDetails",
+      JSON.stringify(
+        validBankList.length > 0 ? validBankList : [{ accountName: "", bankName: "", accountNumber: "", ifsc: "" }],
+      ),
+    );
+
+    // സേവ് ചെയ്ത ശേഷം ഒഴിഞ്ഞ ഫീൽഡുകൾ UI-ൽ നിന്നും മാറ്റാൻ (ഓപ്ഷണൽ)
+    setUpiList(validUpiList.length > 0 ? validUpiList : [""]);
+    setBankList(
+      validBankList.length > 0 ? validBankList : [{ accountName: "", bankName: "", accountNumber: "", ifsc: "" }],
+    );
+
     console.log({
-      upiDetails: upiList.filter((upi) => upi.trim() !== ""), // ഒഴിഞ്ഞ ഫീൽഡുകൾ ഒഴിവാക്കാൻ
-      bankDetails: bankList.filter((bank) => bank.accountNumber.trim() !== ""),
+      upiDetails: validUpiList,
+      bankDetails: validBankList,
     });
     alert("Collection details saved successfully!");
   };
