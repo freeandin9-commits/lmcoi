@@ -59,6 +59,9 @@ export function TradePanel({ side }: { side: Side }) {
   const inr = Number(wallet?.inr_balance ?? 0);
   const lmc = Number(wallet?.lmc_balance ?? 0);
 
+  // home.tsx ൽ ഉള്ളതുപോലെ Total Balance കണക്കാക്കുന്നു
+  const total = lmc * FIXED_PRICE_PER_LMC + inr;
+
   const lmcPerInr = LMC_PER_INR;
   const pricePerLmcInr = FIXED_PRICE_PER_LMC;
   const sellableInr = Math.round(lmc * pricePerLmcInr * 100) / 100;
@@ -334,7 +337,7 @@ export function TradePanel({ side }: { side: Side }) {
                   {side === "sell" && (
                     <span className="text-xs font-medium text-muted-foreground inline-flex items-center gap-1">
                       Available:
-                      <LmcAmount value={lmc} />
+                      <span className="font-mono font-bold text-[color:var(--gold)]">{formatINR(total, 2)}</span>
                     </span>
                   )}
                 </div>
@@ -381,7 +384,10 @@ export function TradePanel({ side }: { side: Side }) {
                   <>
                     <Row k="Price" v={`1 INR = ${formatLMC(lmcPerInr, 4)} LMC`} />
                     <Row k="You receive" v={formatINR(enteredAmt, 2)} className="text-green-500" />
-                    <Row k="LMC Balance" v={<LmcAmount value={lmc} />} />
+                    <Row
+                      k="Total Balance"
+                      v={<span className="font-mono font-bold text-[color:var(--gold)]">{formatINR(total, 2)}</span>}
+                    />
                   </>
                 )}
               </div>
@@ -567,7 +573,7 @@ export function TradePanel({ side }: { side: Side }) {
   );
 }
 
-// Row component updated to accept className for custom styling
+// കോഡ് നഷ്ടപ്പെടാതിരിക്കാൻ ഇത് ഇവിടെ തന്നെ നിലനിർത്തിയിട്ടുണ്ട്
 function LmcAmount({ value }: { value: number }) {
   return (
     <span className="inline-flex items-center gap-1.5 font-mono font-bold text-[color:var(--gold)]">
