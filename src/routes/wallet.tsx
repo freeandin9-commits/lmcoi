@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-import { useWallet, formatINR, formatLMC, FIXED_PRICE_PER_LMC } from "@/lib/lmc-api";
+import { useWallet, formatINR, formatLMC } from "@/lib/lmc-api";
 
 export const Route = createFileRoute("/wallet")({
   component: WalletPage,
