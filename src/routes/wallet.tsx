@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Shell, AppHeader, LMCMark } from "@/components/lmc/Shell";
 import { useAuth } from "@/hooks/use-auth";
-import { useWallet, formatINR, formatLMC, FIXED_PRICE_PER_LMC } from "@/lib/lmc-api";
+import { useWallet, formatINR, formatLMC } from "@/lib/lmc-api";
 
 export const Route = createFileRoute("/wallet")({
   component: WalletPage,
@@ -24,7 +24,8 @@ function WalletPage() {
   const lmc = Number(wallet?.lmc_balance ?? 0);
   // ഭാവിയിൽ Hold Balance API-ൽ നിന്ന് ലഭ്യമാകുന്നതിനായി സെറ്റ് ചെയ്തത്
   const holdBalance = Number((wallet as any)?.hold_balance ?? 0);
-  const total = inr + lmc * FIXED_PRICE_PER_LMC;
+  // Wallet Total = "You will receive" value (LMC amount credited)
+  const total = lmc;
 
   return (
     <Shell>
@@ -63,17 +64,25 @@ function WalletPage() {
           {/* LMC Price */}
           <div className="mt-2 text-sm font-bold opacity-80 text-foreground">1 INR = 1.25 LMC</div>
 
-          {/* Total Balance */}
+          {/* Total Balance = LMC amount received */}
           <div className="mt-1 text-4xl font-extrabold tabular-nums text-foreground drop-shadow-sm">
-            {formatINR(total, 2)}
+            {formatLMC(total, 4)} <span className="text-2xl">LMC</span>
+          </div>
+
+          {/* INR Balance */}
+          <div className="mt-4 pt-4 border-t border-white/20 text-sm font-bold text-foreground/90 flex justify-between">
+            <span>INR Balance:</span>
+            <span className="font-extrabold">{formatINR(inr, 2)}</span>
           </div>
 
           {/* Hold Balance */}
-          <div className="mt-4 pt-4 border-t border-white/20 text-sm font-bold text-foreground/90">
-            Hold Balance: <span className="font-extrabold">{formatLMC(holdBalance, 4)} LMC</span>
+          <div className="mt-2 text-sm font-bold text-foreground/90 flex justify-between">
+            <span>Hold Balance:</span>
+            <span className="font-extrabold">{formatLMC(holdBalance, 4)} LMC</span>
           </div>
         </div>
       </div>
     </Shell>
   );
 }
+
